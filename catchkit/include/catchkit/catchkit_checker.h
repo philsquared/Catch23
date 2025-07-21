@@ -1,0 +1,172 @@
+//
+// Created by Phil Nash on 21/07/2025.
+//
+
+#ifndef CATCHKIT_CHECKER_H
+#define CATCHKIT_CHECKER_H
+
+#include "catchkit_result_handler.h"
+#include "catchkit_assertion_context.h"
+#include "catchkit_expr_ref.h"
+#include "catchkit_internal_warnings.h"
+#include "catchkit_operator_to_string.h"
+#include "catchkit_decomposer.h"
+#include "catchkit_exceptions.h"
+#include "catchkit_stringify.h"
+
+#include <utility>
+
+namespace CatchKit::Detail
+{
+    struct Checker {
+        ResultHandler& result_handler;
+        ResultDisposition result_disposition;
+        bool should_report_success = true;
+        bool should_decompose = true;
+        AssertionContext current_context = AssertionContext{};
+
+        auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Checker&;
+        auto operator()(AssertionContext const& context) -> Checker&;
+        auto combine_messages(std::string_view additional_message) -> std::string;
+
+        void handle_unexpected_exceptions(std::invocable<> auto const& expr_call) {
+            try {
+                expr_call();
+            }
+            catch(...) {
+                result_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
+            }
+        }
+
+        void simple_assert(auto const& result, std::string_view message = {}) noexcept {
+            result_handler.on_assertion_result(!result ? ResultType::ExpressionFailed : ResultType::Pass, {}, combine_messages(message));
+        }
+        void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
+
+        // To kick off an expression decomposition
+        template<typename LhsT>
+        [[maybe_unused]] friend constexpr auto operator << ( Checker& checker, LhsT&& lhs ) noexcept {
+            return UnaryExprRef{ lhs, &checker };
+        }
+    };
+
+    // --------------
+
+    template<typename T>
+    UnaryExprRef<T>::~UnaryExprRef() {
+        if( checker )
+            checker->accept_expr(*this);
+    }
+
+    template<typename T>
+    auto UnaryExprRef<T>::evaluate() -> ResultType {
+        if constexpr( requires (T v){ { !v } -> std::same_as<bool>; }) {
+            CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_ADDRESS
+            return !value ? ResultType::ExpressionFailed : ResultType::Pass;
+            CATCHKIT_WARNINGS_SUPPRESS_END
+        }
+        else {
+            // Have to do this at runtime because we can get here from the destructor of a UnaryExpr,
+            // even if it doesn't happen at runtime because it's actually a binary expresion
+            throw std::logic_error("Attempt to use a value that cannot convert to bool in boolean context");
+        }
+    }
+    template<typename T>
+    auto UnaryExprRef<T>::expand(ResultType) -> ExpressionInfo {
+        return ExpressionInfo{ {std::string(stringify(value))}, {}, Operators::None, {} };
+    }
+
+    template<typename LhsT, typename RhsT, Operators Op>
+    BinaryExprRef<LhsT, RhsT, Op>::~BinaryExprRef() {
+        if( checker )
+            checker->accept_expr(*this);
+    }
+
+    CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_SIGN_MISMATCH
+    template<typename LhsT, typename RhsT, Operators Op>
+    auto eval_expr(BinaryExprRef<LhsT, RhsT, Op>& expr) {
+        using enum Operators;
+        if constexpr( Op == Equals )                    return expr.lhs == expr.rhs;
+        else if constexpr( Op == NotEqualTo )           return expr.lhs != expr.rhs;
+        else if constexpr( Op == GreaterThan )          return expr.lhs >  expr.rhs;
+        else if constexpr( Op == LessThan )             return expr.lhs <  expr.rhs;
+        else if constexpr( Op == GreaterThanOrEqual )   return expr.lhs >= expr.rhs;
+        else if constexpr( Op == LessThanOrEqual )      return expr.lhs <= expr.rhs;
+        else {
+            // Note that while None is a valid enum value, we should never use it on a path that leads here
+            static_assert( false, "Operator not implemented" );
+        }
+        std::unreachable();
+    }
+    CATCHKIT_WARNINGS_SUPPRESS_END
+
+    template<typename LhsT, typename RhsT, Operators Op>
+    auto BinaryExprRef<LhsT, RhsT, Op>::evaluate() -> ResultType {
+        return static_cast<bool>( eval_expr(*this) ) ? ResultType::Pass : ResultType::ExpressionFailed;
+    }
+    template<typename LhsT, typename RhsT, Operators Op>
+    auto BinaryExprRef<LhsT, RhsT, Op>::expand(ResultType) -> ExpressionInfo {
+        return ExpressionInfo{
+            std::string( stringify(lhs) ),
+            std::string( stringify(rhs) ),
+            Op,
+            operator_to_string<Op>() };
+    }
+
+    template<typename ArgT, typename MatcherT>
+    MatchExprRef<ArgT, MatcherT>::~MatchExprRef() {
+        if( checker )
+            checker->accept_expr(*this);
+    }
+
+    // -------
+
+    void Checker::accept_expr( auto& expr ) noexcept {
+        auto result = expr.evaluate();
+
+        if( should_report_success || result != ResultType::Pass ) {
+            result_handler.on_assertion_result( result, expr.expand(result), combine_messages(expr.message) );
+        }
+        else {
+            result_handler.on_assertion_result( result, {}, combine_messages(expr.message) );
+        }
+    }
+
+} // namespace CatchKit::Detail
+
+namespace CatchKit
+{
+    using Detail::Checker;
+
+} //namespace CatchKit
+
+// These global instances are used if not using the ones passed in to a function locally
+extern constinit CatchKit::Checker check, require;
+
+
+#define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \
+if(checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).should_decompose) { \
+CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
+checker.handle_unexpected_exceptions([&]{ checker << __VA_ARGS__; }); \
+CATCHKIT_WARNINGS_SUPPRESS_END \
+} else checker.simple_assert(__VA_ARGS__)
+
+
+#define CATCHKIT_ASSERT_THAT_INTERNAL(macro_name, checker, arg, match_expr) \
+do { using namespace CatchKit::Matchers; \
+checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)) << [&]{ return arg; }, match_expr; \
+} while( false )
+
+
+#define CHECK(...) CATCHKIT_ASSERT_INTERNAL( "CHECK", check, __VA_ARGS__ )
+#define REQUIRE(...) CATCHKIT_ASSERT_INTERNAL( "REQUIRE", require, __VA_ARGS__ )
+
+#define CHECK_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "CHECK_THAT", check, arg, matcher )
+#define REQUIRE_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "REQUIRE_THAT", require, arg, matcher )
+
+// !TBD: These should have a dedicated internal macro (in Catch2 it was INTERNAL_CATCH_MSG)
+#define PASS(...) CATCHKIT_ASSERT_INTERNAL( "PASS", check, true __VA_OPT__(,) __VA_ARGS__ )
+#define FAIL(...) CATCHKIT_ASSERT_INTERNAL( "FAIL", require, false __VA_OPT__(,) __VA_ARGS__ )
+
+
+#endif // CATCHKIT_CHECKER_H
