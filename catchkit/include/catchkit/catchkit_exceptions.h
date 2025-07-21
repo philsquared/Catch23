@@ -5,8 +5,8 @@
 #ifndef CATCHKIT_EXCEPTIONS_H
 #define CATCHKIT_EXCEPTIONS_H
 
-#include <stdexcept>
 #include <string>
+#include <exception>
 
 namespace CatchKit::Detail {
 

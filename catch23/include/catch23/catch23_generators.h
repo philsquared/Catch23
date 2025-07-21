@@ -76,7 +76,7 @@ namespace CatchKit::Generators {
         auto size_of(values_of<T> const&) { return 1; }
 
         template<std::integral T>
-        auto generate_value(values_of<T> const& values) {
+        auto generate_value(values_of<T> const&) {
             static int i = 0;
             return i++;
             // !TBD generate random

@@ -7,6 +7,7 @@
 
 #include <print>
 #include <cassert>
+#include <exception>
 
 namespace CatchKit::Detail {
 
