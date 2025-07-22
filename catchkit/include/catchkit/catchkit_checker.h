@@ -46,7 +46,9 @@ namespace CatchKit::Detail
         }
 
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
-            checker.result_handler.on_assertion_result(!result ? ResultType::ExpressionFailed : ResultType::Pass, {}, message);
+            bool bool_result = !result;
+            if( checker.should_report_success || bool_result ) {}
+                checker.result_handler.on_assertion_result(bool_result ? ResultType::Pass : ResultType::ExpressionFailed, {}, message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
@@ -139,9 +141,6 @@ namespace CatchKit::Detail
 
         if( checker.should_report_success || result != ResultType::Pass ) {
             checker.result_handler.on_assertion_result( result, expr.expand(result), expr.message );
-        }
-        else {
-            checker.result_handler.on_assertion_result( result, {}, expr.message );
         }
     }
 

@@ -13,16 +13,22 @@
 namespace CatchKit {
 
 
-    void ConsoleReporter::on_test_start( TestInfo const& test_info ) {
-        std::println("-------------------------------------------------------------------------------");
-        {
-            TextColour _(Colours::BoldNormal);
-            std::println("TEST: {}", test_info.name);
+    void ConsoleReporter::lazy_print_test_header() {
+        if( lazy_test_info ) {
+            std::println("-------------------------------------------------------------------------------");
+            {
+                TextColour _(Colours::BoldNormal);
+                std::println("TEST: {}", lazy_test_info->name);
+            }
+            std::println("{}:{}",
+                    lazy_test_info->location.file_name(),
+                    lazy_test_info->location.line());
+            std::println("...............................................................................\n");
+            lazy_test_info.reset();
         }
-        std::println("{}:{}",
-                test_info.location.file_name(),
-                test_info.location.line());
-        std::println("...............................................................................\n");
+    }
+    void ConsoleReporter::on_test_start( TestInfo const& test_info ) {
+        lazy_test_info = test_info;
     }
     void ConsoleReporter::on_test_end( TestInfo const& ) {
     }
@@ -30,6 +36,7 @@ namespace CatchKit {
     void ConsoleReporter::on_assertion_start( AssertionContext const& ) {
     }
     void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) {
+        lazy_print_test_header();
         {
             TextColour colour;
             if ( assertion_info.passed() )

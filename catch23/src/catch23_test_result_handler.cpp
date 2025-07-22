@@ -22,7 +22,15 @@ namespace CatchKit::Detail {
 
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
         last_result = result;
-
+        if( !message.empty() ) {
+            // Attempt to string out an inline message
+            // note: this is quite brittle, so if it seems to have stopped working
+            // check that this logic still matches usage
+            if( auto pos = current_context.original_expression.find(message); pos != std::string::npos ) {
+                if( pos > 3 && current_context.original_expression[pos-3] == ',' )
+                    current_context.original_expression = current_context.original_expression.substr( 0, pos-3 );
+            }
+        }
         reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, std::string(message) } );
 
     }

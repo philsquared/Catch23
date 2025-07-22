@@ -10,6 +10,8 @@
 namespace CatchKit {
 
     struct ConsoleReporter : Reporter {
+        std::optional<TestInfo> lazy_test_info;
+        void lazy_print_test_header();
         void on_test_start( TestInfo const& test_info ) override;
         void on_test_end( TestInfo const& test_info ) override;
 

@@ -25,9 +25,9 @@ namespace CatchKit::Detail
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
 
-        auto get_reporter() -> Reporter& { return reporter; }
-        auto get_current_context() -> AssertionContext const& { return current_context; }
-        auto passed() { return last_result == CatchKit::ResultType::Pass; }
+        [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
+        [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }
+        [[nodiscard]] auto passed() const { return last_result == CatchKit::ResultType::Pass; }
     };
 
 } // namespace CatchKit::Detail

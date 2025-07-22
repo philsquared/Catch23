@@ -5,7 +5,7 @@
 #include "catchkit/catchkit_matchers.h"
 
 
-TEST("test a") {
+TEST("test a", "[.]") {
     CHECK( 1 == 2 );
     throw std::domain_error("I didn't expect that!");
 }

@@ -40,12 +40,12 @@ namespace CatchKit::Detail {
     }
 
     template<typename ArgT>
-    [[maybe_unused]] constexpr auto operator, ( UnaryExprRef<ArgT>&& value_ref, std::string_view message ) noexcept {
+    [[maybe_unused]] constexpr auto&& operator, ( UnaryExprRef<ArgT>&& value_ref, std::string_view message ) noexcept {
         value_ref.message = message;
         return value_ref;
     }
     template<typename LhsT, typename RhsT, Operators Op>
-    [[maybe_unused]] constexpr auto operator, ( BinaryExprRef<LhsT, RhsT, Op>&& expr_ref, std::string_view message ) noexcept {
+    [[maybe_unused]] constexpr auto&& operator, ( BinaryExprRef<LhsT, RhsT, Op>&& expr_ref, std::string_view message ) noexcept {
         expr_ref.message = message;
         return expr_ref;
     }

@@ -17,10 +17,23 @@ namespace CatchKit::Detail {
 
     void run_tests( range_of<Test> auto const& tests, Reporter& reporter ) {
         TestResultHandler test_handler( reporter );
+        bool should_report_success = false;
 
         for( auto&& test : tests) {
-            Checker check{ test_handler, ResultDisposition::Continue };
-            Checker require{ test_handler, ResultDisposition::Abort };
+
+            // !TBD: this skips hidden tests until we do proper tag parsing
+            if( test.test_info.tags.find("[.") != std::string::npos )
+                continue;
+
+            // ReentryNodes nodes;
+            Checker check{
+                .result_handler=test_handler,
+                .result_disposition=ResultDisposition::Continue,
+                .should_report_success=should_report_success };
+            Checker require{
+                .result_handler=test_handler,
+                .result_disposition=ResultDisposition::Abort,
+                .should_report_success=should_report_success };
 
             reporter.on_test_start(test.test_info);
             try {
