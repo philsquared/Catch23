@@ -2,9 +2,11 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-#include "catch23_colour.h"
+#include "../include/catch23/catch23_colour.h"
 
 #include <print>
+#include <cassert>
+#include <utility>
 
 #if !(defined(__DJGPP__) && defined(__STRICT_ANSI__))
 #  include <unistd.h>
@@ -49,6 +51,9 @@ namespace CatchKit {
                     case BoldWhite:     return "1;37";
                     case BoldYellow:    return "1;33";
                     case BoldNormal:    return "1;39";
+                    default:
+                        assert(false);
+                        std::unreachable();
                 }
             }());
         }
