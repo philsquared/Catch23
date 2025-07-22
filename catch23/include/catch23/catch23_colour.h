@@ -17,13 +17,12 @@ namespace CatchKit {
         Yellow,
         Grey,
 
-        Bright = 0x10,
-
-        BrightRed = Bright | Red,
-        BrightGreen = Bright | Green,
-        LightGrey = Bright | Grey,
-        BrightWhite = Bright | White,
-        BrightYellow = Bright | Yellow,
+        BoldRed,
+        BoldGreen,
+        BoldGrey,
+        BoldWhite,
+        BoldYellow,
+        BoldNormal
 };
 
     class TextColour {

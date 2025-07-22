@@ -21,7 +21,15 @@ namespace CatchKit {
 
     struct ConsoleReporter : Reporter {
         void on_test_start( TestInfo const& test_info ) override {
-            std::println("Running test: {}", test_info.name);
+            std::println("-------------------------------------------------------------------------------");
+            {
+                TextColour _(Colours::BoldNormal);
+                std::println("TEST: {}", test_info.name);
+            }
+            std::println("{}:{}",
+                    test_info.location.file_name(),
+                    test_info.location.line());
+            std::println("...............................................................................\n");
         }
         void on_test_end( TestInfo const& test_info ) override {
             std::println("Finished: {}\n", test_info.name);
@@ -70,14 +78,14 @@ namespace CatchKit {
             default:
                 if(assertion_info.expression_info) {
                     std::println("with expansion:");
-                    TextColour _(Colours::BrightYellow);
+                    TextColour _(Colours::BoldYellow);
                     std::println("\t{}", *assertion_info.expression_info);
                 }
                 break;
             }
             if (!assertion_info.message.empty()) {
                 std::println("with message:");
-                TextColour _(Colours::BrightWhite);
+                TextColour _(Colours::BoldWhite);
                 std::println("\t{}", assertion_info.message);
             }
         }

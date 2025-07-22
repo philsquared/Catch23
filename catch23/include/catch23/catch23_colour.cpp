@@ -43,11 +43,12 @@ namespace CatchKit {
                     case Yellow:    return "0;33";
                     case Grey:      return "1;30";
 
-                    case LightGrey:     return "0;37";
-                    case BrightRed:     return "1;31";
-                    case BrightGreen:   return "1;32";
-                    case BrightWhite:   return "1;37";
-                    case BrightYellow:  return "1;33";
+                    case BoldGrey:      return "0;37";
+                    case BoldRed:       return "1;31";
+                    case BoldGreen:     return "1;32";
+                    case BoldWhite:     return "1;37";
+                    case BoldYellow:    return "1;33";
+                    case BoldNormal:    return "1;39";
                 }
             }());
         }
