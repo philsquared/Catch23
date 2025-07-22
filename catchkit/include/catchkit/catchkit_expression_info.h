@@ -24,6 +24,12 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
+namespace CatchKit {
+
+    using Detail::ExpressionInfo;
+
+}
+
 template<>
 struct std::formatter<CatchKit::Detail::ExpressionInfo> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }

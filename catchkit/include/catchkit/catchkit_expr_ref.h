@@ -12,14 +12,14 @@
 
 namespace CatchKit::Detail {
 
-    struct Checker;
+    struct Asserter;
 
     // Holds a unary expression - ie just evaluates to a single value
     // Also used for the LHS of a binary expression during decomposition
     template<typename T>
     struct UnaryExprRef {
         T& value;
-        Checker* checker = nullptr;
+        Asserter* asserter = nullptr;
         std::string_view message = {};
 
         auto evaluate() -> ResultType;
@@ -33,7 +33,7 @@ namespace CatchKit::Detail {
     struct BinaryExprRef {
         LhsT& lhs;
         RhsT& rhs;
-        Checker* checker = nullptr;
+        Asserter* asserter = nullptr;
         std::string_view message = {};
 
         auto evaluate() -> ResultType;
@@ -46,7 +46,7 @@ namespace CatchKit::Detail {
     struct MatchExprRef {
         ArgT& arg;
         MatcherT const& matcher;
-        Checker* checker = nullptr;
+        Asserter* asserter = nullptr;
         std::string_view message = {};
 
         auto evaluate() -> ResultType;

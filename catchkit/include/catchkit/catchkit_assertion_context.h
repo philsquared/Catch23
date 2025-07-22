@@ -15,6 +15,8 @@ namespace CatchKit::Detail {
         std::string_view original_expression;
         std::string_view message  = {};
         std::source_location location = std::source_location::current();
+
+        auto combine_messages(std::string_view additional_message) -> std::string;
     };
 
 } // namespace CatchKit::Detail

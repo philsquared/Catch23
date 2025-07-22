@@ -21,25 +21,13 @@ namespace CatchKit::Detail {
         current_assertion_handler = &handler;
     }
 
-    auto Checker::operator()(std::string_view message, std::source_location assertion_location) -> Checker& {
+    auto Checker::operator()(std::string_view message, std::source_location assertion_location) -> Asserter {
         return operator()(AssertionContext{{}, {}, message, assertion_location});
     }
 
-    auto Checker::operator()(AssertionContext const& context) -> Checker& {
-        current_context = context;
-        result_handler.on_assertion_start(current_context);
-        return *this;
-    }
-
-    auto Checker::combine_messages( std::string_view additional_message ) -> std::string {
-        if(!current_context.message.empty()) {
-            if(!additional_message.empty())
-                return std::string(current_context.message) + "\n" + std::string(additional_message);
-            return std::string(current_context.message);
-        }
-        if(!additional_message.empty())
-            return std::string(additional_message);
-        return {};
+    auto Checker::operator()(AssertionContext const& context) -> Asserter {
+        result_handler.on_assertion_start(result_disposition, context);
+        return Asserter{*this};
     }
 
 } // namespace CatchKit::Detail

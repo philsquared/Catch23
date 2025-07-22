@@ -11,11 +11,12 @@
 
 namespace CatchKit::Detail {
 
-    void AssertResultHandler::on_assertion_start( AssertionContext const& context ) {
+    void AssertResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
         current_context = &context;
+        this->result_disposition = result_disposition;
     }
 
-    void AssertResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string const& message ) {;
+    void AssertResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
         last_result = result;
 
         // !TBD When we can use stacktrace do something like this:
@@ -58,7 +59,7 @@ namespace CatchKit::Detail {
             std::println(os, "with message:\n\t{}", message);
         }
     }
-    void AssertResultHandler::on_assertion_end(ResultDisposition result_disposition) {
+    void AssertResultHandler::on_assertion_end() {
         if ( last_result != ResultType::Pass && result_disposition == ResultDisposition::Abort ) {
             std::terminate();
         }

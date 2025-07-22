@@ -18,35 +18,43 @@
 
 namespace CatchKit::Detail
 {
+    struct Asserter;
+
     struct Checker {
         ResultHandler& result_handler;
         ResultDisposition result_disposition;
         bool should_report_success = true;
         bool should_decompose = true;
-        AssertionContext current_context = AssertionContext{};
 
-        auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Checker&;
-        auto operator()(AssertionContext const& context) -> Checker&;
-        auto combine_messages(std::string_view additional_message) -> std::string;
+        auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
+        auto operator()(AssertionContext const& context) -> Asserter;
+    };
 
-        void handle_unexpected_exceptions(std::invocable<> auto const& expr_call) {
+    struct Asserter {
+        Checker& checker;
+
+        void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
-                expr_call();
+                expr_call(*this);
             }
             catch(...) {
-                result_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
+                checker.result_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
             }
         }
 
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
-            result_handler.on_assertion_result(!result ? ResultType::ExpressionFailed : ResultType::Pass, {}, combine_messages(message));
+            checker.result_handler.on_assertion_result(!result ? ResultType::ExpressionFailed : ResultType::Pass, {}, message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
         // To kick off an expression decomposition
         template<typename LhsT>
-        [[maybe_unused]] friend constexpr auto operator << ( Checker& checker, LhsT&& lhs ) noexcept {
-            return UnaryExprRef{ lhs, &checker };
+        [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, LhsT&& lhs ) noexcept {
+            return UnaryExprRef{ lhs, &asserter };
+        }
+        template<typename LhsT>
+        [[maybe_unused]] friend constexpr auto operator << ( Asserter&& asserter, LhsT&& lhs ) noexcept {
+            return UnaryExprRef{ lhs, &asserter };
         }
     };
 
@@ -54,8 +62,8 @@ namespace CatchKit::Detail
 
     template<typename T>
     UnaryExprRef<T>::~UnaryExprRef() {
-        if( checker )
-            checker->accept_expr(*this);
+        if( asserter )
+            asserter->accept_expr(*this);
     }
 
     template<typename T>
@@ -78,8 +86,8 @@ namespace CatchKit::Detail
 
     template<typename LhsT, typename RhsT, Operators Op>
     BinaryExprRef<LhsT, RhsT, Op>::~BinaryExprRef() {
-        if( checker )
-            checker->accept_expr(*this);
+        if( asserter )
+            asserter->accept_expr(*this);
     }
 
     CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_SIGN_MISMATCH
@@ -115,20 +123,20 @@ namespace CatchKit::Detail
 
     template<typename ArgT, typename MatcherT>
     MatchExprRef<ArgT, MatcherT>::~MatchExprRef() {
-        if( checker )
-            checker->accept_expr(*this);
+        if( asserter )
+            asserter->accept_expr(*this);
     }
 
     // -------
 
-    void Checker::accept_expr( auto& expr ) noexcept {
+    void Asserter::accept_expr( auto& expr ) noexcept {
         auto result = expr.evaluate();
 
-        if( should_report_success || result != ResultType::Pass ) {
-            result_handler.on_assertion_result( result, expr.expand(result), combine_messages(expr.message) );
+        if( checker.should_report_success || result != ResultType::Pass ) {
+            checker.result_handler.on_assertion_result( result, expr.expand(result), expr.message );
         }
         else {
-            result_handler.on_assertion_result( result, {}, combine_messages(expr.message) );
+            checker.result_handler.on_assertion_result( result, {}, expr.message );
         }
     }
 
@@ -145,16 +153,16 @@ extern constinit CatchKit::Checker check, require;
 
 
 #define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \
-if(checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).should_decompose) { \
-CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
-checker.handle_unexpected_exceptions([&]{ checker << __VA_ARGS__; }); \
-CATCHKIT_WARNINGS_SUPPRESS_END \
-} else checker.simple_assert(__VA_ARGS__)
+if(checker.should_decompose) { \
+    CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
+    checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ asserter << __VA_ARGS__; }); \
+    CATCHKIT_WARNINGS_SUPPRESS_END \
+} else checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).simple_assert(__VA_ARGS__)
 
 
 #define CATCHKIT_ASSERT_THAT_INTERNAL(macro_name, checker, arg, match_expr) \
 do { using namespace CatchKit::Matchers; \
-checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)) << [&]{ return arg; }, match_expr; \
+    checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)) << [&]{ return arg; }, match_expr; \
 } while( false )
 
 

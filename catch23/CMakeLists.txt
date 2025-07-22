@@ -9,8 +9,12 @@ add_library(Catch23 STATIC
         src/catch23_test_result_handler.cpp
         src/catch23_internal_test.cpp
         src/catch23_test.cpp
-        include/catch23/catch23_generators.cpp
-        include/catch23/catch23_generators.h)
+        src/catch23_generators.cpp
+        include/catch23/catch23_generators.h
+        src/catch23_reporter.cpp
+        include/catch23/catch23_reporter.h
+        src/catch23_test_info.cpp
+        include/catch23/catch23_test_info.h)
 
 target_include_directories(Catch23 PUBLIC include)
 target_link_libraries(Catch23 PUBLIC Catchkit)

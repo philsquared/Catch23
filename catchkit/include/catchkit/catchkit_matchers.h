@@ -122,7 +122,7 @@ namespace CatchKit {
         template<typename ArgT, IsMatcher MatcherT>
         [[maybe_unused]] constexpr auto operator, ( UnaryExprRef<ArgT>&& arg, MatcherT const& matcher ) noexcept {
             static_assert(MatcherHasDescribeMethod<MatcherT>, "Matcher is missing describe method");
-            return MatchExprRef{ arg.value, matcher, std::exchange(arg.checker, nullptr) };
+            return MatchExprRef{ arg.value, matcher, std::exchange(arg.asserter, nullptr) };
         }
 
         template<typename ArgT, typename MatcherT>

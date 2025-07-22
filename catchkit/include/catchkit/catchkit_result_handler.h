@@ -9,7 +9,7 @@
 #include "catchkit_expression_info.h"
 
 #include <optional>
-#include <string>
+#include <string_view>
 
 namespace CatchKit::Detail
 {
@@ -19,9 +19,9 @@ namespace CatchKit::Detail
 
     struct ResultHandler {
         virtual ~ResultHandler();
-        virtual void on_assertion_start( AssertionContext const& context ) = 0;
-        virtual void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string const& message ) = 0;
-        virtual void on_assertion_end( ResultDisposition result_disposition ) = 0;
+        virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) = 0;
+        virtual void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) = 0;
+        virtual void on_assertion_end() = 0;
     };
 
 } // namespace CatchKit::Detail

@@ -5,9 +5,9 @@
 #ifndef CATCH23_INTERNAL_TEST_H
 #define CATCH23_INTERNAL_TEST_H
 
+#include "catch23_test_info.h"
+
 #include <functional>
-#include <string>
-#include <source_location>
 #include <vector>
 
 namespace CatchKit::Detail {
@@ -15,9 +15,7 @@ namespace CatchKit::Detail {
 
     struct Test {
         std::function<void(Checker&, Checker&)> test_fun;
-        std::source_location location;
-        std::string name = {};
-        std::string tags = {};
+        TestInfo test_info;
     };
     std::vector<Test> const& get_all_tests();
 

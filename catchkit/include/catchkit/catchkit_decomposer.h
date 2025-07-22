@@ -14,27 +14,27 @@ namespace CatchKit::Detail {
     // To decompose a comparison with another value
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs == rhs; }
     [[maybe_unused]] constexpr auto operator == ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::Equals>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::Equals>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs != rhs; }
     [[maybe_unused]] constexpr auto operator != ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::NotEqualTo>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::NotEqualTo>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs > rhs; }
     [[maybe_unused]] constexpr auto operator > ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::GreaterThan>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::GreaterThan>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs < rhs; }
     [[maybe_unused]] constexpr auto operator < ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::LessThan>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::LessThan>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs >= rhs; }
     [[maybe_unused]] constexpr auto operator >= ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::GreaterThanOrEqual>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::GreaterThanOrEqual>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
     template<typename LhsT, typename RhsT> requires requires( LhsT lhs, RhsT rhs ) { lhs <= rhs; }
     [[maybe_unused]] constexpr auto operator <= ( UnaryExprRef<LhsT>&& lhs, RhsT&& rhs ) noexcept {
-        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::LessThanOrEqual>{ lhs.value, rhs, std::exchange(lhs.checker, nullptr) };
+        return BinaryExprRef<LhsT, std::remove_reference_t<RhsT>, Operators::LessThanOrEqual>{ lhs.value, rhs, std::exchange(lhs.asserter, nullptr) };
     }
 
     template<typename ArgT>
