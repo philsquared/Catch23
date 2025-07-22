@@ -8,6 +8,10 @@
 
 namespace CatchKit {
 
+    // !TBD: test the others
+    static_assert(Detail::IsMatcher<GenericMatchers::Equals<bool>>);
+    // static_assert(Detail::IsEagerMatcher<GenericMatchers::Equals<char[7]>>);
+
     namespace StringMatchers {
 
         bool CaseSensitive::equal(std::string_view str1, std::string_view str2) {

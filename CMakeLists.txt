@@ -10,7 +10,8 @@ set(CMAKE_CXX_STANDARD 23)
 add_subdirectory(catch23)
 add_subdirectory(catchkit)
 
-add_executable(Catch23Test src/main.cpp)
+add_executable(Catch23Test src/main.cpp src/UsageTests/Condition.tests.cpp)
 
 target_link_libraries(Catch23Test PUBLIC Catch23)
 target_link_libraries(Catch23Test PUBLIC Catchkit)
+target_compile_options(Catch23Test PRIVATE -Wall -Wextra -Wpedantic)

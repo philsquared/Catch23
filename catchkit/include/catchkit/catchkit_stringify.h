@@ -20,7 +20,11 @@
 
 namespace CatchKit {
 
-    void ignore( auto&& ) noexcept {}
+    namespace Detail {
+        auto raw_memory_to_string(void const* object, std::size_t size ) -> std::string;
+        auto pointer_to_string(void const* p) -> std::string;
+        void ignore( auto&& ) noexcept {}
+    }
 
     #ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
     template <typename T>
@@ -48,7 +52,7 @@ namespace CatchKit {
             #endif
 
             #if !defined(FALLBACK_TO_OSTREAM_STRING_CONVERSIONS) && !defined(FALLBACK_TO_FORMAT_STRING_CONVERSIONS)
-            ignore( value );
+            Detail::ignore( value );
             #endif
 
             return "{?}";
@@ -89,15 +93,31 @@ namespace CatchKit {
     template<>
     struct Stringifier<char const*> {
         [[nodiscard]] static constexpr auto stringify( char const* value ) -> std::string {
-            return value;
+            return value ? std::string( value ) : std::string("nullptr");
         }
     };
     template<size_t size>
     struct Stringifier<char[size]> {
         [[nodiscard]] static constexpr auto stringify( char const* value ) -> std::string {
-            return { value, size };
+            return value;
         }
     };
+
+    template<>
+    struct Stringifier<nullptr_t> {
+        [[nodiscard]] static constexpr auto stringify( nullptr_t ) -> std::string {
+            return "nullptr";
+        }
+    };
+
+    template<typename T>
+    requires requires{ !std::same_as<std::decay_t<T>, char>; }
+    struct Stringifier<T*> {
+        [[nodiscard]] static constexpr auto stringify( T* value ) -> std::string {
+            return value ? Detail::pointer_to_string( value ) : std::string("nullptr");
+        }
+    };
+
     // !TBD: more conversions of built-ins, including containers
     // - also wait for std::format for ranges to match with that
 

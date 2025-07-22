@@ -9,6 +9,8 @@
 
 #include <utility>
 
+#include "catchkit_matchers.h"
+
 namespace CatchKit::Detail {
 
     // To decompose a comparison with another value
@@ -46,6 +48,10 @@ namespace CatchKit::Detail {
     [[maybe_unused]] constexpr auto operator, ( BinaryExprRef<LhsT, RhsT, Op>&& expr_ref, std::string_view message ) noexcept {
         expr_ref.message = message;
         return expr_ref;
+    }
+    template<typename ArgT, typename T>
+    [[maybe_unused]] constexpr auto operator, ( UnaryExprRef<ArgT>&&, T const& ) noexcept {
+        static_assert(false, "comma operator only supported for matchers and messages");
     }
 
 } // namespace CatchKit::Detail

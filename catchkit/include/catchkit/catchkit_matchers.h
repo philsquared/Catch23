@@ -7,6 +7,7 @@
 
 #include "catchkit_expr_ref.h"
 #include "catchkit_exceptions.h"
+#include "catchkit_stringify.h"
 
 #include <type_traits>
 #include <format>
@@ -75,6 +76,18 @@ namespace CatchKit {
             }
         };
 
+        template<typename M>
+        struct NotMatcher {
+            M const& base_matcher;
+
+            MatchResult matches( auto const& value ) const {
+                return !base_matcher.matches(value);
+            }
+            auto describe() const {
+                return std::format("NotMatcher"); // !TBD
+            }
+        };
+
         template<typename M2>
         auto operator && (IsMatcher auto const& m1, M2 const& m2) {
             static_assert(IsMatcher<M2>, "Operand to && is not a matcher");
@@ -85,6 +98,10 @@ namespace CatchKit {
         auto operator || (IsMatcher auto const& m1, M2 const& m2) {
             static_assert(IsMatcher<M2>, "Operand to || is not a matcher");
             return OrMatcher(m1, m2);
+        }
+
+        auto operator ! (IsMatcher auto const& m) {
+            return NotMatcher(m);
         }
 
         // Invokes the lambda and checks if it throws - potentially if it throws a specific type
@@ -154,6 +171,22 @@ namespace CatchKit {
 
     } // namespace Detail
 
+    namespace GenericMatchers {
+        template<typename T>
+        struct Equals {
+            T& match_value;
+
+            [[nodiscard]] constexpr auto matches(std::remove_const_t<T>& value) const -> MatchResult {
+                return value == match_value;
+            }
+            [[nodiscard]] constexpr auto matches(T const& value) const -> MatchResult {
+                return value == match_value;
+            }
+            constexpr auto describe() const {
+                return std::format("equals( {} )", stringify(match_value));
+            }
+        };
+    }
     namespace StringMatchers {
 
         struct CaseSensitive {
@@ -283,7 +316,7 @@ namespace CatchKit {
 
             [[nodiscard]] constexpr auto matches(double value) const -> MatchResult {
                 // !TBD: use better approach
-                return std::fabs(value-target) < std::numeric_limits<double>::epsilon();
+                return std::fabs(value-target) < 10*std::numeric_limits<double>::epsilon();
             }
             constexpr auto describe() const {
                 return std::format("is_close_to({})", target);
@@ -312,6 +345,15 @@ namespace CatchKit {
         using StringMatchers::CaseSensitive;
         using StringMatchers::CaseInsensitive;
 
+        template<class T>
+        concept NotStringViewable = !std::is_convertible_v<T, std::string_view>;
+
+        template<NotStringViewable T>
+        constexpr auto equals(T& value) { return GenericMatchers::Equals<T>{value}; }
+
+        template<NotStringViewable T>
+        constexpr auto equals(T&& value) { return GenericMatchers::Equals<T>{value}; }
+
         template<typename CasePolicy=CaseSensitive>
         constexpr auto starts_with(std::string_view str) { return StringMatchers::StartsWith<CasePolicy>{str}; }
         template<typename CasePolicy=CaseSensitive>
@@ -320,6 +362,9 @@ namespace CatchKit {
         constexpr auto equals(std::string_view str) { return StringMatchers::Equals<CasePolicy>{str}; }
 
         constexpr auto is_close_to(double target) { return FloatMatchers::IsCloseTo{target}; }
+
+        constexpr auto is_true() { static bool true_value = true; return equals(true_value); }
+        constexpr auto is_false() { static bool false_value = false; return equals(false_value); }
 
         template<typename T>
         constexpr auto equals(std::vector<T> const& vec) { return VectorMatchers::Equals<T>{vec}; }
@@ -332,7 +377,9 @@ namespace CatchKit {
 
         using Detail::operator &&;
         using Detail::operator ||;
-    }
+        using Detail::operator !;
+
+    } // namespace Matchers
 
 } // namespace CatchKit
 

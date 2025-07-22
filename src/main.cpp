@@ -4,7 +4,6 @@
 
 #include "catchkit/catchkit_matchers.h"
 
-#include <print>
 
 TEST("test a") {
     CHECK( 1 == 2 );

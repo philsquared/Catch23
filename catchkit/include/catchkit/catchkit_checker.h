@@ -72,7 +72,9 @@ namespace CatchKit::Detail
     template<typename T>
     auto UnaryExprRef<T>::evaluate() -> ResultType {
         if constexpr( requires (T v){ { !v } -> std::same_as<bool>; }) {
-            CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_ADDRESS
+            CATCHKIT_WARNINGS_SUPPRESS_START
+            CATCHKIT_WARNINGS_SUPPRESS_ADDRESS
+            CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
             return !value ? ResultType::ExpressionFailed : ResultType::Pass;
             CATCHKIT_WARNINGS_SUPPRESS_END
         }

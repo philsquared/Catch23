@@ -20,7 +20,10 @@ add_library(Catch23 STATIC
         include/catch23/catch23_console_reporter.cpp
         include/catch23/catch23_console_reporter.h
         src/catch23_runner.cpp
-        include/catch23/catch23_runner.h)
+        include/catch23/catch23_runner.h
+        src/catch23_catch2.cpp
+        include/catch23/catch23_catch2.h
+)
 
 target_include_directories(Catch23 PUBLIC include)
 target_link_libraries(Catch23 PUBLIC Catchkit)
