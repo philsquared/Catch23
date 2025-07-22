@@ -12,8 +12,10 @@ TEST("test a") {
 }
 
 TEST("test b") {
-    REQUIRE_THAT("one", equals("two"));
+    REQUIRE_THAT("one", equals("one"));
 }
+
+#include "catch23/catch23_colour.h"
 
 namespace CatchKit {
 
@@ -26,13 +28,17 @@ namespace CatchKit {
         }
 
         void on_assertion_start( AssertionContext const& context ) override {
-            std::println("{}:{}:{}: in function '{}'",
-                    context.location.file_name(),
-                    context.location.line(),
-                    context.location.column(),
-                    context.location.function_name());
         }
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {
+            TextColour colour;
+            if ( assertion_info.passed() )
+                colour.set(Colours::Green);
+            else
+                colour.set(Colours::Red);
+            std::print("{}:{}:{}:",
+                    context.location.file_name(),
+                    context.location.line(),
+                    context.location.column());
             std::string_view macro_name = context.macro_name;
             if( macro_name.empty() )
                 macro_name = "assertion";
@@ -46,18 +52,18 @@ namespace CatchKit {
 
             switch( assertion_info.result ) {
             case ResultType::UnexpectedException:
-                std::println("due to an unexpected exception");
+                std::println("\tdue to an unexpected exception");
                 break;
             case ResultType::MissingException:
-                std::println("due to a missing exception");
+                std::println("\tdue to a missing exception");
                 break;
             default:
                 if(assertion_info.expression_info)
-                    std::println("with expansion:\n\t{}", *assertion_info.expression_info);
+                    std::println("\twith expansion:\n\t\t{}", *assertion_info.expression_info);
                 break;
             }
             if (!assertion_info.message.empty()) {
-                std::println("with message:\n\t{}", assertion_info.message);
+                std::println("\twith message:\n\t\t{}", assertion_info.message);
             }
         }
     };
@@ -79,15 +85,17 @@ void run_tests() {
         }
         catch( ... )
         {
+            // We need a new context because the old one had string_views to outdated data
+            // - we want to preserve the last known source location, though
             CatchKit::AssertionContext context{
                 .macro_name = "test",
-                .original_expression = {},
+                .original_expression = "* unknown line after the reported location *",
                 .message = {},
                 .location = test_handler.get_current_context().location };
             test_handler.on_assertion_start( CatchKit::ResultDisposition::Continue, std::move(context) );
             test_handler.on_assertion_result( CatchKit::ResultType::UnexpectedException, {}, CatchKit::Detail::get_exception_message(std::current_exception()) );
         }
-        reporter.on_test_end(test.test_info);
+        reporter.on_test_end(test.test_info); // !TBD: report number of assertions passed/ failed and overall status
     }
 
 }
