@@ -27,12 +27,15 @@ namespace CatchKit::Detail
         bool should_decompose = true;
 
         auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
-        auto operator()(AssertionContext const& context) -> Asserter;
+        auto operator()(AssertionContext&& context) -> Asserter;
     };
 
     struct Asserter {
         Checker& checker;
 
+        ~Asserter() noexcept(false) {
+            checker.result_handler.on_assertion_end(); // This may throw to cancel the test
+        }
         void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
                 expr_call(*this);

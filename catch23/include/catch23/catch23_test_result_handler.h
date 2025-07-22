@@ -12,19 +12,23 @@
 
 namespace CatchKit::Detail
 {
+    class TestCancelled {};
+
     class TestResultHandler : public ResultHandler {
         std::unique_ptr<Reporter> reporter;
-        AssertionContext const* current_context;
+        AssertionContext current_context;
         ResultType last_result = ResultType::Unknown;
         ResultDisposition result_disposition = ResultDisposition::Abort;
 
-        void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) override;
+    public:
+        explicit TestResultHandler(std::unique_ptr<Reporter>&& reporter);
+
+        void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
 
-    public:
-        explicit TestResultHandler(std::unique_ptr<Reporter>&& reporter);
         auto get_reporter() -> Reporter& { return *reporter; }
+        auto get_current_context() -> AssertionContext const& { return current_context; }
         auto passed() { return last_result == CatchKit::ResultType::Pass; }
     };
 

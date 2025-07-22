@@ -14,23 +14,22 @@ namespace CatchKit::Detail {
     : reporter(std::move(reporter))
     {}
 
-    void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
-        current_context = &context;
+    void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
+        current_context = std::move(context);
         this->result_disposition = result_disposition;
         reporter->on_assertion_start( context );
     }
 
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
-        assert(current_context);
         last_result = result;
 
-        reporter->on_assertion_end(*current_context, AssertionInfo{ result, expression_info, std::string(message) } );
+        reporter->on_assertion_end(current_context, AssertionInfo{ result, expression_info, std::string(message) } );
+
     }
     void TestResultHandler::on_assertion_end() {
         if( last_result != ResultType::Pass && result_disposition == ResultDisposition::Abort ) {
-            throw std::domain_error("cancel test"); // !TBD
+            throw TestCancelled();
         }
-        current_context = nullptr;
     }
 
 } // namespace CatchKit::Detail

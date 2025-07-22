@@ -8,6 +8,7 @@
 
 TEST("test a") {
     CHECK( 1 == 2 );
+    throw std::domain_error("I didn't expect that!");
 }
 
 TEST("test b") {
@@ -32,8 +33,16 @@ namespace CatchKit {
                     context.location.function_name());
         }
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {
-            std::println("{} {} for expression:", context.macro_name, assertion_info.passed() ? "passed" : "failed");
-            std::println("\t{}", context.original_expression);
+            std::string_view macro_name = context.macro_name;
+            if( macro_name.empty() )
+                macro_name = "assertion";
+            if( !context.original_expression.empty() )
+                std::println("{} {} for expression:\n\t{}",
+                        macro_name, assertion_info.passed() ? "passed" : "failed",
+                        context.original_expression);
+            else
+                std::println("{} {}",
+                    macro_name, assertion_info.passed() ? "passed" : "failed");
 
             switch( assertion_info.result ) {
             case ResultType::UnexpectedException:
@@ -65,9 +74,18 @@ void run_tests() {
         try {
             test.test_fun(check, require);
         }
-        // !TBD: test cancellation
-        catch(...) {
-            std::println("  *** aborted");
+        catch( CatchKit::Detail::TestCancelled ) {
+            std::println("  *** aborted"); // !TBD
+        }
+        catch( ... )
+        {
+            CatchKit::AssertionContext context{
+                .macro_name = "test",
+                .original_expression = {},
+                .message = {},
+                .location = test_handler.get_current_context().location };
+            test_handler.on_assertion_start( CatchKit::ResultDisposition::Continue, std::move(context) );
+            test_handler.on_assertion_result( CatchKit::ResultType::UnexpectedException, {}, CatchKit::Detail::get_exception_message(std::current_exception()) );
         }
         reporter.on_test_end(test.test_info);
     }

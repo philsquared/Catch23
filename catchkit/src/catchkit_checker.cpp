@@ -25,8 +25,8 @@ namespace CatchKit::Detail {
         return operator()(AssertionContext{{}, {}, message, assertion_location});
     }
 
-    auto Checker::operator()(AssertionContext const& context) -> Asserter {
-        result_handler.on_assertion_start(result_disposition, context);
+    auto Checker::operator()(AssertionContext&& context) -> Asserter {
+        result_handler.on_assertion_start(result_disposition, std::move(context));
         return Asserter{*this};
     }
 

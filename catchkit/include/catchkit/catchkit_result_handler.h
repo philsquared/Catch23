@@ -19,7 +19,7 @@ namespace CatchKit::Detail
 
     struct ResultHandler {
         virtual ~ResultHandler();
-        virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) = 0;
+        virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) = 0;
         virtual void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) = 0;
         virtual void on_assertion_end() = 0;
     };

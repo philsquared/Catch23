@@ -6,14 +6,15 @@
 #define CATCHKIT_ASSERT_RESULT_HANDLER_H
 
 #include "catchkit/catchkit_result_handler.h"
+#include "catchkit/catchkit_assertion_context.h"
 
 namespace CatchKit::Detail {
 
     struct AssertResultHandler : ResultHandler {
-        AssertionContext const* current_context;
+        AssertionContext current_context;
         ResultType last_result = ResultType::Unknown;
         ResultDisposition result_disposition = ResultDisposition::Abort;
-        void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) override;
+        void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
     };
