@@ -21,7 +21,8 @@ namespace CatchKit {
 }
 
 void run_tests() {
-    CatchKit::TestResultHandler test_handler( std::make_unique<CatchKit::ConsoleReporter>() );
+    CatchKit::ConsoleReporter reporter;
+    CatchKit::TestResultHandler test_handler( reporter );
     CatchKit::Checker check{ test_handler, CatchKit::ResultDisposition::Continue };
     CatchKit::Checker require{ test_handler, CatchKit::ResultDisposition::Abort };
 
@@ -34,8 +35,7 @@ void run_tests() {
         catch( CatchKit::Detail::TestCancelled ) {
             std::println("  *** aborted"); // !TBD
         }
-        catch( ... )
-        {
+        catch( ... ) {
             // We need a new context because the old one had string_views to outdated data
             // - we want to preserve the last known source location, though
             CatchKit::AssertionContext context{

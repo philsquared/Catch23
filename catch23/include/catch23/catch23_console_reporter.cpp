@@ -24,8 +24,7 @@ namespace CatchKit {
                 test_info.location.line());
         std::println("...............................................................................\n");
     }
-    void ConsoleReporter::on_test_end( TestInfo const& test_info ) {
-        std::println("Finished: {}\n", test_info.name);
+    void ConsoleReporter::on_test_end( TestInfo const& ) {
     }
 
     void ConsoleReporter::on_assertion_start( AssertionContext const& ) {

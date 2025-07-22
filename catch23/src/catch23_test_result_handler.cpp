@@ -10,20 +10,20 @@
 
 namespace CatchKit::Detail {
 
-    TestResultHandler::TestResultHandler(std::unique_ptr<Reporter>&& reporter)
-    : reporter(std::move(reporter))
+    TestResultHandler::TestResultHandler(Reporter& reporter)
+    : reporter(reporter)
     {}
 
     void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
         current_context = std::move(context);
         this->result_disposition = result_disposition;
-        reporter->on_assertion_start( context );
+        reporter.on_assertion_start( context );
     }
 
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
         last_result = result;
 
-        reporter->on_assertion_end(current_context, AssertionInfo{ result, expression_info, std::string(message) } );
+        reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, std::string(message) } );
 
     }
     void TestResultHandler::on_assertion_end() {
