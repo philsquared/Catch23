@@ -1,11 +1,15 @@
+//
+// Created by Phil Nash on 22/07/2025.
+//
+
+// These test have been taken from the Catch2 test suite, with minor modifications applied
+// (mostly using matchers instead of Approx)
+
 #include "catch23/catch23_catch2.h"
 #include "catchkit/catchkit_internal_warnings.h"
 
 #include <string>
 #include <limits>
-
-// These test have been taken from the Catch2 test suite, with minor modifications applied
-// (mostly using matchers instead of Approx)
 
 namespace {
 

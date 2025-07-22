@@ -17,7 +17,7 @@ add_library(Catch23 STATIC
         include/catch23/catch23_test_info.h
         src/catch23_colour.cpp
         include/catch23/catch23_colour.h
-        include/catch23/catch23_console_reporter.cpp
+        src/catch23_console_reporter.cpp
         include/catch23/catch23_console_reporter.h
         src/catch23_runner.cpp
         include/catch23/catch23_runner.h

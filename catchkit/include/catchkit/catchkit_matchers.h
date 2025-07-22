@@ -218,7 +218,7 @@ namespace CatchKit {
             [[nodiscard]] constexpr auto matches(std::string_view str) const -> MatchResult {
                 if( match_str.size() > str.size() )
                     return false;
-                return CasePolicy::equal(str.substr(match_str.size()-str.size()), match_str);
+                return CasePolicy::equal(str.substr(str.size()-match_str.size()), match_str);
             }
             constexpr auto describe() const {
                 return std::format("ends_with(\"{}\")", match_str);
@@ -228,7 +228,7 @@ namespace CatchKit {
         struct Contains {
             std::string_view match_str;
             [[nodiscard]] constexpr auto matches(std::string_view str) const -> MatchResult {
-                return CasePolicy::find(match_str, str);
+                return CasePolicy::find(str, match_str);
             }
             constexpr auto describe() const {
                 return std::format("contains(\"{}\")", match_str);
@@ -356,8 +356,13 @@ namespace CatchKit {
 
         template<typename CasePolicy=CaseSensitive>
         constexpr auto starts_with(std::string_view str) { return StringMatchers::StartsWith<CasePolicy>{str}; }
+
+        template<typename CasePolicy=CaseSensitive>
+        constexpr auto ends_with(std::string_view str) { return StringMatchers::EndsWith<CasePolicy>{str}; }
+
         template<typename CasePolicy=CaseSensitive>
         constexpr auto contains(std::string_view str) { return StringMatchers::Contains<CasePolicy>{str}; }
+
         template<typename CasePolicy=CaseSensitive>
         constexpr auto equals(std::string_view str) { return StringMatchers::Equals<CasePolicy>{str}; }
 

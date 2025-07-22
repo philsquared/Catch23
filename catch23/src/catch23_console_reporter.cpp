@@ -2,9 +2,9 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-#include "catch23_console_reporter.h"
-#include "catch23_colour.h"
-#include "catch23_test_info.h"
+#include "../include/catch23/catch23_console_reporter.h"
+#include "../include/catch23/catch23_colour.h"
+#include "../include/catch23/catch23_test_info.h"
 
 #include <print>
 
