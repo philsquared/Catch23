@@ -30,40 +30,55 @@ namespace CatchKit {
         void on_assertion_start( AssertionContext const& context ) override {
         }
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {
-            TextColour colour;
-            if ( assertion_info.passed() )
-                colour.set(Colours::Green);
-            else
-                colour.set(Colours::Red);
-            std::print("{}:{}:{}:",
-                    context.location.file_name(),
-                    context.location.line(),
-                    context.location.column());
-            std::string_view macro_name = context.macro_name;
-            if( macro_name.empty() )
-                macro_name = "assertion";
+            {
+                TextColour colour;
+                if ( assertion_info.passed() )
+                    colour.set(Colours::Green);
+                else
+                    colour.set(Colours::Red);
+                std::println("{}:{}:{}: {}",
+                        context.location.file_name(),
+                        context.location.line(),
+                        context.location.column(),
+                        assertion_info.passed() ? "PASSED" : "FAILED");
+            }
+
             if( !context.original_expression.empty() )
-                std::println("{} {} for expression:\n\t{}",
-                        macro_name, assertion_info.passed() ? "passed" : "failed",
-                        context.original_expression);
-            else
-                std::println("{} {}",
-                    macro_name, assertion_info.passed() ? "passed" : "failed");
+                std::println( "for expression:" );
+
+            {
+                TextColour colour(Colours::Cyan);
+                if( context.macro_name.empty() ) {
+                    if( !context.original_expression.empty() )
+                        std::println( "\t{}", context.original_expression );
+                }
+                else {
+                    if( !context.original_expression.empty() )
+                        std::println( "\t{}( {} )", context.macro_name, context.original_expression );
+                    else
+                        std::println( "\tfor {}", context.macro_name );
+                }
+            }
 
             switch( assertion_info.result ) {
             case ResultType::UnexpectedException:
-                std::println("\tdue to an unexpected exception");
+                std::println("due to an unexpected exception");
                 break;
             case ResultType::MissingException:
-                std::println("\tdue to a missing exception");
+                std::println("due to a missing exception");
                 break;
             default:
-                if(assertion_info.expression_info)
-                    std::println("\twith expansion:\n\t\t{}", *assertion_info.expression_info);
+                if(assertion_info.expression_info) {
+                    std::println("with expansion:");
+                    TextColour _(Colours::BrightYellow);
+                    std::println("\t{}", *assertion_info.expression_info);
+                }
                 break;
             }
             if (!assertion_info.message.empty()) {
-                std::println("\twith message:\n\t\t{}", assertion_info.message);
+                std::println("with message:");
+                TextColour _(Colours::BrightWhite);
+                std::println("\t{}", assertion_info.message);
             }
         }
     };
@@ -88,7 +103,7 @@ void run_tests() {
             // We need a new context because the old one had string_views to outdated data
             // - we want to preserve the last known source location, though
             CatchKit::AssertionContext context{
-                .macro_name = "test",
+                .macro_name = "",
                 .original_expression = "* unknown line after the reported location *",
                 .message = {},
                 .location = test_handler.get_current_context().location };

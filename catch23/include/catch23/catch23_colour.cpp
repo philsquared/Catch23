@@ -18,10 +18,9 @@ namespace CatchKit {
                 isatty(STDOUT_FILENO)
 #endif
 #if defined(CATCHKIT_PLATFORM_APPLE)
-            && !isDebuggerActive();
-#else
-            ;
+            && !isDebuggerActive()
 #endif
+            ;
             return colour_available;
         }
     } // namespace Detail
@@ -36,10 +35,19 @@ namespace CatchKit {
                 switch( colour )
                 {
                     using enum Colours;
-                    case Reset: return "0;39";
-                    case Red: return "0;31";
-                    case Green: return "0;32";
-                    case Blue: return "0;34";
+                    case Reset:     return "0;39";
+                    case Red:       return "0;31";
+                    case Green:     return "0;32";
+                    case Blue:      return "0;34";
+                    case Cyan:      return "0;36";
+                    case Yellow:    return "0;33";
+                    case Grey:      return "1;30";
+
+                    case LightGrey:     return "0;37";
+                    case BrightRed:     return "1;31";
+                    case BrightGreen:   return "1;32";
+                    case BrightWhite:   return "1;37";
+                    case BrightYellow:  return "1;33";
                 }
             }());
         }

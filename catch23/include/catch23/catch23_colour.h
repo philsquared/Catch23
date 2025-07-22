@@ -8,14 +8,28 @@
 namespace CatchKit {
 
     enum class Colours {
-        Reset,
+        Reset = 0,
+        White = Reset,
         Red,
         Green,
-        Blue
-    };
+        Blue,
+        Cyan,
+        Yellow,
+        Grey,
+
+        Bright = 0x10,
+
+        BrightRed = Bright | Red,
+        BrightGreen = Bright | Green,
+        LightGrey = Bright | Grey,
+        BrightWhite = Bright | White,
+        BrightYellow = Bright | Yellow,
+};
 
     class TextColour {
     public:
+        TextColour() = default;
+        explicit TextColour(Colours initial_colour) { set(initial_colour); };
         ~TextColour();
 
         auto operator=(TextColour&&)  = delete; // non-moveable, non-copyable
