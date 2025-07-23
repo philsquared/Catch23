@@ -4,7 +4,7 @@ A new test framework, in the spirit of Catch/ Catch2, but rewritten from the gro
 This is an early work-in-progress and is not intended for general use.
 
 What's different?
-The vast majority is purely internal - which not only makes maintenance far easier (and enabled new possibilities) 
+The vast majority is purely internal - which not only makes maintenance far easier (and enables new possibilities) 
 but should improve runtime - and may help with compile times, too (not currently measured).
 
 But there are some differences and new capabilities, too. 

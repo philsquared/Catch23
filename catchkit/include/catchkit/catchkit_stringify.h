@@ -37,7 +37,7 @@ namespace CatchKit {
                 if(e == candidate) {
                     return parse_enum_name_from_function(std::source_location::current().function_name());
                 }
-                if constexpr(candidate != static_cast<E>(max_enum_scan)) {
+                if constexpr(static_cast<size_t>(candidate) < max_enum_scan) {
                     return enum_value_string<E, static_cast<E>(static_cast<size_t>(candidate)+1)>::find(e);
                 }
                 else {
@@ -90,28 +90,6 @@ namespace CatchKit {
     };
 
     template<>
-    struct Stringifier<bool> {
-        [[nodiscard]] static constexpr auto stringify( bool value ) -> std::string {
-            return value ? "true" : "false";
-        }
-    };
-
-    // to_string is a good balance of compile-time and run-time performance, without external dependencies
-    // in the case where you need to end up with a std::string, anyway
-    // (faster algos are typically lower-level and need to be followed up with a copy)
-    // see: https://www.zverovich.net/2020/06/13/fast-int-to-string-revisited.html
-    template<std::integral T>
-    struct Stringifier<T> {
-        [[nodiscard]] static constexpr auto stringify( T value ) -> std::string { return std::to_string( value ); }
-    };
-
-    template<std::floating_point T>
-    struct Stringifier<T> {
-        // !TBD: customise output (e.g. strip trailing zeros)?
-        [[nodiscard]] static constexpr auto stringify( T value ) -> std::string { return std::to_string( value ); }
-    };
-
-    template<>
     struct Stringifier<std::string> {
         [[nodiscard]] static constexpr auto stringify( std::string const& value ) -> std::string { return value; }
         [[nodiscard]] static constexpr auto stringify( std::string&& value ) -> std::string { return std::move(value); }
@@ -133,13 +111,6 @@ namespace CatchKit {
         }
     };
 
-    template<>
-    struct Stringifier<nullptr_t> {
-        [[nodiscard]] static constexpr auto stringify( nullptr_t ) -> std::string {
-            return "nullptr";
-        }
-    };
-
     template<typename T>
     requires requires{ !std::same_as<std::decay_t<T>, char>; }
     struct Stringifier<T*> {
@@ -154,15 +125,16 @@ namespace CatchKit {
     // Don't specialise this
     template<typename T>
     [[nodiscard]] auto constexpr stringify(T const& value ) {
-        if constexpr( std::same_as<T, bool> ) {
+        if constexpr( std::same_as<T, bool> )
             return value ? "true" : "false";
-        }
-        else if constexpr( std::is_enum_v<T> ) {
+        else if constexpr( std::is_enum_v<T> )
             return Detail::enum_to_string( value );
-        }
-        else {
+        else if constexpr( std::floating_point<T> || std::integral<T> )
+            return std::to_string( value );
+        else if constexpr( std::is_null_pointer_v<T> )
+            return "nullptr";
+        else
             return Stringifier<T>::stringify( value );
-        }
     }
 
 } // namespace CatchKit

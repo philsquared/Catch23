@@ -48,11 +48,13 @@ namespace CatchKit::Detail
         void simple_assert(auto const&, T&&) noexcept {
             static_assert(std::is_convertible_v<T, std::string_view>, "Only matchers or strings can follow the comma operator");
         }
-
+        void simple_assert(nullptr_t, std::string_view message = {}) noexcept {
+            simple_assert(false, message);
+        }
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
-            bool bool_result = !result;
-            if( checker.result_handler.report_on == ReportOn::AllResults || bool_result ) {}
-                checker.result_handler.on_assertion_result(bool_result ? ResultType::Pass : ResultType::ExpressionFailed, {}, message);
+            bool is_failure = !result;
+            if( checker.result_handler.report_on == ReportOn::AllResults || is_failure ) {}
+                checker.result_handler.on_assertion_result(is_failure ? ResultType::ExpressionFailed : ResultType::Pass, {}, message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
@@ -83,6 +85,10 @@ namespace CatchKit::Detail
             CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
             return !value ? ResultType::ExpressionFailed : ResultType::Pass;
             CATCHKIT_WARNINGS_SUPPRESS_END
+        }
+        else if constexpr( std::is_null_pointer_v<T> ) {
+            // Special case for GCC
+            return ResultType::ExpressionFailed;
         }
         else {
             // Have to do this at runtime because we can get here from the destructor of a UnaryExpr,
