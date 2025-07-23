@@ -212,6 +212,52 @@ TEST( "One TickTock node, one regular node" ) {
     CHECK( s_node->get_current_index() == 0 );
 }
 
+TEST( "One regular node with a nested TickTock node" ) {
+    using namespace CatchKit::Detail;
+
+    ExecutionNodes nodes({"root"});
+    auto& root = nodes.get_root();
+    root.enter();
+
+    NodeId tt_id({"tt"}), s_id({"s"});
+
+    // First go into the "section" node
+    nodes.add_node(NodeId(s_id));
+    auto s_node = nodes.find_node(s_id);
+    CHECK( s_node->get_size() == 1 );
+    s_node->enter();
+    CHECK( s_node->get_current_index() == 0 );
+
+    // Now, while the section is open, enter the tick tock node
+    nodes.add_node( std::make_unique<TickTockNode>(NodeId(tt_id)) );
+    auto tt_node = nodes.find_node(tt_id);
+    tt_node->enter();
+    CHECK( tt_node->get_state() == ExecutionNode::States::Entered );
+    CHECK( tt_node->get_current_index() == 0 );
+
+    CHECK( s_node->exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( tt_node->get_state() == ExecutionNode::States::Incomplete);
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( tt_node->get_state() == ExecutionNode::States::Incomplete );
+    CHECK( s_node->get_state() == ExecutionNode::States::HasIncompleteChildren );
+
+    CHECK( tt_node->get_current_index() == 1 );
+    CHECK( s_node->get_current_index() == 0 );
+
+    root.enter();
+    s_node->enter();
+    tt_node->enter();
+
+    CHECK( s_node->exit() == ExecutionNode::States::Completed );
+    CHECK( tt_node->get_state() == ExecutionNode::States::None);
+
+    CHECK( root.exit() == ExecutionNode::States::Completed );
+
+    CHECK( tt_node->get_current_index() == 0 );
+    CHECK( s_node->get_current_index() == 0 );
+}
+
 namespace CatchKit::Detail {
     struct SectionInfo {
         ExecutionNode& node;
