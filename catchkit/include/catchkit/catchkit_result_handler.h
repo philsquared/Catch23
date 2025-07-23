@@ -7,6 +7,7 @@
 
 #include "catchkit_result_type.h"
 #include "catchkit_expression_info.h"
+#include "catchkit_report_on.h"
 
 #include <optional>
 #include <string_view>
@@ -18,7 +19,11 @@ namespace CatchKit::Detail
     enum class ResultDisposition { Abort, Continue };
 
     struct ResultHandler {
+        ReportOn report_on;
+
+        explicit ResultHandler(ReportOn report_on) : report_on(report_on) {}
         virtual ~ResultHandler();
+
         virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) = 0;
         virtual void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) = 0;
         virtual void on_assertion_end() = 0;

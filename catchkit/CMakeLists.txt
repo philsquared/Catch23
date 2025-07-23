@@ -32,7 +32,8 @@ add_library(Catchkit STATIC
         src/catchkit_matchers.cpp
         include/catchkit/catchkit_matchers.h
         include/catchkit/catchkit_platform.h
-    )
+        include/catchkit/catchkit_report_on.h
+)
 
 target_include_directories(Catchkit PUBLIC include)
 target_compile_options(Catchkit PRIVATE -Wall -Wextra -Wpedantic)

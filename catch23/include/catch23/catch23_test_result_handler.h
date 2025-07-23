@@ -21,6 +21,8 @@ namespace CatchKit::Detail
     public:
         explicit TestResultHandler(Reporter& reporter);
 
+        auto operator=(TestResultHandler&&) = delete; // non-copyable, non-moveable
+
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;

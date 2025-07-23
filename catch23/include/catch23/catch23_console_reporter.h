@@ -9,9 +9,20 @@
 
 namespace CatchKit {
 
-    struct ConsoleReporter : Reporter {
+    class ConsoleReporter : public Reporter {
         std::optional<TestInfo> lazy_test_info;
+        ReportOn what_to_report_on;
         void lazy_print_test_header();
+
+    public:
+        explicit ConsoleReporter( ReportOn what_to_report_on )
+        : what_to_report_on( what_to_report_on )
+        {}
+
+        auto report_on_what() const -> ReportOn override {
+            return what_to_report_on;
+        }
+
         void on_test_start( TestInfo const& test_info ) override;
         void on_test_end( TestInfo const& test_info ) override;
 

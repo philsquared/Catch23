@@ -23,7 +23,6 @@ namespace CatchKit::Detail
     struct Checker {
         ResultHandler& result_handler;
         ResultDisposition result_disposition;
-        bool should_report_success = true;
         bool should_decompose = true;
 
         auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
@@ -52,7 +51,7 @@ namespace CatchKit::Detail
 
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
             bool bool_result = !result;
-            if( checker.should_report_success || bool_result ) {}
+            if( checker.result_handler.report_on == ReportOn::AllResults || bool_result ) {}
                 checker.result_handler.on_assertion_result(bool_result ? ResultType::Pass : ResultType::ExpressionFailed, {}, message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
@@ -144,8 +143,11 @@ namespace CatchKit::Detail
     void Asserter::accept_expr( auto& expr ) noexcept {
         auto result = expr.evaluate();
 
-        if( checker.should_report_success || result != ResultType::Pass ) {
+        if( checker.result_handler.report_on == ReportOn::AllResults || result != ResultType::Pass ) {
             checker.result_handler.on_assertion_result( result, expr.expand(result), expr.message );
+        }
+        else {
+            checker.result_handler.on_assertion_result( result, {}, expr.message );
         }
     }
 

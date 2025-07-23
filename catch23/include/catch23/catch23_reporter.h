@@ -10,6 +10,7 @@
 #include "catchkit/catchkit_expression_info.h"
 #include "catchkit/catchkit_result_type.h"
 #include "catchkit/catchkit_assertion_context.h"
+#include "catchkit/catchkit_report_on.h"
 
 #include <optional>
 
@@ -25,6 +26,8 @@ namespace CatchKit {
 
     struct Reporter {
         virtual ~Reporter() = default;
+
+        virtual auto report_on_what() const -> ReportOn = 0;
 
         virtual void on_test_start( TestInfo const& test_info ) = 0;
         virtual void on_test_end( TestInfo const& test_info ) = 0;
