@@ -10,6 +10,8 @@
 #include <source_location>
 #include <cassert>
 
+#include "catchkit/catchkit_stringify.h"
+
 namespace CatchKit::Detail {
 
     struct NodeId {
@@ -34,7 +36,8 @@ namespace CatchKit::Detail {
             None, // Just added or not entered yet
             Entered,
             EnteredButDoneForThisLevel,
-            ExitedButIncomplete,
+            HasIncompleteChildren,
+            Incomplete, // Children are complete, but there are more local levels (e.g. generator values)
             Completed
         };
 
@@ -75,6 +78,8 @@ namespace CatchKit::Detail {
         auto get_size() const { return size; }
 
         void reset();
+        void reset_children();
+
         void enter();
         auto exit() -> States;
 
@@ -103,5 +108,6 @@ namespace CatchKit::Detail {
     };
 
 } // namespace CatchKit::Detail
+
 
 #endif //CATCH23_INTERNAL_EXECUTION_NODES_H

@@ -27,6 +27,9 @@ TEST("execution nodes") {
         "When we exit immediately should completes");
 
     CHECK(nodes.get_root().exit() == ExecutionNode::States::Completed);
+
+    nodes.get_root().reset();
+
     nodes.get_root().enter();
 
     node.enter();
@@ -37,10 +40,10 @@ TEST("execution nodes") {
     auto& node_b = nodes.add_node(NodeId(b_id));
     CHECK(node.find_child(b_id) == &node_b);
 
-    CHECK(node.exit() == ExecutionNode::States::ExitedButIncomplete,
+    CHECK(node.exit() == ExecutionNode::States::Incomplete,
         "When we exit after adding a new node it should be incomplete");
 
-    CHECK(nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete);
+    CHECK(nodes.get_root().exit() == ExecutionNode::States::Incomplete);
     nodes.get_root().enter();
 
     node.enter();
@@ -140,7 +143,7 @@ TEST("peer sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should skip second node at same level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
     nodes.get_root().enter(); // re-enter whole test
 
     CHECK( !try_enter_section(nodes, "s1", stable_loc ),
@@ -173,7 +176,7 @@ TEST("nested sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should skip subsequent node at top level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
     nodes.get_root().enter(); // re-enter whole test
 
     {
@@ -191,7 +194,7 @@ TEST("nested sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should still skip subsequent node at top level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
     nodes.get_root().enter(); // re-enter whole test
 
     CHECK( !try_enter_section(nodes, "s1", stable_loc), "should now skip first node");

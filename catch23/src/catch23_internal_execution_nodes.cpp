@@ -4,6 +4,7 @@
 
 #include "catch23_internal_execution_nodes.h"
 
+
 namespace CatchKit::Detail {
 
     auto ExecutionNode::set_current_node(ExecutionNode* node) {
@@ -25,15 +26,19 @@ namespace CatchKit::Detail {
     }
 
     void ExecutionNode::reset() {
-        assert(state != States::Entered);
+        if( state != States::None ) {
+            state = States::None;
+            reset_children();
+        }
+    }
+    void ExecutionNode::reset_children() {
         for(auto const& child : children) {
             child->reset();
         }
     }
 
     void ExecutionNode::enter() {
-        assert(state != States::Entered);
-        reset();
+        assert(state != States::Entered && state != States::Completed);
         state = States::Entered;
         set_current_node(this);
     }
@@ -47,9 +52,12 @@ namespace CatchKit::Detail {
         }
         for(auto const& child : children) {
             if( child->state != States::Completed )
-                return state = States::ExitedButIncomplete;
+                return state = States::HasIncompleteChildren;
         }
+        if( ++current_index != size )
+            return state = States::Incomplete;
 
+        reset_children();
         return state = States::Completed;
     }
 
