@@ -95,28 +95,77 @@ namespace CatchKit::Detail {
     }
 }
 
-TEST("sections") {
+TEST("peer sections") {
     using namespace CatchKit::Detail;
 
     ExecutionNodes nodes({"root"});
     nodes.get_root().enter();
 
-    NodeId a_id({"a"});
+    std::source_location stable_loc;
 
-    CHECK( try_enter_section(nodes, "s1", a_id.location ),
+    CHECK( try_enter_section(nodes, "s1", stable_loc ),
         "should enter first node encountered");
-    CHECK( !try_enter_section(nodes, "s2", a_id.location ),
+    CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should skip second node at same level");
 
     CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
     nodes.get_root().enter(); // re-enter whole test
 
-    CHECK( !try_enter_section(nodes, "s1", a_id.location ),
+    CHECK( !try_enter_section(nodes, "s1", stable_loc ),
         "should skip first node when re-encountered");
 
-    CHECK( try_enter_section(nodes, "s2", a_id.location ),
+    CHECK( try_enter_section(nodes, "s2", stable_loc ),
         "should now go into second node");
+}
 
+TEST("nested sections") {
+    using namespace CatchKit::Detail;
+
+    ExecutionNodes nodes({"root"});
+    nodes.get_root().enter();
+
+    std::source_location stable_loc;
+
+    {
+        auto s1 = try_enter_section(nodes, "s1", stable_loc);
+        CHECK( s1, "should enter first node encountered");
+
+        // section still open
+
+        CHECK( try_enter_section(nodes, "s1.1", stable_loc ),
+            "should enter nested node");
+
+        CHECK( !try_enter_section(nodes, "s1.2", stable_loc ),
+            "should skip subsequent node at nested level");
+    }
+    CHECK( !try_enter_section(nodes, "s2", stable_loc ),
+        "should skip subsequent node at top level");
+
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
+    nodes.get_root().enter(); // re-enter whole test
+
+    {
+        auto s1 = try_enter_section(nodes, "s1", stable_loc);
+        CHECK( s1, "should enter first node, again");
+
+        // section still open
+
+        CHECK( !try_enter_section(nodes, "s1.1", stable_loc ),
+            "should now skip first nested node");
+
+        CHECK( try_enter_section(nodes, "s1.2", stable_loc ),
+            "should enter second nested node");
+    }
+    CHECK( !try_enter_section(nodes, "s2", stable_loc ),
+        "should still skip subsequent node at top level");
+
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::ExitedButIncomplete );
+    nodes.get_root().enter(); // re-enter whole test
+
+    CHECK( !try_enter_section(nodes, "s1", stable_loc), "should now skip first node");
+
+    CHECK( try_enter_section(nodes, "s2", stable_loc ),
+        "should now enter second node at top level");
 }
 
 int main() {
