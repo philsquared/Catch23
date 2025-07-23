@@ -51,6 +51,7 @@ namespace CatchKit::Detail {
         std::vector<std::unique_ptr<ExecutionNode>> children;
         States state = States::None;
 
+        auto get_current_node() -> ExecutionNode*;
         auto set_current_node(ExecutionNode* node);
 
     protected:
@@ -76,6 +77,7 @@ namespace CatchKit::Detail {
         auto get_parent() { return parent; }
         auto get_parent_state() const { return parent ? parent->get_state() : States::None; }
         auto get_size() const { return size; }
+        auto get_current_index() const { return current_index; }
 
         void reset();
         void reset_children();

@@ -7,6 +7,10 @@
 
 namespace CatchKit::Detail {
 
+    auto ExecutionNode::get_current_node() -> ExecutionNode* {
+        assert(container);
+        return container->current_node;
+    }
     auto ExecutionNode::set_current_node(ExecutionNode* node) {
         assert(container);
         return container->current_node = node;
@@ -47,16 +51,26 @@ namespace CatchKit::Detail {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
         if(parent) {
-            set_current_node(parent);
+            if(get_current_node() == this) {
+                set_current_node(parent);
+            }
             assert(parent->state == States::Entered || parent->state == States::EnteredButDoneForThisLevel);
             parent->state = States::EnteredButDoneForThisLevel;
         }
         for(auto const& child : children) {
-            if( child->state != States::Completed )
-                return state = States::HasIncompleteChildren;
+            if( child->state == States::Entered )
+                child->exit();
+            if( child->state != States::Completed ) {
+                state = States::HasIncompleteChildren;
+            }
         }
-        if( ++current_index != size )
+        if( state == States::HasIncompleteChildren )
+            return state;
+
+        if( ++current_index != size ) {
+            reset_children();
             return state = States::Incomplete;
+        }
 
         reset_children();
         return state = States::Completed;

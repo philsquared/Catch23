@@ -63,7 +63,7 @@ struct TickTockNode : public CatchKit::Detail::ExecutionNode {
     }
 };
 
-TEST("TickTick Execution Nodes") {
+TEST("TickTick Execution Nodes : one node - no children") {
     using namespace CatchKit::Detail;
 
     ExecutionNodes nodes({"root"});
@@ -87,13 +87,84 @@ TEST("TickTick Execution Nodes") {
 
     CHECK( ttnode->current_value() == 1 );
 
-    node->exit();
-    root.exit();
+    CHECK( node->get_state() == ExecutionNode::States::Entered );
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( node->get_state() == ExecutionNode::States::Incomplete,
+        "Not explicitly exited node should be exited by its parent");
 
     root.enter();
     node->enter();
 
     CHECK( ttnode->current_value() == 2 );
+
+    CHECK( root.exit() == ExecutionNode::States::Completed );
+}
+
+TEST( "TickTick Execution Nodes : two nodes" ) {
+    using namespace CatchKit::Detail;
+
+    ExecutionNodes nodes({"root"});
+    auto& root = nodes.get_root();
+    root.enter();
+
+    NodeId a_id({"a"}), b_id({"b"});
+
+    nodes.add_node( std::make_unique<TickTockNode>(NodeId(a_id)) );
+    auto node = nodes.find_node(a_id);
+    REQUIRE( node );
+    CHECK( node->get_size() == 2 );
+
+    node->enter();
+    CHECK( node->get_state() == ExecutionNode::States::Entered );
+    CHECK( node->get_current_index() == 0 );
+
+    nodes.add_node( std::make_unique<TickTockNode>(NodeId(b_id)) );
+    auto b_node = nodes.find_node(b_id);
+    REQUIRE( b_node );
+    CHECK( b_node->get_size() == 2 );
+    b_node->enter();
+    CHECK( b_node->get_current_index() == 0 );
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( node->get_state() == ExecutionNode::States::HasIncompleteChildren);
+    CHECK( b_node->get_state() == ExecutionNode::States::Incomplete);
+
+    CHECK( node->get_current_index() == 0 );
+    CHECK( b_node->get_current_index() == 1 );
+
+    root.enter();
+    node->enter();
+    b_node->enter();
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( node->get_state() == ExecutionNode::States::Incomplete );
+    CHECK( b_node->get_state() == ExecutionNode::States::None );
+
+    CHECK( node->get_current_index() == 1 );
+    CHECK( b_node->get_current_index() == 0 );
+
+    root.enter();
+    node->enter();
+    b_node->enter();
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( node->get_state() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( b_node->get_state() == ExecutionNode::States::Incomplete );
+
+    CHECK( node->get_current_index() == 1 );
+    CHECK( b_node->get_current_index() == 1 );
+
+    root.enter();
+    node->enter();
+    b_node->enter();
+
+    CHECK( root.exit() == ExecutionNode::States::Completed );
+    CHECK( node->get_state() == ExecutionNode::States::None );
+    CHECK( b_node->get_state() == ExecutionNode::States::None );
+
+    CHECK( node->get_current_index() == 0 );
+    CHECK( b_node->get_current_index() == 0 );
 }
 
 namespace CatchKit::Detail {
