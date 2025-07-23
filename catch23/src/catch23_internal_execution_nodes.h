@@ -48,10 +48,11 @@ namespace CatchKit::Detail {
         std::vector<std::unique_ptr<ExecutionNode>> children;
         States state = States::None;
 
-        size_t size;
-        size_t current_index = 0;
-
         auto set_current_node(ExecutionNode* node);
+
+    protected:
+        const size_t size;
+        size_t current_index = 0;
 
     public:
         explicit ExecutionNode(NodeId&& id, size_t size = 1)
@@ -71,6 +72,7 @@ namespace CatchKit::Detail {
         auto get_state() const { return state; }
         auto get_parent() { return parent; }
         auto get_parent_state() const { return parent ? parent->get_state() : States::None; }
+        auto get_size() const { return size; }
 
         void reset();
         void enter();
@@ -94,6 +96,7 @@ namespace CatchKit::Detail {
         auto find_node(NodeId const& id) -> ExecutionNode* {
             return current_node->find_child(id);
         }
+        void add_node(std::unique_ptr<ExecutionNode>&& child);
         auto add_node(NodeId&& id) -> ExecutionNode&;
 
         auto& get_root() { return root; }

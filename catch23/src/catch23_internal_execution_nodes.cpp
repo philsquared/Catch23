@@ -58,12 +58,16 @@ namespace CatchKit::Detail {
         return ++current_index <= size;
     }
 
+    void ExecutionNodes::add_node(std::unique_ptr<ExecutionNode>&& child) {
+        child->container = this;
+        current_node->add_child(std::move(child));
+    }
+
     auto ExecutionNodes::add_node(NodeId&& id) -> ExecutionNode& {
         assert(find_node(id) == nullptr);
         auto& new_node = current_node->add_child(std::move(id));
         new_node.container = this;
         return new_node;
     }
-
 
 } // namespace CatchKit::Detail
