@@ -2,6 +2,7 @@
 // Created by Phil Nash on 23/07/2025.
 //
 #include "catch23/catch23_test.h"
+#include "catch23/catch23_sections.h"
 #include "../src/catch23_internal_execution_nodes.h"
 
 TEST("execution nodes") {
@@ -256,37 +257,6 @@ TEST( "One regular node with a nested TickTock node" ) {
 
     CHECK( tt_node->get_current_index() == 0 );
     CHECK( s_node->get_current_index() == 0 );
-}
-
-namespace CatchKit::Detail {
-    struct SectionInfo {
-        ExecutionNode& node;
-        bool entered;
-
-        ~SectionInfo() {
-            if( entered )
-                node.exit();
-        }
-
-        explicit operator bool() const noexcept { return entered; }
-    };
-
-    auto try_enter_section(ExecutionNodes& nodes, std::string&& name, std::source_location const& location) {
-        if(auto node = nodes.find_node({name, location})) {
-            if(node->get_state() != ExecutionNode::States::Completed
-                && node->get_parent_state() != ExecutionNode::States::EnteredButDoneForThisLevel) {
-                node->enter();
-                return SectionInfo{*node, true};
-                }
-            return SectionInfo{*node, false};
-        }
-        auto& node = nodes.add_node({std::move(name), location});
-        if( node.get_parent_state() != ExecutionNode::States::EnteredButDoneForThisLevel ) {
-            node.enter();
-            return SectionInfo{node, true};
-        }
-        return SectionInfo{node, false};
-    }
 }
 
 TEST("peer sections") {

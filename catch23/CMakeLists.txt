@@ -25,6 +25,8 @@ add_library(Catch23 STATIC
         include/catch23/catch23_catch2.h
         src/catch23_internal_execution_nodes.cpp
         src/catch23_internal_execution_nodes.h
+        src/catch23_sections.cpp
+        include/catch23/catch23_sections.h
 )
 
 target_include_directories(Catch23 PUBLIC include)
