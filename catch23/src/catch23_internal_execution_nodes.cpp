@@ -28,6 +28,7 @@ namespace CatchKit::Detail {
     void ExecutionNode::reset() {
         if( state != States::None ) {
             state = States::None;
+            current_index = 0;
             reset_children();
         }
     }

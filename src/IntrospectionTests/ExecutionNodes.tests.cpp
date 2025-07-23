@@ -10,7 +10,7 @@ TEST("execution nodes") {
     ExecutionNodes nodes({"root"});
     nodes.get_root().enter();
 
-    NodeId a_id({"a"}); // Use this one so it has a stable location
+    NodeId a_id( {"a"} ); // Use this one so it has a stable location
 
     CHECK( nodes.find_node(a_id) == nullptr );
     auto& node = nodes.add_node(NodeId(a_id));
@@ -21,36 +21,36 @@ TEST("execution nodes") {
     CHECK( nodes.find_node(NodeId(a_id)) == &node );
 
     node.enter();
-    CHECK(node.get_state() == ExecutionNode::States::Entered);
+    CHECK( node.get_state() == ExecutionNode::States::Entered );
 
-    CHECK(node.exit() == ExecutionNode::States::Completed,
-        "When we exit immediately should completes");
+    CHECK( node.exit() == ExecutionNode::States::Completed,
+        "When we exit immediately should completes" );
 
-    CHECK(nodes.get_root().exit() == ExecutionNode::States::Completed);
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::Completed );
 
     nodes.get_root().reset();
 
     nodes.get_root().enter();
 
     node.enter();
-    CHECK(node.get_state() == ExecutionNode::States::Entered);
+    CHECK( node.get_state() == ExecutionNode::States::Entered );
 
-    NodeId b_id({"b"});
+    NodeId b_id( {"b"} );
 
-    auto& node_b = nodes.add_node(NodeId(b_id));
-    CHECK(node.find_child(b_id) == &node_b);
+    auto& node_b = nodes.add_node( NodeId(b_id) );
+    CHECK( node.find_child(b_id) == &node_b );
 
-    CHECK(node.exit() == ExecutionNode::States::Incomplete,
-        "When we exit after adding a new node it should be incomplete");
+    CHECK( node.exit() == ExecutionNode::States::HasIncompleteChildren,
+        "When we exit after adding a new node it should be incomplete" );
 
-    CHECK(nodes.get_root().exit() == ExecutionNode::States::Incomplete);
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::HasIncompleteChildren );
     nodes.get_root().enter();
 
     node.enter();
     node_b.enter();
-    CHECK(node_b.exit() == ExecutionNode::States::Completed);
-    CHECK(node.exit() == ExecutionNode::States::Completed);
-    CHECK(nodes.get_root().exit() == ExecutionNode::States::Completed);
+    CHECK( node_b.exit() == ExecutionNode::States::Completed );
+    CHECK( node.exit() == ExecutionNode::States::Completed );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::Completed );
 }
 
 struct TickTockNode : public CatchKit::Detail::ExecutionNode {
@@ -143,7 +143,7 @@ TEST("peer sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should skip second node at same level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::HasIncompleteChildren );
     nodes.get_root().enter(); // re-enter whole test
 
     CHECK( !try_enter_section(nodes, "s1", stable_loc ),
@@ -176,7 +176,7 @@ TEST("nested sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should skip subsequent node at top level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::HasIncompleteChildren );
     nodes.get_root().enter(); // re-enter whole test
 
     {
@@ -194,7 +194,7 @@ TEST("nested sections") {
     CHECK( !try_enter_section(nodes, "s2", stable_loc ),
         "should still skip subsequent node at top level");
 
-    CHECK( nodes.get_root().exit() == ExecutionNode::States::Incomplete );
+    CHECK( nodes.get_root().exit() == ExecutionNode::States::HasIncompleteChildren );
     nodes.get_root().enter(); // re-enter whole test
 
     CHECK( !try_enter_section(nodes, "s1", stable_loc), "should now skip first node");
