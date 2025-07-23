@@ -24,7 +24,7 @@ namespace CatchKit::Detail {
         auto start = function_name.find("candidate = ");
         if (start != std::string_view::npos) {
             start += 12;
-            auto end = function_name.find_first_of(";]", start);
+            auto end = function_name.find_first_of(",;", start);
             if (end != std::string_view::npos) {
                 auto qualified_enum_name = function_name.substr(start, end-start);
                 if( fully_qualified )
