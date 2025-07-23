@@ -45,6 +45,11 @@ namespace CatchKit::Detail
             }
         }
 
+        template<typename T>
+        void simple_assert(auto const&, T&&) noexcept {
+            static_assert(std::is_convertible_v<T, std::string_view>, "Only matchers or strings can follow the comma operator");
+        }
+
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
             bool bool_result = !result;
             if( checker.should_report_success || bool_result ) {}
