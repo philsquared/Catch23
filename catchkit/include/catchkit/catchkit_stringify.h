@@ -22,7 +22,6 @@
 namespace CatchKit {
 
     namespace Detail {
-        auto raw_memory_to_string(void const* object, std::size_t size ) -> std::string;
         auto pointer_to_string(void const* p) -> std::string;
         void ignore( auto&& ) noexcept {}
 
