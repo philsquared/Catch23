@@ -39,20 +39,33 @@ namespace CatchKit::Detail {
         };
 
     private:
+        friend class ExecutionNodes;
+
         NodeId id;
-        ExecutionNodes& container;
-        ExecutionNode* parent;
+        ExecutionNodes* container = nullptr;
+
+        ExecutionNode* parent = nullptr;
         std::vector<std::unique_ptr<ExecutionNode>> children;
         States state = States::None;
 
+        size_t size;
+        size_t current_index = 0;
+
+        auto set_current_node(ExecutionNode* node);
+
     public:
-        explicit ExecutionNode(NodeId&& id, ExecutionNodes& container, ExecutionNode* parent)
+        explicit ExecutionNode(NodeId&& id, size_t size = 1)
         :   id(std::move(id)),
-            container(container),
-            parent(parent)
+            size(size)
         {}
+        virtual ~ExecutionNode() = default;
 
         auto find_child(NodeId const& id) -> ExecutionNode*;
+
+        void add_child(std::unique_ptr<ExecutionNode>&& child) {
+            child->parent = this;
+            children.emplace_back( std::move(child) );
+        }
         auto add_child(NodeId&& id) -> ExecutionNode&;
 
         auto get_state() const { return state; }
@@ -62,6 +75,8 @@ namespace CatchKit::Detail {
         void reset();
         void enter();
         auto exit() -> States;
+
+        bool move_next();
     };
 
     class ExecutionNodes {
@@ -70,17 +85,16 @@ namespace CatchKit::Detail {
         friend class ExecutionNode;
     public:
         explicit ExecutionNodes(NodeId&& root_id)
-        :   root(std::move(root_id), *this, nullptr),
+        :   root(std::move(root_id)),
             current_node(&root)
-        {}
+        {
+            root.container = this;
+        }
 
         auto find_node(NodeId const& id) -> ExecutionNode* {
             return current_node->find_child(id);
         }
-        auto add_node(NodeId&& id) -> ExecutionNode& {
-            assert(find_node(id) == nullptr);
-            return current_node->add_child(std::move(id));
-        }
+        auto add_node(NodeId&& id) -> ExecutionNode&;
 
         auto& get_root() { return root; }
     };

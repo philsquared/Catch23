@@ -6,6 +6,11 @@
 
 namespace CatchKit::Detail {
 
+    auto ExecutionNode::set_current_node(ExecutionNode* node) {
+        assert(container);
+        return container->current_node = node;
+    }
+
     auto ExecutionNode::find_child(NodeId const& id) -> ExecutionNode* {
         for(auto const& child : children) {
             if(child->id == id)
@@ -15,7 +20,7 @@ namespace CatchKit::Detail {
     }
 
     auto ExecutionNode::add_child(NodeId&& id) -> ExecutionNode& {
-        children.emplace_back( std::make_unique<ExecutionNode>(std::move(id), container, this) );
+        add_child( std::make_unique<ExecutionNode>(std::move(id)) );
         return *children.back();
     }
 
@@ -30,13 +35,13 @@ namespace CatchKit::Detail {
         assert(state != States::Entered);
         reset();
         state = States::Entered;
-        container.current_node = this;
+        set_current_node(this);
     }
     auto ExecutionNode::exit() -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
         if(parent) {
-            container.current_node = parent;
+            set_current_node(parent);
             assert(parent->state == States::Entered || parent->state == States::EnteredButDoneForThisLevel);
             parent->state = States::EnteredButDoneForThisLevel;
         }
@@ -47,5 +52,18 @@ namespace CatchKit::Detail {
 
         return state = States::Completed;
     }
+
+    bool ExecutionNode::move_next() {
+        assert(current_index < size);
+        return ++current_index <= size;
+    }
+
+    auto ExecutionNodes::add_node(NodeId&& id) -> ExecutionNode& {
+        assert(find_node(id) == nullptr);
+        auto& new_node = current_node->add_child(std::move(id));
+        new_node.container = this;
+        return new_node;
+    }
+
 
 } // namespace CatchKit::Detail
