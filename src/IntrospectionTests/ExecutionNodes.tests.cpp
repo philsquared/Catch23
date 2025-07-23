@@ -3,7 +3,7 @@
 //
 #include "catch23/catch23_test.h"
 #include "catch23/catch23_sections.h"
-#include "../src/catch23_internal_execution_nodes.h"
+#include "catch23/catch23_internal_execution_nodes.h"
 
 TEST("execution nodes") {
     using namespace CatchKit::Detail;

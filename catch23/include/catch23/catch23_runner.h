@@ -15,42 +15,17 @@ namespace CatchKit::Detail {
     concept range_of = std::ranges::range<R> &&
                        std::same_as<std::ranges::range_value_t<R>, T>;
 
+    void run_test( Test const& test, TestResultHandler& test_handler );
+
     void run_tests( range_of<Test> auto const& tests, Reporter& reporter ) {
         TestResultHandler test_handler( reporter );
 
         for( auto&& test : tests) {
-
             // !TBD: this skips hidden tests until we do proper tag parsing
             if( test.test_info.tags.find("[.") != std::string::npos )
                 continue;
 
-            // ReentryNodes nodes;
-            Checker check{
-                .result_handler=test_handler,
-                .result_disposition=ResultDisposition::Continue };
-            Checker require{
-                .result_handler=test_handler,
-                .result_disposition=ResultDisposition::Abort };
-
-            reporter.on_test_start(test.test_info);
-            try {
-                test.test_fun(check, require);
-            }
-            catch( TestCancelled ) {
-                // std::println("  *** aborted"); // !TBD
-            }
-            catch( ... ) {
-                // We need a new context because the old one had string_views to outdated data
-                // - we want to preserve the last known source location, though
-                AssertionContext context{
-                    .macro_name = "",
-                    .original_expression = "* unknown line after the reported location *",
-                    .message = {},
-                    .location = test_handler.get_current_context().location };
-                test_handler.on_assertion_start( CatchKit::ResultDisposition::Continue, std::move(context) );
-                test_handler.on_assertion_result( CatchKit::ResultType::UnexpectedException, {}, CatchKit::Detail::get_exception_message(std::current_exception()) );
-            }
-            reporter.on_test_end(test.test_info); // !TBD: report number of assertions passed/ failed and overall status
+            run_test(test, test_handler);
         }
     }
 
