@@ -70,7 +70,7 @@ namespace CatchKit::Generators {
         struct values_of {
             using ValueType = T;
             T from = min_of<T>;
-            T to = max_of<T>;
+            T up_to = max_of<T>;
         };
         template<typename T>
         auto size_of(values_of<T> const&) { return 1; }
