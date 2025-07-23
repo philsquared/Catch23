@@ -93,10 +93,7 @@ TEST("TickTick Execution Nodes") {
     root.enter();
     node->enter();
 
-    // !TBD: Just need to get this working.
-    // This will require advancing the "current_index" member
-    // - but being careful of the interplay between that and child nodes
-    CHECK( ttnode->current_value() == 3 );
+    CHECK( ttnode->current_value() == 2 );
 }
 
 namespace CatchKit::Detail {
