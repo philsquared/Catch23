@@ -20,6 +20,26 @@ namespace CatchKit::Detail {
         }
     }
 
+    auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified) -> std::string_view {
+        auto start = function_name.find("candidate = ");
+        if (start != std::string_view::npos) {
+            start += 12;
+            auto end = function_name.find_first_of(";>", start);
+            if (end != std::string_view::npos) {
+                auto qualified_enum_name = function_name.substr(start, end-start);
+                auto q2 = std::string(qualified_enum_name);
+                if( fully_qualified )
+                    return qualified_enum_name;
+                auto last_colon = qualified_enum_name.find_last_of(':');
+                return qualified_enum_name.substr(last_colon+1);
+            }
+        }
+        return {};
+    }
+    auto unknown_enum_to_string(size_t enum_value) -> std::string {
+        return std::format("<unknown enum value: {}>", enum_value);
+    }
+
     auto raw_memory_to_string(void const* object, std::size_t size ) -> std::string {
         // Reverse order for little endian architectures
         int i = 0, end = static_cast<int>( size ), inc = 1;

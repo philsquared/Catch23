@@ -7,6 +7,7 @@
 
 #include <string>
 #include <string_view>
+#include <source_location>
 
 #define CATCHKIT_FALLBACK_TO_FORMAT_STRING_CONVERSIONS
 // #define CATCHKIT_FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
@@ -24,6 +25,35 @@ namespace CatchKit {
         auto raw_memory_to_string(void const* object, std::size_t size ) -> std::string;
         auto pointer_to_string(void const* p) -> std::string;
         void ignore( auto&& ) noexcept {}
+
+        auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified = false) -> std::string_view;
+        auto unknown_enum_to_string(size_t enum_value) -> std::string;
+
+        constexpr size_t max_enum_scan = 16;
+
+        template<typename E, E candidate=static_cast<E>(0)>
+        struct enum_value_string {
+            static auto find(E e) -> std::string_view {
+                if(e == candidate) {
+                    return parse_enum_name_from_function(std::source_location::current().function_name());
+                }
+                if constexpr(candidate != static_cast<E>(max_enum_scan)) {
+                    return enum_value_string<E, static_cast<E>(static_cast<size_t>(candidate)+1)>::find(e);
+                }
+                else {
+                    return {};
+                }
+            }
+        };
+
+        template<typename E>
+        auto enum_to_string(E e) -> std::string {
+            auto val = enum_value_string<E>::find(e);
+            if( val.empty() )
+                return unknown_enum_to_string(static_cast<size_t>(e));
+            return std::string(val);
+        }
+
     }
 
     #ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
@@ -124,7 +154,15 @@ namespace CatchKit {
     // Don't specialise this
     template<typename T>
     [[nodiscard]] auto constexpr stringify(T const& value ) {
-        return Stringifier<T>::stringify( value );
+        if constexpr( std::same_as<T, bool> ) {
+            return value ? "true" : "false";
+        }
+        else if constexpr( std::is_enum_v<T> ) {
+            return Detail::enum_to_string( value );
+        }
+        else {
+            return Stringifier<T>::stringify( value );
+        }
     }
 
 } // namespace CatchKit
