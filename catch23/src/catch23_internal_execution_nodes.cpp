@@ -58,7 +58,7 @@ namespace CatchKit::Detail {
             parent->state = States::EnteredButDoneForThisLevel;
         }
         for(auto const& child : children) {
-            if( child->state == States::Entered )
+            if( child->state == States::Entered || child->state == States::EnteredButDoneForThisLevel )
                 child->exit();
             if( child->state != States::Completed ) {
                 state = States::HasIncompleteChildren;

@@ -166,6 +166,51 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
     CHECK( node->get_current_index() == 0 );
     CHECK( b_node->get_current_index() == 0 );
 }
+TEST( "One TickTock node, one regular node" ) {
+    using namespace CatchKit::Detail;
+
+    ExecutionNodes nodes({"root"});
+    auto& root = nodes.get_root();
+    root.enter();
+
+    NodeId a_id({"a"}), s_id({"b"});
+
+    nodes.add_node( std::make_unique<TickTockNode>(NodeId(a_id)) );
+    auto node = nodes.find_node(a_id);
+
+    node->enter();
+    CHECK( node->get_state() == ExecutionNode::States::Entered );
+    CHECK( node->get_current_index() == 0 );
+
+    nodes.add_node(NodeId(s_id));
+    auto s_node = nodes.find_node(s_id);
+    CHECK( s_node->get_size() == 1 );
+    s_node->enter();
+    CHECK( s_node->get_current_index() == 0 );
+
+    CHECK( s_node->exit() == ExecutionNode::States::Completed );
+
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
+    CHECK( node->get_state() == ExecutionNode::States::Incomplete);
+    CHECK( s_node->get_state() == ExecutionNode::States::None,
+        "Node has been reset");
+
+    CHECK( node->get_current_index() == 1 );
+    CHECK( s_node->get_current_index() == 0 );
+
+    root.enter();
+    node->enter();
+    s_node->enter();
+
+    CHECK( s_node->exit() == ExecutionNode::States::Completed );
+
+    CHECK( root.exit() == ExecutionNode::States::Completed );
+    CHECK( node->get_state() == ExecutionNode::States::None);
+    CHECK( s_node->get_state() == ExecutionNode::States::None);
+
+    CHECK( node->get_current_index() == 0 );
+    CHECK( s_node->get_current_index() == 0 );
+}
 
 namespace CatchKit::Detail {
     struct SectionInfo {
