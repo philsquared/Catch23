@@ -755,43 +755,44 @@ TEST_CASE( "Composed generic matchers shortcircuit",
     }
 }
 
-// template <typename Range>
-// struct EqualsRangeMatcher : Catch::Matchers::MatcherGenericBase {
-//
-//     EqualsRangeMatcher( Range const& range ): m_range{ range } {}
-//
-//     template <typename OtherRange> bool match( OtherRange const& other ) const {
-//         using std::begin;
-//         using std::end;
-//
-//         return std::equal(
-//             begin( m_range ), end( m_range ), begin( other ), end( other ) );
-//     }
-//
-//     std::string describe() const override {
-//         return "Equals: " + Catch::rangeToString( m_range );
-//     }
-//
-// private:
-//     Range const& m_range;
-// };
-//
-// template <typename Range>
-// auto EqualsRange( const Range& range ) -> EqualsRangeMatcher<Range> {
-//     return EqualsRangeMatcher<Range>{ range };
-// }
-//
-// TEST_CASE( "Combining templated matchers", "[matchers][templated]" ) {
-//     std::array<int, 3> container{ { 1, 2, 3 } };
-//
-//     std::array<int, 3> a{ { 1, 2, 3 } };
-//     std::vector<int> b{ 0, 1, 2 };
-//     std::list<int> c{ 4, 5, 6 };
-//
-//     REQUIRE_THAT( container,
-//                   EqualsRange( a ) || EqualsRange( b ) || EqualsRange( c ) );
-// }
-//
+template <typename Range>
+struct EqualsRangeMatcher {
+
+    EqualsRangeMatcher(Range const& range): m_range{ range } {}
+
+    auto matches( auto const& other ) const -> CatchKit::MatchResult {
+        using std::begin;
+        using std::end;
+
+        return std::equal(
+            begin( m_range ), end( m_range ), begin( other ), end( other ) );
+    }
+
+    auto describe() const {
+        // return "Equals: " + Catch::rangeToString( m_range );
+        return "EqualsRange x"; // !TBD
+    }
+
+private:
+    Range const& m_range;
+};
+
+template <typename Range>
+auto EqualsRange( const Range& range ) -> EqualsRangeMatcher<Range> {
+    return EqualsRangeMatcher<Range>{ range };
+}
+
+TEST_CASE( "Combining templated matchers", "[matchers][templated]" ) {
+    std::array<int, 3> container{ { 1, 2, 3 } };
+
+    std::array<int, 3> a{ { 1, 2, 3 } };
+    std::vector<int> b{ 0, 1, 2 };
+    std::list<int> c{ 4, 5, 6 };
+
+    REQUIRE_THAT( container,
+                  EqualsRange( a ) || EqualsRange( b ) || EqualsRange( c ) );
+}
+
 // TEST_CASE( "Combining templated and concrete matchers",
 //            "[matchers][templated]" ) {
 //     std::vector<int> vec{ 1, 3, 5 };
@@ -835,7 +836,7 @@ TEST_CASE( "Composed generic matchers shortcircuit",
 //                   ( StartsWith( "foo" ) && EndsWith( "bar" ) ) ||
 //                       EqualsRange( bad_arr ) );
 // }
-//
+
 // TEST_CASE( "Combining concrete matchers does not use templated matchers",
 //            "[matchers][templated]" ) {
 //     using Catch::Matchers::EndsWith;
@@ -989,38 +990,40 @@ TEST_CASE( "Composed generic matchers shortcircuit",
 //     REQUIRE_THAT( 1, !!!!MatcherA() );
 // }
 //
-// struct EvilAddressOfOperatorUsed : std::exception {
-//     const char* what() const noexcept override {
-//         return "overloaded address-of operator of matcher was used instead of "
-//                "std::addressof";
-//     }
-// };
-//
-// struct EvilCommaOperatorUsed : std::exception {
-//     const char* what() const noexcept override {
-//         return "overloaded comma operator of matcher was used";
-//     }
-// };
-//
-// struct EvilMatcher : Catch::Matchers::MatcherGenericBase {
-//     std::string describe() const override { return "equals: 45"; }
-//
-//     bool match( int i ) const { return i == 45; }
-//
-//     EvilMatcher const* operator&() const { throw EvilAddressOfOperatorUsed(); }
-//
-//     int operator,( EvilMatcher const& ) const { throw EvilCommaOperatorUsed(); }
-// };
-//
-// TEST_CASE( "Overloaded comma or address-of operators are not used",
-//            "[matchers][templated]" ) {
-//     REQUIRE_THROWS_AS( ( EvilMatcher(), EvilMatcher() ),
-//                        EvilCommaOperatorUsed );
-//     REQUIRE_THROWS_AS( &EvilMatcher(), EvilAddressOfOperatorUsed );
-//     REQUIRE_NOTHROW( EvilMatcher() || ( EvilMatcher() && !EvilMatcher() ) );
-//     REQUIRE_NOTHROW( ( EvilMatcher() && EvilMatcher() ) || !EvilMatcher() );
-// }
-//
+struct EvilAddressOfOperatorUsed : std::exception {
+    const char* what() const noexcept override {
+        return "overloaded address-of operator of matcher was used instead of "
+               "std::addressof";
+    }
+};
+
+struct EvilCommaOperatorUsed : std::exception {
+    const char* what() const noexcept override {
+        return "overloaded comma operator of matcher was used";
+    }
+};
+
+struct EvilMatcher {
+    auto describe() const { return "equals: 45"; }
+
+    auto matches( int i ) const -> CatchKit::MatchResult { return i == 45; }
+
+    EvilMatcher const* operator&() const { throw EvilAddressOfOperatorUsed(); }
+
+    int operator,( EvilMatcher const& ) const { throw EvilCommaOperatorUsed(); }
+};
+
+TEST_CASE( "Overloaded comma or address-of operators are not used",
+           "[matchers][templated]" ) {
+    REQUIRE_THAT( ( EvilMatcher(), EvilMatcher() ),
+                       throws<EvilCommaOperatorUsed>() );
+
+    REQUIRE_THAT( &EvilMatcher(), throws<EvilAddressOfOperatorUsed>() );
+
+    REQUIRE_THAT( EvilMatcher() || ( EvilMatcher() && !EvilMatcher()), doesnt_throw() );
+    REQUIRE_THAT( ( EvilMatcher() && EvilMatcher() ) || !EvilMatcher(), doesnt_throw() );
+}
+
 // struct ImmovableMatcher : Catch::Matchers::MatcherGenericBase {
 //     ImmovableMatcher() = default;
 //     ImmovableMatcher( ImmovableMatcher const& ) = delete;

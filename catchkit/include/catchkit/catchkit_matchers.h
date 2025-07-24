@@ -380,6 +380,8 @@ namespace CatchKit {
         template<typename E=void>
         using throws = ExceptionMatchers::Throws<E>;
 
+        // !TBD: Get !throws working to avoid needing this
+        // - requires the composition matchers (esp Not) handling lazy matchers
         template<typename E=void>
         using doesnt_throw = ExceptionMatchers::DoesntThrow<E>;
 
