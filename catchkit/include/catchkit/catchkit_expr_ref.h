@@ -20,7 +20,7 @@ namespace CatchKit::Detail {
     struct UnaryExprRef {
         T& value;
         Asserter* asserter = nullptr;
-        std::string_view message = {};
+        std::string message = {};
 
         auto evaluate() -> ResultType;
         auto expand( ResultType result ) -> ExpressionInfo;
@@ -34,7 +34,7 @@ namespace CatchKit::Detail {
         LhsT& lhs;
         RhsT& rhs;
         Asserter* asserter = nullptr;
-        std::string_view message = {};
+        std::string message = {};
 
         auto evaluate() -> ResultType;
         auto expand( ResultType result ) -> ExpressionInfo;
@@ -47,7 +47,7 @@ namespace CatchKit::Detail {
         ArgT& arg;
         MatcherT const& matcher;
         Asserter* asserter = nullptr;
-        std::string_view message = {};
+        std::string message = {};
 
         auto evaluate() -> ResultType;
         auto expand( ResultType result ) -> ExpressionInfo;
