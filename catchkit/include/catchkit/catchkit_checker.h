@@ -189,6 +189,8 @@ do { using namespace CatchKit::Matchers; \
 #define CHECK_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "CHECK_THAT", check, arg, matcher )
 #define REQUIRE_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "REQUIRE_THAT", require, arg, matcher )
 
+#define REQUIRE_STATIC(...) static_assert(__VA_ARGS__)
+
 // !TBD: These should have a dedicated internal macro (in Catch2 it was INTERNAL_CATCH_MSG)
 #define PASS(...) CATCHKIT_ASSERT_INTERNAL( "PASS", check, true __VA_OPT__(,) __VA_ARGS__ )
 #define FAIL(...) CATCHKIT_ASSERT_INTERNAL( "FAIL", require, false __VA_OPT__(,) __VA_ARGS__ )

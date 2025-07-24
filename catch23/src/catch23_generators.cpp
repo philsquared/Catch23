@@ -20,12 +20,13 @@ namespace CatchKit::Detail {
         std::string const printable_ascii = word_chars + symbols;
     }
 
-    auto generate_value( values_of<std::string> const& generator ) -> std::string {
-        auto len = generate_random_number(generator.min_len, generator.max_len);
+
+    auto values_of<std::string>::generate() const -> std::string {
+        auto len = generate_random_number(min_len, max_len);
         std::string str;
         str.resize(len);
         for(size_t i = 0; i < len; ++i)
-            str[i] = generator.charset[generate_random_number<size_t>(0, generator.charset.length()-1)];
+            str[i] = charset[generate_random_number<size_t>(0, charset.length()-1)];
         return str;
     }
 

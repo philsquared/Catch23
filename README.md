@@ -152,12 +152,13 @@ Writing your own generator is very easy. E.g. here's how a string generator is i
 ```c++
 template<>
 struct values_of<std::string> {
-    using ValueType = std::string;
     size_t min_len = 0;
     size_t max_len = 65;
+    
+    auto generate() -> std::string;
+    // Impl does the actual generating of a random string, given that data    
 };
-auto generate_value(values_of<std::string> const& values);
-// Impl does the actual generating of a random string, given that data
+
 
 // ...
 
