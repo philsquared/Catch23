@@ -14,4 +14,6 @@
 #define CHECK_FALSE(...) CATCHKIT_ASSERT_THAT_INTERNAL( "CHECK_TRUE", check, __VA_ARGS__, is_false() )
 #define REQUIRE_FALSE(...) CATCHKIT_ASSERT_THAT_INTERNAL( "REQUIRE_TRUE", require, __VA_ARGS__, is_false() )
 
+#define SUCCEED(...) PASS(__VA_ARGS__)
+
 #endif //CATCH23_CATCH2_H
