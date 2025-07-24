@@ -36,6 +36,8 @@ TEST_CASE( "nested SECTION tests", "[.][sections][failing]" ) {
 }
 
 TEST_CASE( "more nested SECTION tests", "[sections][failing][/.]" ) {
+    // check.result_handler.report_on = CatchKit::ReportOn::AllResults;
+
     int a = 1;
     int b = 2;
 
@@ -43,8 +45,6 @@ TEST_CASE( "more nested SECTION tests", "[sections][failing][/.]" ) {
         SECTION( "equal" ) {
             REQUIRE( a == b );
         }
-
-        // !TBD node handling needs to account for early exits (as above)
 
         SECTION( "not equal" ) {
             REQUIRE( a != b );

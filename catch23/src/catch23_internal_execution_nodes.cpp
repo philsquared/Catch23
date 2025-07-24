@@ -47,7 +47,7 @@ namespace CatchKit::Detail {
         state = States::Entered;
         set_current_node(this);
     }
-    auto ExecutionNode::exit() -> States {
+    auto ExecutionNode::exit(bool early) -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
         if(parent) {
@@ -63,6 +63,8 @@ namespace CatchKit::Detail {
             if( child->state != States::Completed ) {
                 state = States::HasIncompleteChildren;
             }
+            if( child->state == States::ExitedEarly )
+                child->state = States::Completed;
         }
         if( state == States::HasIncompleteChildren )
             return state;
@@ -73,6 +75,9 @@ namespace CatchKit::Detail {
         }
 
         reset_children();
+        if( early )
+            return state = States::ExitedEarly;
+
         return state = States::Completed;
     }
 

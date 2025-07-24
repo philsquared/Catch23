@@ -36,6 +36,7 @@ namespace CatchKit::Detail {
             None, // Just added or not entered yet
             Entered,
             EnteredButDoneForThisLevel,
+            ExitedEarly, // through an early return or exception - including test cancellation
             HasIncompleteChildren,
             Incomplete, // Children are complete, but there are more local levels (e.g. generator values)
             Completed
@@ -59,7 +60,7 @@ namespace CatchKit::Detail {
         size_t current_index = 0;
 
     public:
-        explicit ExecutionNode(NodeId&& id, size_t size = 1)
+        explicit ExecutionNode( NodeId&& id, size_t size = 1 )
         :   id(std::move(id)),
             size(size)
         {}
@@ -83,7 +84,7 @@ namespace CatchKit::Detail {
         void reset_children();
 
         void enter();
-        auto exit() -> States;
+        auto exit(bool early = false) -> States;
 
         bool move_next();
     };

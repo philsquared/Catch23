@@ -8,14 +8,19 @@
 
 namespace CatchKit::Detail {
 
+    SectionInfo::~SectionInfo() {
+        if( entered )
+            node.exit( std::uncaught_exceptions() > 0 );
+    }
+
     auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location const& location) -> SectionInfo {
         // !TBD: avoid always copying the string
         if(auto node = nodes.find_node({std::string(name), location})) {
-            if(node->get_state() != ExecutionNode::States::Completed
-                && node->get_parent_state() != ExecutionNode::States::EnteredButDoneForThisLevel) {
+            if( node->get_state() != ExecutionNode::States::Completed
+                    && node->get_parent_state() != ExecutionNode::States::EnteredButDoneForThisLevel ) {
                 node->enter();
                 return SectionInfo{*node, true};
-                }
+            }
             return SectionInfo{*node, false};
         }
         auto& node = nodes.add_node({std::string(name), location});

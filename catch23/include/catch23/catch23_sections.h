@@ -14,10 +14,7 @@ namespace CatchKit::Detail {
         ExecutionNode& node;
         bool entered;
 
-        ~SectionInfo() {
-            if( entered )
-                node.exit();
-        }
+        ~SectionInfo();
 
         explicit operator bool() const noexcept { return entered; }
     };

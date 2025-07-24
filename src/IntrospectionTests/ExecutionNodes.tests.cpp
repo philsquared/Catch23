@@ -54,6 +54,39 @@ TEST("execution nodes") {
     CHECK( nodes.get_root().exit() == ExecutionNode::States::Completed );
 }
 
+TEST("execution nodes with early returns") {
+    using namespace CatchKit::Detail;
+
+    ExecutionNodes nodes({"root"});
+    auto& root = nodes.get_root();
+    root.enter();
+
+    NodeId a_id( {"a"} ), b_id( {"b"} );
+
+    auto& a_node = nodes.add_node(NodeId(a_id));
+
+    a_node.enter();
+
+    a_node.exit(true); // Simulate early exit
+
+    // Simulate early exit by exiting the root before closing a
+    CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren,
+        "This should be incomplete because we don't know "
+        " if there are more sections after a");
+
+    CHECK( a_node.get_state() == ExecutionNode::States::Completed );
+
+    CHECK( a_node.get_current_index() == 1,
+        "although it exited early it still advanced" );
+
+    root.enter();
+
+    CHECK( root.exit() == ExecutionNode::States::Completed,
+        "Should now be complete");
+
+
+}
+
 struct TickTockNode : public CatchKit::Detail::ExecutionNode {
     explicit TickTockNode(CatchKit::Detail::NodeId&& id)
     :   ExecutionNode(std::move(id), 2)
