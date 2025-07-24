@@ -50,9 +50,6 @@ namespace CatchKit::Detail {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
         if(parent) {
-            if(get_current_node() == this) {
-                set_current_node(parent);
-            }
             assert(parent->state == States::Entered || parent->state == States::EnteredButDoneForThisLevel);
             parent->state = States::EnteredButDoneForThisLevel;
         }
@@ -65,6 +62,10 @@ namespace CatchKit::Detail {
             if( child->state == States::ExitedEarly )
                 child->state = States::Completed;
         }
+        if( get_current_node() == this ) {
+            set_current_node(parent);
+        }
+
         if( state == States::HasIncompleteChildren )
             return state;
 
