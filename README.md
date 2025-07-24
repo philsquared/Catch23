@@ -138,15 +138,15 @@ There is a minimal test runner and a basic ConsoleReporter. There is no command 
 ## What's next
 
 In progress right now is support for `SECTION`s, as well as generators (they both run on something called "Execution Nodes").
-Basic generator support is already there but needs to be connected to the Execution Nodes system.
+The features are there and working, but need more testing and fleshing out.
 
 Currently, the generators interface is looking like this (same idea as Catch2, but more streamlined implementation):
 
 ```c++
-auto value = GENERATE( 100 * values_of<int>(.up_to=42) );
+auto value = GENERATE( 100, values_of<int>(.up_to=42) );
 ```
 
-The `100*` syntax is under consideration. Without it the default is 100 values.
+The `100,` syntax is under consideration. Without it the default is 100 values.
 Writing your own generator is very easy. E.g. here's how a string generator is implemented:
 
 ```c++

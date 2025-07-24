@@ -4,6 +4,7 @@
 
 #include "catch23_internal_execution_nodes.h"
 #include "catch23_test_result_handler.h"
+#include "catch23_random.h"
 
 #include "catchkit/catchkit_checker.h"
 
@@ -39,11 +40,12 @@ namespace CatchKit {
             }
             // !TBD shrink?
         };
-        
+
         // -- generator builders
         // To provide your own generators, either:
         // 1. specialise values_of for your type and generate_value for valuesOf<your type>, or
         // 2. for something more general/ operators on multiple values, specialise size_of and generate_at
+        // In any case they need an embedded ValueType
 
         template<typename T> constexpr T min_of;
         template<typename T> constexpr T max_of;
@@ -54,29 +56,36 @@ namespace CatchKit {
         template<typename T>
         struct values_of {
             using ValueType = T;
-            T from = min_of<T>;
+            T from{};
             T up_to = max_of<T>;
         };
         template<typename T>
         auto size_of(values_of<T> const&) { return 1; }
 
         template<std::integral T>
-        auto generate_value(values_of<T> const&) {
-            static int i = 0;
-            return i++;
-            // !TBD generate random
+        auto generate_value(values_of<T> const& generator) {
+            return generate_random_number(generator.from, generator.up_to);
         }
 
+        namespace Charsets {
+            extern std::string const lcase;
+            extern std::string const ucase;
+            extern std::string const all_alpha;
+            extern std::string const numbers;
+            extern std::string const alphanumeric;
+            extern std::string const word_chars;
+            extern std::string const symbols;
+            extern std::string const printable_ascii;
+        }
 
         template<>
         struct values_of<std::string> {
             using ValueType = std::string;
             size_t min_len = 0;
             size_t max_len = 65;
+            std::string_view charset = Charsets::word_chars; // Must be from string literal
         };
-        inline auto generate_value(values_of<std::string> const&) {
-            return "<random>"; // !TBD generate random
-        }
+        auto generate_value(values_of<std::string> const&) -> std::string;
 
         template<typename T>
         auto generate_at(values_of<T> const& values, size_t) {
@@ -97,7 +106,7 @@ namespace CatchKit {
         auto generate_at(multiple_values<T> const& values, size_t) { return generate_value(values.value_generator); }
 
         template<typename T>
-        constexpr auto operator*(int multiple, values_of<T>&& values) {
+        constexpr auto operator, (int multiple, values_of<T>&& values) {
             return multiple_values{multiple, std::move(values) };
         }
 
@@ -128,6 +137,7 @@ namespace CatchKit {
 
     namespace Generators {
 
+        namespace Charsets { using namespace Detail::Charsets; }
         using Detail::values_of;
 
     } // namespace Generators
@@ -137,9 +147,9 @@ namespace CatchKit {
 
 #define GENERATE(...) \
         [&check]{ using namespace CatchKit::Generators; \
-            CatchKit::Detail::GeneratorAcquirer invoker(check, {#__VA_ARGS__}); \
-            if( !invoker.generator_node ) invoker.make_generator(__VA_ARGS__); \
-            return invoker.derived_node<decltype(__VA_ARGS__)>(); \
+            CatchKit::Detail::GeneratorAcquirer acquirer(check, {#__VA_ARGS__}); \
+            if( !acquirer.generator_node ) acquirer.make_generator((__VA_ARGS__)); \
+            return acquirer.derived_node<decltype((__VA_ARGS__))>(); \
         }()->current_value()
 
 
