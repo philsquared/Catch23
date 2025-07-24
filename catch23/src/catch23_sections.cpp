@@ -32,11 +32,5 @@ namespace CatchKit::Detail {
         }
         return SectionInfo{node, false};
     }
-    auto try_enter_section(ResultHandler& handler, std::string_view name, std::source_location const& location) -> SectionInfo {
-        auto execution_nodes = dynamic_cast<TestResultHandler&>(handler).get_execution_nodes();
-        assert(execution_nodes);
-        return try_enter_section(*execution_nodes, name, location);
-    }
-
 
 } // namespace CatchKit::Detail

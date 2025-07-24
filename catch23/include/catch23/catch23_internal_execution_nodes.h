@@ -68,9 +68,10 @@ namespace CatchKit::Detail {
 
         auto find_child(NodeId const& id) -> ExecutionNode*;
 
-        void add_child(std::unique_ptr<ExecutionNode>&& child) {
+        auto add_child(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {
             child->parent = this;
             children.emplace_back( std::move(child) );
+            return *children.back();
         }
         auto add_child(NodeId&& id) -> ExecutionNode&;
 
@@ -104,7 +105,7 @@ namespace CatchKit::Detail {
         auto find_node(NodeId const& id) -> ExecutionNode* {
             return current_node->find_child(id);
         }
-        void add_node(std::unique_ptr<ExecutionNode>&& child);
+        auto add_node(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode&;
         auto add_node(NodeId&& id) -> ExecutionNode&;
 
         auto& get_root() { return root; }

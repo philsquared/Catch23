@@ -37,6 +37,8 @@ namespace CatchKit::Detail
         void set_execution_nodes( ExecutionNodes* nodes ) { execution_nodes = nodes; }
     };
 
+    auto get_execution_nodes_from_result_handler(ResultHandler& handler) -> ExecutionNodes&;
+
 } // namespace CatchKit::Detail
 
 namespace CatchKit {

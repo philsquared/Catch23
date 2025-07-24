@@ -2,6 +2,11 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
+#include "catch23_internal_execution_nodes.h"
+#include "catch23_test_result_handler.h"
+
+#include "catchkit/catchkit_checker.h"
+
 #include <vector>
 #include <source_location>
 #include <memory>
@@ -9,32 +14,20 @@
 #ifndef CATCH23_GENERATORS_H
 #define CATCH23_GENERATORS_H
 
-namespace CatchKit::Generators {
+namespace CatchKit {
 
     namespace Detail {
 
-        // Base class for polymorphic generator holder
-        class Generator {
-        protected:
-            size_t size;
-            size_t current_index = 0;
-
-            explicit Generator(size_t size) : size(size) {}
-
-        public:
-            virtual ~Generator() = default;
-            bool move_next();
-        };
-
         // Typed generator holder
         template<typename T>
-        class GeneratorHolder : public Generator {
+        class GeneratorNode : public ExecutionNode {
             using ValueType = T::ValueType;
             T generator;
             std::vector<ValueType> values;
 
         public:
-            explicit GeneratorHolder( T&& gen) : Generator(size_of(gen)), generator(std::move(gen)) {
+            explicit GeneratorNode( NodeId&& id, T&& gen )
+            : ExecutionNode(std::move(id), size_of(gen)), generator(std::move(gen)) {
                 values.reserve(size);
                 for(size_t i=0; i < size; ++i) {
                     values.emplace_back(generate_at(generator, i));
@@ -46,15 +39,7 @@ namespace CatchKit::Generators {
             }
             // !TBD shrink?
         };
-
-        auto add_generator(std::unique_ptr<Generator> generator, std::source_location loc=std::source_location::current()) -> Generator*;
-        auto find_generator(std::source_location loc=std::source_location::current()) -> Generator*;
-
-        template<typename T>
-        auto make_generator(T&& gen, std::source_location loc=std::source_location::current()) -> Generator* {
-            return add_generator(std::make_unique<GeneratorHolder<T>>(std::forward<T>(gen)), loc);
-        }
-
+        
         // -- generator builders
         // To provide your own generators, either:
         // 1. specialise values_of for your type and generate_value for valuesOf<your type>, or
@@ -116,17 +101,46 @@ namespace CatchKit::Generators {
             return multiple_values{multiple, std::move(values) };
         }
 
+        struct GeneratorAcquirer {
+            ExecutionNodes& execution_nodes;
+            NodeId id;
+            ExecutionNode* generator_node;
+
+            GeneratorAcquirer(Checker& checker, NodeId&& id)
+                :   execution_nodes(get_execution_nodes_from_result_handler(checker.result_handler)),
+                    id(std::move(id)),
+                    generator_node(execution_nodes.find_node(this->id))
+            {}
+
+            template<typename T>
+            void make_generator(T&& gen) {
+                generator_node = &execution_nodes.add_node( std::make_unique<GeneratorNode<T>>(std::move(id), std::forward<T>(gen)) );
+            }
+            template<typename T>
+            auto derived_node() {
+                assert(generator_node != nullptr);
+                generator_node->enter();
+                return static_cast<GeneratorNode<T>*>(generator_node);
+            }
+        };
+
     } // namespace Detail
 
-    using Detail::values_of;
+    namespace Generators {
 
-} // namespace CatchKit::Generators
+        using Detail::values_of;
+
+    } // namespace Generators
+
+} // namespace CatchKit
+
 
 #define GENERATE(...) \
-        []{ using namespace CatchKit::Generators; \
-            auto gen = Detail::find_generator(); \
-            if( !gen ) gen = Detail::make_generator(__VA_ARGS__); \
-            return static_cast<Detail::GeneratorHolder<decltype(__VA_ARGS__)>*>(gen); }() \
-    ->current_value()
+        [&check]{ using namespace CatchKit::Generators; \
+            CatchKit::Detail::GeneratorAcquirer invoker(check, {#__VA_ARGS__}); \
+            if( !invoker.generator_node ) invoker.make_generator(__VA_ARGS__); \
+            return invoker.derived_node<decltype(__VA_ARGS__)>(); \
+        }()->current_value()
 
-#endif //CATCH23_GENERATORS_H
+
+#endif // CATCH23_GENERATORS_H

@@ -25,8 +25,7 @@ namespace CatchKit::Detail {
     }
 
     auto ExecutionNode::add_child(NodeId&& id) -> ExecutionNode& {
-        add_child( std::make_unique<ExecutionNode>(std::move(id)) );
-        return *children.back();
+        return add_child( std::make_unique<ExecutionNode>(std::move(id)) );
     }
 
     void ExecutionNode::reset() {
@@ -86,9 +85,9 @@ namespace CatchKit::Detail {
         return ++current_index <= size;
     }
 
-    void ExecutionNodes::add_node(std::unique_ptr<ExecutionNode>&& child) {
+    auto ExecutionNodes::add_node(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {
         child->container = this;
-        current_node->add_child(std::move(child));
+        return current_node->add_child(std::move(child));
     }
 
     auto ExecutionNodes::add_node(NodeId&& id) -> ExecutionNode& {

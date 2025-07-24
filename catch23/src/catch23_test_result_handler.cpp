@@ -46,4 +46,11 @@ namespace CatchKit::Detail {
         }
     }
 
+    auto get_execution_nodes_from_result_handler(ResultHandler& handler) -> ExecutionNodes& {
+        assert(dynamic_cast<TestResultHandler*>(&handler) != nullptr);
+        auto execution_nodes = static_cast<TestResultHandler&>(handler).get_execution_nodes();
+        assert(execution_nodes);
+        return *execution_nodes;
+    }
+
 } // namespace CatchKit::Detail

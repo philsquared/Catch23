@@ -13,7 +13,8 @@ add_subdirectory(catchkit)
 add_executable(Catch23Test src/main.cpp src/UsageTests/Condition.tests.cpp
         src/UsageTests/Matchers.tests.cpp
         src/IntrospectionTests/ExecutionNodes.tests.cpp
-        src/UsageTests/Section.tests.cpp)
+        src/UsageTests/Section.tests.cpp
+        src/UsageTests/Generator.tests.cpp)
 
 target_link_libraries(Catch23Test PUBLIC Catch23)
 target_link_libraries(Catch23Test PUBLIC Catchkit)
