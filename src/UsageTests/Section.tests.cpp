@@ -3,7 +3,6 @@
 //
 
 #include "catch23/catch23_test.h"
-#include "catch23/catch23_sections.h"
 #include "catch23/catch23_catch2.h"
 
 

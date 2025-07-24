@@ -325,11 +325,11 @@ namespace CatchKit {
     } // namespace FloatMatchers
 
     namespace VectorMatchers {
-        template<typename T>
+        template<typename T, typename AllocatorT>
         struct Equals {
-            std::vector<T> const& match_vec;
+            std::vector<T, AllocatorT> const& match_vec;
 
-            [[nodiscard]] constexpr auto matches(std::vector<T> const& vec) const -> MatchResult {
+            [[nodiscard]] constexpr auto matches(auto const& vec) const -> MatchResult {
                 if (match_vec.size() != vec.size())
                     return false;
                 return std::equal(match_vec.begin(), match_vec.end(), vec.begin());
@@ -371,8 +371,11 @@ namespace CatchKit {
         constexpr auto is_true() { static bool true_value = true; return equals(true_value); }
         constexpr auto is_false() { static bool false_value = false; return equals(false_value); }
 
-        template<typename T>
-        constexpr auto equals(std::vector<T> const& vec) { return VectorMatchers::Equals<T>{vec}; }
+        template<typename T, typename AllocatorT>
+        constexpr auto equals(std::vector<T, AllocatorT> const& vec) { return VectorMatchers::Equals<T, AllocatorT>{vec}; }
+
+        template<typename T, typename AllocatorT>
+        constexpr auto equals(std::vector<T, AllocatorT>& vec) { return VectorMatchers::Equals<T, AllocatorT>{vec}; }
 
         template<typename E=void>
         using throws = ExceptionMatchers::Throws<E>;

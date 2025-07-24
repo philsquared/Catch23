@@ -205,133 +205,132 @@ TEST_CASE( "Matchers can be negated (Not) with the ! operator - failing",
     CHECK_THAT( testStringForMatching(), !contains( "substring" ) );
 }
 
-// template <typename T> struct CustomAllocator : private std::allocator<T> {
-//     using size_type = size_t;
-//     using difference_type = ptrdiff_t;
-//     using pointer = T*;
-//     using const_pointer = const T*;
-//     using reference = T&;
-//     using const_reference = const T&;
-//     using value_type = T;
-//
-//     template <typename U> struct rebind { using other = CustomAllocator<U>; };
-//
-//     using propagate_on_container_move_assignment = std::true_type;
-//     using is_always_equal = std::true_type;
-//
-//     CustomAllocator() = default;
-//
-//     CustomAllocator( const CustomAllocator& other ):
-//         std::allocator<T>( other ) {}
-//
-//     template <typename U> CustomAllocator( const CustomAllocator<U>& ) {}
-//
-//     ~CustomAllocator() = default;
-//
-//     using std::allocator<T>::allocate;
-//     using std::allocator<T>::deallocate;
-// };
-//
-// TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
-//     std::vector<int> v;
-//     v.push_back( 1 );
-//     v.push_back( 2 );
-//     v.push_back( 3 );
-//
-//     std::vector<int> v2;
-//     v2.push_back( 1 );
-//     v2.push_back( 2 );
-//
-//     std::vector<double> v3;
-//     v3.push_back( 1 );
-//     v3.push_back( 2 );
-//     v3.push_back( 3 );
-//
-//     std::vector<double> v4;
-//     v4.push_back( 1 + 1e-8 );
-//     v4.push_back( 2 + 1e-8 );
-//     v4.push_back( 3 + 1e-8 );
-//
-//     std::vector<int, CustomAllocator<int>> v5;
-//     v5.push_back( 1 );
-//     v5.push_back( 2 );
-//     v5.push_back( 3 );
-//
-//     std::vector<int, CustomAllocator<int>> v6;
-//     v6.push_back( 1 );
-//     v6.push_back( 2 );
-//
-//     std::vector<int> empty;
-//
-//     SECTION( "Contains (element)" ) {
-//         CHECK_THAT( v, VectorContains( 1 ) );
-//         CHECK_THAT( v, VectorContains( 2 ) );
-//         CHECK_THAT( v5, ( VectorContains<int, CustomAllocator<int>>( 2 ) ) );
-//     }
-//     SECTION( "Contains (vector)" ) {
-//         CHECK_THAT( v, Contains( v2 ) );
-//         CHECK_THAT( v, Contains<int>( { 1, 2 } ) );
-//         CHECK_THAT( v5,
-//                     ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
-//                         v2 ) ) );
-//
-//         v2.push_back( 3 ); // now exactly matches
-//         CHECK_THAT( v, Contains( v2 ) );
-//
-//         CHECK_THAT( v, Contains( empty ) );
-//         CHECK_THAT( empty, Contains( empty ) );
-//
-//         CHECK_THAT( v5,
-//                     ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
-//                         v2 ) ) );
-//         CHECK_THAT( v5, Contains( v6 ) );
-//     }
-//     SECTION( "Contains (element), composed" ) {
-//         CHECK_THAT( v, VectorContains( 1 ) && VectorContains( 2 ) );
-//     }
-//
-//     SECTION( "Equals" ) {
-//
-//         // Same vector
-//         CHECK_THAT( v, Equals( v ) );
-//
-//         CHECK_THAT( empty, Equals( empty ) );
-//
-//         // Different vector with same elements
-//         CHECK_THAT( v, Equals<int>( { 1, 2, 3 } ) );
-//         v2.push_back( 3 );
-//         CHECK_THAT( v, Equals( v2 ) );
-//
-//         CHECK_THAT(
-//             v5,
-//             ( Equals<int, std::allocator<int>, CustomAllocator<int>>( v2 ) ) );
-//
-//         v6.push_back( 3 );
-//         CHECK_THAT( v5, Equals( v6 ) );
-//     }
-//     SECTION( "UnorderedEquals" ) {
-//         CHECK_THAT( v, UnorderedEquals( v ) );
-//         CHECK_THAT( v, UnorderedEquals<int>( { 3, 2, 1 } ) );
-//         CHECK_THAT( empty, UnorderedEquals( empty ) );
-//
-//         auto permuted = v;
-//         std::next_permutation( begin( permuted ), end( permuted ) );
-//         REQUIRE_THAT( permuted, UnorderedEquals( v ) );
-//
-//         std::reverse( begin( permuted ), end( permuted ) );
-//         REQUIRE_THAT( permuted, UnorderedEquals( v ) );
-//
-//         CHECK_THAT(
-//             v5,
-//             ( UnorderedEquals<int, std::allocator<int>, CustomAllocator<int>>(
-//                 permuted ) ) );
-//
-//         auto v5_permuted = v5;
-//         std::next_permutation( begin( v5_permuted ), end( v5_permuted ) );
-//         CHECK_THAT( v5_permuted, UnorderedEquals( v5 ) );
-//     }
-// }
-//
+template <typename T> struct CustomAllocator : private std::allocator<T> {
+    using size_type = size_t;
+    using difference_type = ptrdiff_t;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using value_type = T;
+
+    template <typename U> struct rebind { using other = CustomAllocator<U>; };
+
+    using propagate_on_container_move_assignment = std::true_type;
+    using is_always_equal = std::true_type;
+
+    CustomAllocator() = default;
+
+    CustomAllocator( const CustomAllocator& other ):
+        std::allocator<T>( other ) {}
+
+    template <typename U> CustomAllocator( const CustomAllocator<U>& ) {}
+
+    ~CustomAllocator() = default;
+
+    using std::allocator<T>::allocate;
+    using std::allocator<T>::deallocate;
+};
+
+TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
+    std::vector<int> v;
+    v.push_back( 1 );
+    v.push_back( 2 );
+    v.push_back( 3 );
+
+    std::vector<int> v2;
+    v2.push_back( 1 );
+    v2.push_back( 2 );
+
+    std::vector<double> v3;
+    v3.push_back( 1 );
+    v3.push_back( 2 );
+    v3.push_back( 3 );
+
+    std::vector<double> v4;
+    v4.push_back( 1 + 1e-8 );
+    v4.push_back( 2 + 1e-8 );
+    v4.push_back( 3 + 1e-8 );
+
+    std::vector<int, CustomAllocator<int>> v5;
+    v5.push_back( 1 );
+    v5.push_back( 2 );
+    v5.push_back( 3 );
+
+    std::vector<int, CustomAllocator<int>> v6;
+    v6.push_back( 1 );
+    v6.push_back( 2 );
+
+    std::vector<int> empty;
+
+    // SECTION( "Contains (element)" ) {
+    //     CHECK_THAT( v, contains( 1 ) );
+    //     CHECK_THAT( v, VectorContains( 2 ) );
+    //     CHECK_THAT( v5, ( VectorContains<int, CustomAllocator<int>>( 2 ) ) );
+    // }
+    // SECTION( "Contains (vector)" ) {
+    //     CHECK_THAT( v, Contains( v2 ) );
+    //     CHECK_THAT( v, Contains<int>( { 1, 2 } ) );
+    //     CHECK_THAT( v5,
+    //                 ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
+    //                     v2 ) ) );
+    //
+    //     v2.push_back( 3 ); // now exactly matches
+    //     CHECK_THAT( v, Contains( v2 ) );
+    //
+    //     CHECK_THAT( v, Contains( empty ) );
+    //     CHECK_THAT( empty, Contains( empty ) );
+    //
+    //     CHECK_THAT( v5,
+    //                 ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
+    //                     v2 ) ) );
+    //     CHECK_THAT( v5, Contains( v6 ) );
+    // }
+    // SECTION( "Contains (element), composed" ) {
+    //     CHECK_THAT( v, VectorContains( 1 ) && VectorContains( 2 ) );
+    // }
+
+    SECTION( "Equals" ) {
+
+        // Same vector
+        CHECK_THAT( v, equals( v ) );
+
+        CHECK_THAT( empty, equals( empty ) );
+
+        // Different vector with same elements
+        CHECK_THAT( v, equals( std::vector{ 1, 2, 3 } ) );
+        v2.push_back( 3 );
+        CHECK_THAT( v, equals(v2) );
+
+        // Different allocators
+        CHECK_THAT( v5, equals(v2) );
+
+        v6.push_back( 3 );
+        CHECK_THAT( v5, equals(v6) );
+    }
+    // SECTION( "UnorderedEquals" ) {
+    //     CHECK_THAT( v, UnorderedEquals( v ) );
+    //     CHECK_THAT( v, UnorderedEquals<int>( { 3, 2, 1 } ) );
+    //     CHECK_THAT( empty, UnorderedEquals( empty ) );
+    //
+    //     auto permuted = v;
+    //     std::next_permutation( begin( permuted ), end( permuted ) );
+    //     REQUIRE_THAT( permuted, UnorderedEquals( v ) );
+    //
+    //     std::reverse( begin( permuted ), end( permuted ) );
+    //     REQUIRE_THAT( permuted, UnorderedEquals( v ) );
+    //
+    //     CHECK_THAT(
+    //         v5,
+    //         ( UnorderedEquals<int, std::allocator<int>, CustomAllocator<int>>(
+    //             permuted ) ) );
+    //
+    //     auto v5_permuted = v5;
+    //     std::next_permutation( begin( v5_permuted ), end( v5_permuted ) );
+    //     CHECK_THAT( v5_permuted, UnorderedEquals( v5 ) );
+    // }
+}
+
 // TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
 //     std::vector<int> v;
 //     v.push_back( 1 );
