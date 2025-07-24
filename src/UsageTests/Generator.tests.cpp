@@ -36,7 +36,6 @@ TEST_CASE("Random generator", "[generators][approvals]") {
         REQUIRE(0 <= val);
         REQUIRE(val <= 1);
     }
-    // !TBD: need a double generator
     SECTION("Infer double from double arguments") {
         auto val = GENERATE(4, values_of<double>{.from=0., .up_to=1.});
         REQUIRE_STATIC(std::is_same_v<decltype(val), double>);

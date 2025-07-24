@@ -28,6 +28,8 @@ add_library(Catch23 STATIC
         src/catch23_sections.cpp
         include/catch23/catch23_sections.h
         include/catch23/catch23_random.h
+        include/catch23/catch23_local_test.cpp
+        include/catch23/catch23_local_test.h
 )
 
 target_include_directories(Catch23 PUBLIC include)
