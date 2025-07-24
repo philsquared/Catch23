@@ -6,6 +6,8 @@
 
 #include "catch23/catch23_test_result_handler.h"
 
+#include <exception>
+
 namespace CatchKit::Detail {
 
     SectionInfo::~SectionInfo() {

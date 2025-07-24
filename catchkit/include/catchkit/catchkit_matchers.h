@@ -47,8 +47,8 @@ namespace CatchKit {
 
         template<typename M1, typename M2>
         struct AndMatcher {
-            M1 const& matcher1;
-            M2 const& matcher2;
+            M1& matcher1;
+            M2& matcher2;
 
             MatchResult matches( auto const& value ) const {
                 if( auto result = matcher1.matches(value); !result )
@@ -62,8 +62,8 @@ namespace CatchKit {
 
         template<typename M1, typename M2>
         struct OrMatcher {
-            M1 const& matcher1;
-            M2 const& matcher2;
+            M1& matcher1;
+            M2& matcher2;
 
             MatchResult matches( auto const& value ) const {
                 // !TBD: combine results?
@@ -78,7 +78,7 @@ namespace CatchKit {
 
         template<typename M>
         struct NotMatcher {
-            M const& base_matcher;
+            M& base_matcher;
 
             MatchResult matches( auto const& value ) const {
                 return !base_matcher.matches(value);
@@ -89,18 +89,18 @@ namespace CatchKit {
         };
 
         template<typename M2>
-        auto operator && (IsMatcher auto const& m1, M2 const& m2) {
+        auto operator && (IsMatcher auto&& m1, M2&& m2) {
             static_assert(IsMatcher<M2>, "Operand to && is not a matcher");
             return AndMatcher(m1, m2);
         }
 
         template<typename M2>
-        auto operator || (IsMatcher auto const& m1, M2 const& m2) {
+        auto operator || (IsMatcher auto&& m1, M2&& m2) {
             static_assert(IsMatcher<M2>, "Operand to || is not a matcher");
-            return OrMatcher(m1, m2);
+            return OrMatcher( m1, m2 );
         }
 
-        auto operator ! (IsMatcher auto const& m) {
+        auto operator ! (IsMatcher auto&& m) {
             return NotMatcher(m);
         }
 

@@ -676,96 +676,85 @@ TEST_CASE( "Exception message can be matched", "[matchers][exceptions][!throws]"
                     .with_message_that( starts_with( "Special" ) ) );
 }
 
-// struct CheckedTestingMatcher : Catch::Matchers::MatcherBase<int> {
-//     mutable bool matchCalled = false;
-//     bool matchSucceeds = false;
-//
-//     bool match( int const& ) const override {
-//         matchCalled = true;
-//         return matchSucceeds;
-//     }
-//     std::string describe() const override {
-//         return "CheckedTestingMatcher set to " +
-//                ( matchSucceeds ? std::string( "succeed" )
-//                                : std::string( "fail" ) );
-//     }
-// };
-//
-// TEST_CASE( "Composed matchers shortcircuit", "[matchers][composed]" ) {
-//     // Check that if first returns false, second is not touched
-//     CheckedTestingMatcher first, second;
-//     SECTION( "MatchAllOf" ) {
-//         first.matchSucceeds = false;
-//
-//         Detail::MatchAllOf<int> matcher =
-//             Detail::MatchAllOf<int>{} && first && second;
-//         CHECK_FALSE( matcher.match( 1 ) );
-//
-//         // These two assertions are the important ones
-//         REQUIRE( first.matchCalled );
-//         REQUIRE( !second.matchCalled );
-//     }
-//     // Check that if first returns true, second is not touched
-//     SECTION( "MatchAnyOf" ) {
-//         first.matchSucceeds = true;
-//
-//         Detail::MatchAnyOf<int> matcher =
-//             Detail::MatchAnyOf<int>{} || first || second;
-//         CHECK( matcher.match( 1 ) );
-//
-//         // These two assertions are the important ones
-//         REQUIRE( first.matchCalled );
-//         REQUIRE( !second.matchCalled );
-//     }
-// }
-//
-// struct CheckedTestingGenericMatcher : Catch::Matchers::MatcherGenericBase {
-//     mutable bool matchCalled = false;
-//     bool matchSucceeds = false;
-//
-//     bool match( int const& ) const {
-//         matchCalled = true;
-//         return matchSucceeds;
-//     }
-//     std::string describe() const override {
-//         return "CheckedTestingGenericMatcher set to " +
-//                ( matchSucceeds ? std::string( "succeed" )
-//                                : std::string( "fail" ) );
-//     }
-// };
-//
-// TEST_CASE( "Composed generic matchers shortcircuit",
-//            "[matchers][composed][generic]" ) {
-//     // Check that if first returns false, second is not touched
-//     CheckedTestingGenericMatcher first, second;
-//     SECTION( "MatchAllOf" ) {
-//         first.matchSucceeds = false;
-//
-//         Detail::MatchAllOfGeneric<CheckedTestingGenericMatcher,
-//                                   CheckedTestingGenericMatcher>
-//             matcher{ first, second };
-//
-//         CHECK_FALSE( matcher.match( 1 ) );
-//
-//         // These two assertions are the important ones
-//         REQUIRE( first.matchCalled );
-//         REQUIRE( !second.matchCalled );
-//     }
-//     // Check that if first returns true, second is not touched
-//     SECTION( "MatchAnyOf" ) {
-//         first.matchSucceeds = true;
-//
-//         Detail::MatchAnyOfGeneric<CheckedTestingGenericMatcher,
-//                                   CheckedTestingGenericMatcher>
-//             matcher{ first, second };
-//         CHECK( matcher.match( 1 ) );
-//
-//         // These two assertions are the important ones
-//         REQUIRE( first.matchCalled );
-//         REQUIRE( !second.matchCalled );
-//     }
-// }
-//
+struct CheckedTestingMatcher {
+    bool matchCalled = false;
+    bool matchSucceeds = false;
+
+    auto matches( int ) -> CatchKit::MatchResult {
+        matchCalled = true;
+        return matchSucceeds;
+    }
+    auto describe() const {
+        return "CheckedTestingMatcher set to " +
+               ( matchSucceeds ? std::string( "succeed" )
+                               : std::string( "fail" ) );
+    }
+};
+
+TEST_CASE( "Composed matchers shortcircuit", "[matchers][composed]" ) {
+    // Check that if first returns false, second is not touched
+    CheckedTestingMatcher first, second;
+    SECTION( "MatchAllOf" ) {
+        first.matchSucceeds = false;
+
+        CHECK_THAT( 1, !(first && second) );
+
+        // These two assertions are the important ones
+        REQUIRE( first.matchCalled );
+        REQUIRE( !second.matchCalled );
+    }
+    // Check that if first returns true, second is not touched
+    SECTION( "MatchAnyOf" ) {
+        first.matchSucceeds = true;
+
+        CHECK_THAT( 1, first || second );
+
+        // These two assertions are the important ones
+        REQUIRE( first.matchCalled );
+        REQUIRE( !second.matchCalled );
+    }
+}
+
+struct CheckedTestingGenericMatcher {
+    bool matchCalled = false;
+    bool matchSucceeds = false;
+
+    auto matches( int const& ) -> CatchKit::MatchResult {
+        matchCalled = true;
+        return matchSucceeds;
+    }
+    auto describe() const {
+        return "CheckedTestingGenericMatcher set to " +
+               ( matchSucceeds ? std::string( "succeed" )
+                               : std::string( "fail" ) );
+    }
+};
+
+TEST_CASE( "Composed generic matchers shortcircuit",
+           "[matchers][composed][generic]" ) {
+    // Check that if first returns false, second is not touched
+    CheckedTestingGenericMatcher first, second;
+    SECTION( "MatchAllOf" ) {
+        first.matchSucceeds = false;
+
+        CHECK_THAT( 1, !(first && second) );
+
+        // These two assertions are the important ones
+        REQUIRE( first.matchCalled );
+        REQUIRE( !second.matchCalled );
+    }
+    // Check that if first returns true, second is not touched
+    SECTION( "MatchAnyOf" ) {
+        first.matchSucceeds = true;
+
+        CHECK_THAT( 1, first || second );
+
+        // These two assertions are the important ones
+        REQUIRE( first.matchCalled );
+        REQUIRE( !second.matchCalled );
+    }
+}
+
 // template <typename Range>
 // struct EqualsRangeMatcher : Catch::Matchers::MatcherGenericBase {
 //
