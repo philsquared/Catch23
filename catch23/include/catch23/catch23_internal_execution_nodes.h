@@ -23,7 +23,7 @@ namespace CatchKit::Detail {
 
         auto operator == (NodeId const& other) const -> bool {
             return location.line() == other.location.line()
-                && name == other.name
+                && location.column() == other.location.column()
                 && location.file_name() == other.location.file_name();
         };
     };
