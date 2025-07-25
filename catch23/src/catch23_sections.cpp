@@ -15,30 +15,31 @@ namespace CatchKit::Detail {
             node.exit( std::uncaught_exceptions() > 0 );
     }
 
+    namespace {
+        auto try_enter_internal(ExecutionNode& node) {
+
+            // Don't enter if we've already entered a previous peer node
+            if( node.get_parent_state() == ExecutionNode::States::EnteredButDoneForThisLevel ) {
+                node.skip();
+                return false;
+            }
+
+            // ... or if this node has already been completed
+            if( node.get_state() == ExecutionNode::States::Completed ) {
+                return false;
+            }
+
+            node.enter();
+            return true;
+        }
+    }
+
     auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location const& location) -> SectionInfo {
         // !TBD: avoid always copying the string
-        if(auto node = nodes.find_node({std::string(name), location})) {
-            if( node->get_parent_state() == ExecutionNode::States::EnteredButDoneForThisLevel ) {
-                node->skip();
-                return SectionInfo{*node, false};
-            }
-            else if( node->get_state() == ExecutionNode::States::Completed ) {
-
-                // !TBD Deduplicate this logic
-                return SectionInfo{*node, false};
-            }
-            else {
-                node->enter();
-                return SectionInfo{*node, true};
-            }
-        }
-        auto& node = nodes.add_node({std::string(name), location});
-        if( node.get_parent_state() != ExecutionNode::States::EnteredButDoneForThisLevel ) {
-            node.enter();
-            return SectionInfo{node, true};
-        }
-        node.skip();
-        return SectionInfo{node, false};
+        auto node = nodes.find_node({std::string(name), location});
+        if( !node )
+            node = &nodes.add_node({std::string(name), location});
+        return SectionInfo{ *node, try_enter_internal(*node) };
     }
 
 } // namespace CatchKit::Detail
