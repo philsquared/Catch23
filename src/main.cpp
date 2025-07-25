@@ -19,4 +19,6 @@ int main() {
         assert(!tests_to_run.empty());
         run_tests(tests_to_run, reporter);
     }
+
+    reporter.on_test_run_end();
 }

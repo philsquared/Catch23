@@ -14,6 +14,9 @@ namespace CatchKit {
         ReportOn what_to_report_on;
         void lazy_print_test_header();
 
+        Counters test_totals;
+        Counters assertion_totals;
+
     public:
         explicit ConsoleReporter( ReportOn what_to_report_on )
         : what_to_report_on( what_to_report_on )
@@ -24,10 +27,12 @@ namespace CatchKit {
         }
 
         void on_test_start( TestInfo const& test_info ) override;
-        void on_test_end( TestInfo const& test_info ) override;
+        void on_test_end( TestInfo const& test_info, Counters const& assertions ) override;
 
         void on_assertion_start( AssertionContext const& context ) override;
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override;
+
+        void on_test_run_end();
     };
 
 } // namespace CatchKit

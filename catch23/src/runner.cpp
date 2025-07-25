@@ -46,7 +46,8 @@ namespace CatchKit::Detail {
             }
             root_node.exit();
 
-            reporter.on_test_end(test.test_info); // !TBD: report number of assertions passed/ failed and overall status
+            reporter.on_test_end(test.test_info, test_handler.get_assertion_counts() );
+            test_handler.reset_assertion_counts();
         }
         while(root_node.get_state() != ExecutionNode::States::Completed);
 

@@ -30,7 +30,7 @@ namespace CatchKit {
         }
 
         void on_test_start( TestInfo const& ) override {}
-        void on_test_end( TestInfo const& ) override {}
+        void on_test_end( TestInfo const&, Counters const& ) override {}
 
         void on_assertion_start( AssertionContext const& ) override {}
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {

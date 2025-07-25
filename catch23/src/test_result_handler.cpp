@@ -22,6 +22,11 @@ namespace CatchKit::Detail {
     }
 
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
+        if( result == ResultType::Pass )
+            assertions.passed_explicitly++;
+        else
+            assertions.failed++;
+
         last_result = result;
         // !TBD: We should need to check this again
         // - go back to having two on_assertion_result methods - one that takes just a result,

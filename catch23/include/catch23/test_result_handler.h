@@ -20,6 +20,8 @@ namespace CatchKit::Detail
         ResultDisposition result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
 
+        Counters assertions;
+
     public:
         explicit TestResultHandler(Reporter& reporter);
 
@@ -33,7 +35,9 @@ namespace CatchKit::Detail
         [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }
         [[nodiscard]] auto passed() const { return last_result == CatchKit::ResultType::Pass; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
+        [[nodiscard]] auto get_assertion_counts() const { return assertions; }
 
+        void reset_assertion_counts() { assertions = Counters(); }
         void set_execution_nodes( ExecutionNodes* nodes ) { execution_nodes = nodes; }
     };
 
