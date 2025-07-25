@@ -173,7 +173,7 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
 
     CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
     CHECK( node->get_state() == ExecutionNode::States::Incomplete );
-    CHECK( b_node->get_state() == ExecutionNode::States::None );
+    CHECK( b_node->get_state() == ExecutionNode::States::NotEntered );
 
     CHECK( node->get_current_index() == 1 );
     CHECK( b_node->get_current_index() == 0 );
@@ -194,8 +194,8 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
     b_node->enter();
 
     CHECK( root.exit() == ExecutionNode::States::Completed );
-    CHECK( node->get_state() == ExecutionNode::States::None );
-    CHECK( b_node->get_state() == ExecutionNode::States::None );
+    CHECK( node->get_state() == ExecutionNode::States::NotEntered );
+    CHECK( b_node->get_state() == ExecutionNode::States::NotEntered );
 
     CHECK( node->get_current_index() == 0 );
     CHECK( b_node->get_current_index() == 0 );
@@ -226,7 +226,7 @@ TEST( "One TickTock node, one regular node" ) {
 
     CHECK( root.exit() == ExecutionNode::States::HasIncompleteChildren );
     CHECK( node->get_state() == ExecutionNode::States::Incomplete);
-    CHECK( s_node->get_state() == ExecutionNode::States::None,
+    CHECK( s_node->get_state() == ExecutionNode::States::NotEntered,
         "Node has been reset");
 
     CHECK( node->get_current_index() == 1 );
@@ -239,8 +239,8 @@ TEST( "One TickTock node, one regular node" ) {
     CHECK( s_node->exit() == ExecutionNode::States::Completed );
 
     CHECK( root.exit() == ExecutionNode::States::Completed );
-    CHECK( node->get_state() == ExecutionNode::States::None);
-    CHECK( s_node->get_state() == ExecutionNode::States::None);
+    CHECK( node->get_state() == ExecutionNode::States::NotEntered);
+    CHECK( s_node->get_state() == ExecutionNode::States::NotEntered);
 
     CHECK( node->get_current_index() == 0 );
     CHECK( s_node->get_current_index() == 0 );
@@ -284,7 +284,7 @@ TEST( "One regular node with a nested TickTock node" ) {
     tt_node->enter();
 
     CHECK( s_node->exit() == ExecutionNode::States::Completed );
-    CHECK( tt_node->get_state() == ExecutionNode::States::None);
+    CHECK( tt_node->get_state() == ExecutionNode::States::NotEntered);
 
     CHECK( root.exit() == ExecutionNode::States::Completed );
 

@@ -33,11 +33,13 @@ namespace CatchKit::Detail {
     class ExecutionNode {
     public:
         enum class States {
-            None, // Just added or not entered yet
+            None, // Just added
+            NotEntered, // Added on a previous cycle but not (yet) entered on this one
             Entered,
             EnteredButDoneForThisLevel,
             ExitedEarly, // through an early return or exception - including test cancellation
             HasIncompleteChildren,
+            Skipped, // Was seen but skipped due to earlier nodes at this level
             Incomplete, // Children are complete, but there are more local levels (e.g. generator values)
             Completed
         };
@@ -85,6 +87,7 @@ namespace CatchKit::Detail {
         void reset_children();
 
         void enter();
+        void skip();
         auto exit(bool early = false) -> States;
 
         bool move_next();

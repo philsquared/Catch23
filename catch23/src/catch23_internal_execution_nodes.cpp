@@ -29,8 +29,8 @@ namespace CatchKit::Detail {
     }
 
     void ExecutionNode::reset() {
-        if( state != States::None ) {
-            state = States::None;
+        if( state != States::NotEntered ) {
+            state = States::NotEntered;
             current_index = 0;
             reset_children();
         }
@@ -46,6 +46,10 @@ namespace CatchKit::Detail {
         state = States::Entered;
         set_current_node(this);
     }
+    void ExecutionNode::skip() {
+        assert(state == States::NotEntered || state == States::Completed || state == States::Skipped || state == States::None);
+        state = States::Skipped;
+    }
     auto ExecutionNode::exit(bool early) -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
@@ -56,7 +60,7 @@ namespace CatchKit::Detail {
         for(auto const& child : children) {
             if( child->state == States::Entered || child->state == States::EnteredButDoneForThisLevel )
                 child->exit();
-            if( child->state != States::Completed ) {
+            if( child->state != States::Completed && child->state != States::NotEntered ) {
                 state = States::HasIncompleteChildren;
             }
             if( child->state == States::ExitedEarly )

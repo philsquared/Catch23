@@ -4,6 +4,7 @@
 
 #include "catch23/catch23_test.h"
 #include "catch23/catch23_generators.h"
+#include "catch23/catch23_local_test.h"
 
 TEST("Generators", "[.]") {
     auto i = GENERATE(values_of<int>()); // Defaults to 100 values
@@ -25,9 +26,27 @@ TEST("string generators") {
     CHECK( words != symbols );
 }
 
-// From Catch2
+TEST("section within a generator", "[.]") {
+    GENERATE(100, values_of<int>{} ); // Just repeat 100x, !TBD: add a REPEAT macro to do this?
+
+    auto results = LOCAL_TEST() {
+        auto i = GENERATE(10, values_of<int>{.from=0, .up_to=10 } );
+        SECTION("for small values of i") {
+            CHECK(i < 0);
+        }
+        if( i < 5) {
+            SECTION("for large values of i") {
+                CHECK(i > 0);
+            }
+        }
+    };
+    CHECK(results.size() >= 10);
+    CHECK(results.size() <= 20);
+}
 
 #include "catch23/catch23_catch2.h"
+
+// From Catch2
 
 TEST_CASE("Random generator", "[generators][approvals]") {
     SECTION("Infer int from integral arguments") {
