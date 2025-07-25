@@ -16,4 +16,4 @@
 
 #define SUCCEED(...) PASS(__VA_ARGS__)
 
-#endif //CATCH23_CATCH2_H
+#endif // CATCH23_CATCH2_H

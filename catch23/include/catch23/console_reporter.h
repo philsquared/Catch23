@@ -32,4 +32,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCH23_CONSOLE_REPORTER_H
+#endif // CATCH23_CONSOLE_REPORTER_H

@@ -36,4 +36,4 @@ namespace CatchKit
     using Detail::ResultDisposition;
 }
 
-#endif //CATCHKIT_VIOLATION_HANDLER_H
+#endif // CATCHKIT_VIOLATION_HANDLER_H

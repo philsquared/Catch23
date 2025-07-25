@@ -100,4 +100,4 @@ namespace CatchKit {
 } // namespace CatchKit
 
 
-#endif //CATCH23_GENERATE_NODE_H
+#endif // CATCH23_GENERATE_NODE_H

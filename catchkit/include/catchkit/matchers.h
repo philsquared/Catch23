@@ -393,4 +393,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCHKIT_MATCHERS_H
+#endif // CATCHKIT_MATCHERS_H

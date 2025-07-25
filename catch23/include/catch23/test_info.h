@@ -18,4 +18,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCH23_TEST_INFO_H
+#endif // CATCH23_TEST_INFO_H

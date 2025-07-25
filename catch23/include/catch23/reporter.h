@@ -38,4 +38,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCH23_REPORTER_H
+#endif // CATCH23_REPORTER_H

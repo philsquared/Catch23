@@ -64,4 +64,4 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
-#endif //CATCHKIT_EXPR_REF_H
+#endif // CATCHKIT_EXPR_REF_H

@@ -36,4 +36,4 @@ struct std::formatter<CatchKit::Detail::ExpressionInfo> {
     std::format_context::iterator format(const CatchKit::Detail::ExpressionInfo& expr, std::format_context& ctx) const;
 };
 
-#endif //CATCHKIT_EXPRESSION_INFO_H
+#endif // CATCHKIT_EXPRESSION_INFO_H

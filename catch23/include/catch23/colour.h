@@ -38,4 +38,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCH23_COLOUR_H
+#endif // CATCH23_COLOUR_H

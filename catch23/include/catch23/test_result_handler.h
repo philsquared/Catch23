@@ -47,4 +47,4 @@ namespace CatchKit {
 
 } //namespace CatchKit
 
-#endif //CATCHKIT_TEST_ASSERTION_HANDLER_H
+#endif // CATCHKIT_TEST_ASSERTION_HANDLER_H

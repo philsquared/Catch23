@@ -113,4 +113,4 @@ namespace CatchKit::Detail {
 } // namespace CatchKit::Detail
 
 
-#endif //CATCH23_INTERNAL_EXECUTION_NODES_H
+#endif // CATCH23_INTERNAL_EXECUTION_NODES_H

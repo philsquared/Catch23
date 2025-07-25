@@ -29,4 +29,4 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
-#endif //CATCH23_RANDOM_H
+#endif // CATCH23_RANDOM_H
