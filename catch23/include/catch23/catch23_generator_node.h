@@ -21,10 +21,20 @@ namespace CatchKit {
         concept IsSingleValueGenerator = requires(G g){ { g.generate() }; };
 
         template<typename G>
-        concept IsMultiValueGenerator = requires(G g, size_t pos){ { g.generate_at(pos) }; };
+        concept IsMultiValueGenerator = requires(G const& g, size_t pos){ { g.generate_at(pos) }; };
 
-        // Overload this if your generator has multiple values
-        auto size_of(auto const&) { return 100; }
+        template<typename G>
+        concept IsSizedGenerator = requires(G const& g, size_t pos){ { g.size(pos) } -> std::same_as<size_t>; };
+
+        template<typename G>
+        auto size_of(G const& generator, size_t default_size = 100) {
+            if constexpr( IsMultiValueGenerator<G> ) {
+                static_assert( !IsSizedGenerator<G>, "Generator has generate_at() but not size()");
+                return generator.size();
+            }
+            else
+                return default_size;
+        }
 
         template<typename G>
         auto generate_at(G const& generator, size_t pos) {
@@ -36,8 +46,9 @@ namespace CatchKit {
                 return generate_value(generator);
         }
 
+        constexpr size_t default_repetitions = 100; // Make this runtime configurable?
 
-        // Typed generator holder
+        // Typed generator holder node
         template<typename T>
         class GeneratorNode : public ExecutionNode {
             T generator;
@@ -46,7 +57,7 @@ namespace CatchKit {
 
         public:
             explicit GeneratorNode( NodeId&& id, T&& gen )
-            : ExecutionNode(std::move(id), size_of(gen)), generator(std::move(gen)) {
+            : ExecutionNode(std::move(id), size_of(gen, default_repetitions)), generator(std::move(gen)) {
                 values.reserve(size);
                 for(size_t i=0; i < size; ++i) {
                     values.emplace_back(generate_at(generator, i));
@@ -54,6 +65,7 @@ namespace CatchKit {
             }
 
             GeneratedType& current_value() {
+                assert(current_index < values.size());
                 return values[current_index];
             }
             // !TBD shrink?

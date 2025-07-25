@@ -26,17 +26,16 @@ namespace CatchKit {
 
         template<typename T>
         struct multiple_values {
-            int multiple;
+            size_t multiple;
             values_of<T> value_generator;
 
             auto generate_at(size_t) const { return value_generator.generate(); }
+            auto size() const { return multiple; }
         };
 
-        template<typename T>
-        auto size_of(multiple_values<T> const& values) { return values.multiple; }
 
         template<typename T>
-        constexpr auto operator, (int multiple, values_of<T>&& values) {
+        constexpr auto operator, (size_t multiple, values_of<T>&& values) {
             return multiple_values<T>{ multiple, std::move(values) };
         }
 
@@ -90,13 +89,11 @@ namespace CatchKit {
             std::vector<T> values;
 
             auto generate_at(size_t pos) const { return values[pos]; }
+            auto size() const { return values.size(); }
 
         };
         template<typename T>
         from_values(std::initializer_list<T> values) -> from_values<T>;
-
-        template<typename T>
-        auto size_of(from_values<T> const& seq) { return seq.values.size(); }
 
     } // namespace Detail
 
