@@ -39,7 +39,6 @@ namespace CatchKit::Detail {
             EnteredButDoneForThisLevel,
             ExitedEarly, // through an early return or exception - including test cancellation
             HasIncompleteChildren,
-            Skipped, // Was seen but skipped due to earlier nodes at this level
             Incomplete, // Children are complete, but there are more local levels (e.g. generator values)
             Completed
         };
@@ -87,7 +86,6 @@ namespace CatchKit::Detail {
         void reset_children();
 
         void enter();
-        void skip();
         auto exit(bool early = false) -> States;
 
         bool move_next();

@@ -4,7 +4,6 @@
 
 #include "../include/catch23/catch23_internal_execution_nodes.h"
 
-
 namespace CatchKit::Detail {
 
     auto ExecutionNode::get_current_node() -> ExecutionNode* {
@@ -45,10 +44,6 @@ namespace CatchKit::Detail {
         assert(state != States::Entered && state != States::Completed);
         state = States::Entered;
         set_current_node(this);
-    }
-    void ExecutionNode::skip() {
-        assert(state == States::NotEntered || state == States::Completed || state == States::Skipped || state == States::None);
-        state = States::Skipped;
     }
     auto ExecutionNode::exit(bool early) -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
