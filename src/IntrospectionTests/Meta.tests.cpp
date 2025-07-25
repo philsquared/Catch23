@@ -2,10 +2,10 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#include "catch23/catch23_local_test.h"
-#include "catch23/catch23_test.h"
+#include "catch23/local_test.h"
+#include "catch23/test.h"
 
-#include "catchkit/catchkit_matchers.h"
+#include "catchkit/matchers.h"
 
 
 TEST("A test that can run tests") {

@@ -1,9 +1,9 @@
 //
 // Created by Phil Nash on 23/07/2025.
 //
-#include "catch23/catch23_test.h"
-#include "catch23/catch23_sections.h"
-#include "catch23/catch23_internal_execution_nodes.h"
+#include "catch23/test.h"
+#include "catch23/sections.h"
+#include "catch23/internal_execution_nodes.h"
 
 TEST("execution nodes") {
     using namespace CatchKit::Detail;

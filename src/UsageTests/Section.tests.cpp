@@ -2,8 +2,8 @@
 // Created by Phil Nash on 23/07/2025.
 //
 
-#include "catch23/catch23_test.h"
-#include "catch23/catch23_catch2.h"
+#include "catch23/test.h"
+#include "catch23/catch2_compat.h"
 
 
 TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {

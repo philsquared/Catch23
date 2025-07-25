@@ -1,0 +1,121 @@
+//
+// Created by Phil Nash on 22/07/2025.
+//
+
+#ifndef CATCH23_GENERATORS_H
+#define CATCH23_GENERATORS_H
+
+#include "generator_node.h"
+#include "random.h"
+
+#include <vector>
+#include <source_location>
+
+namespace CatchKit {
+
+    namespace Detail {
+
+        // To provide your own generators, either:
+        // 1. specialise values_of for your type and generate_value for valuesOf<your type>, or
+        // 2. for something more general/ operators on multiple values, specialise size_of and generate_at
+
+        template<typename T> struct values_of {}; // Specialise this for your own types
+
+
+        // Adapter to specify number of repetitions:
+
+        template<typename T>
+        struct multiple_values {
+            size_t multiple;
+            values_of<T> value_generator;
+
+            auto generate_at(size_t) const { return value_generator.generate(); }
+            auto size() const { return multiple; }
+        };
+
+
+        template<typename T>
+        constexpr auto operator, (size_t multiple, values_of<T>&& values) {
+            return multiple_values<T>{ multiple, std::move(values) };
+        }
+
+
+        // Numeric (int or real) generators:
+
+        template<IsBuiltInNumeric T>
+        struct values_of<T> {
+            T from {};
+            T up_to = std::numeric_limits<T>::max();
+
+            [[nodiscard]] auto generate() const { return generate_random_number(from, up_to); }
+
+            // Given a starting value, try different strategies to produce a simpler value that might
+            // also fail. If it still passes this function will be called again with an incremented
+            // strategy number, and this will repeat until either a failure is found
+            // or the function returns an empty optional
+
+            // Could use coroutines to "simplify" this?
+            auto shrink(T value, int strategy_index) -> std::optional<T>;
+        };
+
+
+        // String generator:
+
+        namespace Charsets {
+            extern std::string const lcase;
+            extern std::string const ucase;
+            extern std::string const all_alpha;
+            extern std::string const numbers;
+            extern std::string const alphanumeric;
+            extern std::string const word_chars;
+            extern std::string const symbols;
+            extern std::string const printable_ascii;
+        }
+
+        template<>
+        struct values_of<std::string> {
+            size_t min_len = 0;
+            size_t max_len = 65;
+            std::string_view charset = Charsets::word_chars; // Must be from string literal
+
+            [[nodiscard]] auto generate() const -> std::string;
+        };
+
+
+        // Generate specific values:
+
+        template<typename T>
+        struct from_values {
+            std::vector<T> values;
+
+            auto generate_at(size_t pos) const { return values[pos]; }
+            auto size() const { return values.size(); }
+
+        };
+        template<typename T>
+        from_values(std::initializer_list<T> values) -> from_values<T>;
+
+    } // namespace Detail
+
+    namespace Generators {
+
+        namespace Charsets { using namespace Detail::Charsets; }
+
+        // Built in matchers
+        using Detail::values_of;
+        using Detail::from_values;
+
+    } // namespace Generators
+
+} // namespace CatchKit
+
+
+#define GENERATE(...) \
+    [&check]{ using namespace CatchKit::Generators; \
+        CatchKit::Detail::GeneratorAcquirer acquirer(check, {#__VA_ARGS__}); \
+        if( !acquirer.generator_node ) acquirer.make_generator((__VA_ARGS__)); \
+        return acquirer.derived_node<decltype((__VA_ARGS__))>(); \
+    }()->current_value()
+
+
+#endif // CATCH23_GENERATORS_H

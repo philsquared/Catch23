@@ -5,8 +5,8 @@
 // These test have been taken from the Catch2 test suite,
 // with modifications to allow for the new matcher syntax and semantics
 
-#include <catch23/catch23_catch2.h>
-#include <catchkit/catchkit_matchers.h>
+#include <catch23/catch2_compat.h>
+#include <catchkit/matchers.h>
 
 #include <algorithm>
 #include <exception>

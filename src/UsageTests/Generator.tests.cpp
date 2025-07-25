@@ -2,9 +2,9 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#include "catch23/catch23_test.h"
-#include "catch23/catch23_generators.h"
-#include "catch23/catch23_local_test.h"
+#include "catch23/test.h"
+#include "catch23/generators.h"
+#include "catch23/local_test.h"
 
 TEST("Generators", "[.]") {
     auto i = GENERATE(values_of<int>()); // Defaults to 100 values
@@ -44,7 +44,7 @@ TEST("section within a generator", "[.]") {
     CHECK(results.size() <= 20);
 }
 
-#include "catch23/catch23_catch2.h"
+#include "catch23/catch2_compat.h"
 
 // From Phil's Accelerated TDD workshop
 std::string left_pad(std::string const& input_string, int min_len) {

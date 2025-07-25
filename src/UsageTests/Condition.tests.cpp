@@ -5,8 +5,8 @@
 // These test have been taken from the Catch2 test suite, with minor modifications applied
 // (mostly using matchers instead of Approx)
 
-#include "catch23/catch23_catch2.h"
-#include "catchkit/catchkit_internal_warnings.h"
+#include "catch23/catch2_compat.h"
+#include "catchkit/internal_warnings.h"
 
 #include <string>
 #include <limits>
