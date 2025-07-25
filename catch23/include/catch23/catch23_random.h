@@ -14,10 +14,10 @@ namespace CatchKit::Detail {
     // Should probably borrow from Martin's work on Catch2
 
     template<typename T>
-    concept IsNumeric = std::integral<T> || std::floating_point<T>;
+    concept IsBuiltInNumeric = std::integral<T> || std::floating_point<T>;
 
     // Returns a number between from and to, inclusive
-    template<IsNumeric NumberT>
+    template<IsBuiltInNumeric NumberT>
     auto generate_random_number(NumberT from, NumberT to) -> NumberT {
         std::random_device random_device;
         std::mt19937 mt(random_device());
