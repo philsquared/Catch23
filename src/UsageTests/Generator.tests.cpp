@@ -46,6 +46,49 @@ TEST("section within a generator", "[.]") {
 
 #include "catch23/catch23_catch2.h"
 
+// From Phil's Accelerated TDD workshop
+std::string left_pad(std::string const& input_string, int min_len) {
+    if(auto pad_len = min_len-static_cast<int>(input_string.length()); pad_len > 0)
+        return std::string(pad_len, ' ') + input_string;
+    return input_string;
+}
+
+TEST_CASE("left pad properties", "[/.]") {
+    // check.result_handler.report_on = CatchKit::ReportOn::AllResults;
+
+    auto min_len = GENERATE(10, values_of<size_t>{0, 256});
+    auto input_string = GENERATE(10, values_of<std::string>{.min_len=0, .max_len=256});
+    auto output_string = left_pad(input_string, min_len);
+
+    // CAPTURE(input_string);
+    // CAPTURE(output_string);
+    // CAPTURE(min_len);
+
+    REQUIRE(output_string.length() >= min_len);
+    REQUIRE(output_string.length() >= input_string.length());
+    REQUIRE(output_string.find(input_string) != std::string::npos);
+    REQUIRE(output_string.rfind(input_string) == output_string.length()-input_string.length());
+
+    if( input_string.length() == min_len ) {
+        SECTION("if input string length is same as min_len then input string is returned") {
+            REQUIRE(output_string == input_string);
+        }
+    }
+
+    if( input_string.length() > min_len ) {
+        SECTION("if input string length is greater than min len then input string is returned") {
+            REQUIRE(output_string == input_string);
+        }
+    }
+
+    if( input_string.length() < min_len ) {
+        SECTION("If min len is greater than input string length then string is padded") {
+            REQUIRE(output_string[0] == ' ');
+        }
+    }
+}
+
+
 // From Catch2
 
 TEST_CASE("Random generator", "[generators][approvals]") {
