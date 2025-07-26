@@ -1,5 +1,7 @@
-#include "catch23/console_reporter.h"
-#include "catch23/runner.h"
+// #include "catch23/console_reporter.h"
+// #include "catch23/runner.h"
+#include "../../catch23/single_include/catch23.h"
+// #include "../../catchkit/single_include/catchkit.h"
 
 int main() {
     CatchKit::ConsoleReporter reporter(CatchKit::ReportOn::FailuresOnly);
