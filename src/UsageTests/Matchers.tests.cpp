@@ -2,9 +2,6 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-// These test have been taken from the Catch2 test suite,
-// with modifications to allow for the new matcher syntax and semantics
-
 #include <catch23/catch2_compat.h>
 #include <catchkit/matchers.h>
 
@@ -13,6 +10,21 @@
 #include <cmath>
 #include <list>
 #include <sstream>
+
+
+
+TEST("Chained matchers") {
+
+    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message2("Get the message") );
+    // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
+    // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message") );
+    // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= CatchKit::StringMatchers::Equals("message") );
+
+}
+
+// The following test have been taken from the Catch2 test suite,
+// with modifications to allow for the new matcher syntax and semantics
+
 
 #ifdef __clang__
 #    pragma clang diagnostic push
