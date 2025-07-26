@@ -44,7 +44,7 @@ TEST_CASE( "Equality checks that should succeed" )
     REQUIRE_THAT( x, is_close_to( 1.3 ) );
 }
 
-TEST_CASE( "Equality checks that should fail", "[/.][failing][!mayfail]" )
+TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
 {
     TestData data;
 
