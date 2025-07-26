@@ -23,7 +23,25 @@ namespace CatchKit {
         BoldWhite,
         BoldYellow,
         BoldNormal
-};
+    };
+
+    struct ColourIntent {
+        static Colours FileName;
+        static Colours Warning;
+        static Colours ResultError;
+        static Colours ResultSuccess;
+        static Colours ResultExpectedFailure;
+
+        static Colours Error;
+        static Colours Success;
+        static Colours Skip;
+
+        static Colours OriginalExpression;
+        static Colours ReconstructedExpression;
+
+        static Colours SecondaryText;
+        static Colours Headers;
+    };
 
     class TextColour {
     public:

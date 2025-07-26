@@ -59,4 +59,20 @@ namespace CatchKit {
         }
     }
 
+    Colours ColourIntent::FileName = Colours::BoldGrey;
+    Colours ColourIntent::ResultError = Colours::BoldRed;
+    Colours ColourIntent::ResultSuccess = Colours::BoldGreen;
+    Colours ColourIntent::ResultExpectedFailure = Warning;
+
+    Colours ColourIntent::Error = Colours::BoldRed;
+    Colours ColourIntent::Success = Colours::Green;
+    Colours ColourIntent::Warning = Colours::BoldYellow;
+    Colours ColourIntent::Skip = Colours::BoldGrey;
+
+    Colours ColourIntent::OriginalExpression = Colours::Cyan;
+    Colours ColourIntent::ReconstructedExpression = Colours::BoldYellow;
+
+    Colours ColourIntent::SecondaryText = Colours::BoldWhite;
+    Colours ColourIntent::Headers = Colours::White;
+
 } // namespace CatchKit
