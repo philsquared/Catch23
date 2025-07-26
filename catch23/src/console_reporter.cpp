@@ -2,9 +2,9 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-#include "../include/catch23/console_reporter.h"
-#include "../include/catch23/print.h"
-#include "../include/catch23/test_info.h"
+#include "catch23/console_reporter.h"
+#include "catch23/print.h"
+#include "catch23/test_info.h"
 
 #include "catchkit/assertion_context.h"
 

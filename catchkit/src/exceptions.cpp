@@ -2,7 +2,7 @@
 // Created by Phil Nash on 21/07/2025.
 //
 
-#include "../include/catchkit/exceptions.h"
+#include "catchkit/exceptions.h"
 
 namespace CatchKit::Detail {
 

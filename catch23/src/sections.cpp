@@ -3,7 +3,6 @@
 //
 
 #include "catch23/sections.h"
-
 #include "catch23/test_result_handler.h"
 
 #include <exception>

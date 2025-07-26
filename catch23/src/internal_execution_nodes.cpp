@@ -2,7 +2,7 @@
 // Created by Phil Nash on 23/07/2025.
 //
 
-#include "../include/catch23/internal_execution_nodes.h"
+#include "catch23/internal_execution_nodes.h"
 
 namespace CatchKit::Detail {
 

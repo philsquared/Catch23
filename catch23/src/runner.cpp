@@ -2,8 +2,8 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-#include "../include/catch23/runner.h"
-#include "../include/catch23/internal_execution_nodes.h"
+#include "catch23/runner.h"
+#include "catch23/internal_execution_nodes.h"
 
 namespace CatchKit::Detail {
 
@@ -41,8 +41,8 @@ namespace CatchKit::Detail {
                     .original_expression = "* unknown line after the reported location *",
                     .message = {},
                     .location = test_handler.get_current_context().location };
-                test_handler.on_assertion_start( CatchKit::ResultDisposition::Continue, std::move(context) );
-                test_handler.on_assertion_result( CatchKit::ResultType::UnexpectedException, {}, CatchKit::Detail::get_exception_message(std::current_exception()) );
+                test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
+                test_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
             }
             root_node.exit();
 
