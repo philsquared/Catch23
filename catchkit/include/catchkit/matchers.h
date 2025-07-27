@@ -134,12 +134,10 @@ namespace CatchKit {
                     static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
                     return matcher1.matches_lazy_chained(arg, matcher2);
                 }
-                else if constexpr ( IsEagerChainableMatcher<M1> )
-                    return matches(arg);
                 else
-                    static_assert( false, "The LHS of >>= must be a chainable matcher" );
-                std::unreachable();
+                    return matches(arg);
             }
+
             template<typename ArgT>
             auto matches(ArgT const& arg) const -> MatchResult {
                 static_assert( IsEagerChainableMatcher<M1>, "The LHS of >>= must be a chainable matcher" );
@@ -174,17 +172,25 @@ namespace CatchKit {
         }
 
         template<typename ArgT, typename MatcherT>
-        auto MatchExprRef<ArgT, MatcherT>::evaluate() -> ResultType {
+        auto invoke_matcher(MatcherT const& matcher, ArgT&& arg) {
             if constexpr( IsLazyMatcher<MatcherT> ) {
                 static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
-                return matcher.matches_lazy(arg) ? ResultType::Pass : ResultType::MatchFailed;
+                return matcher.matches_lazy(arg);
+            }
+            else if constexpr( IsEagerMatcher<MatcherT> ) {
+                if constexpr( std::invocable<ArgT> )
+                    return matcher.matches(arg());
+                else
+                    return matcher.matches(arg);
             }
             else {
-                if constexpr( std::invocable<ArgT> )
-                    return matcher.matches(arg()) ? ResultType::Pass : ResultType::MatchFailed;
-                else
-                    return matcher.matches(arg) ? ResultType::Pass : ResultType::MatchFailed;
+                static_assert(false, "RHS of match statement is not a matcher");
             }
+        }
+
+        template<typename ArgT, typename MatcherT>
+        auto MatchExprRef<ArgT, MatcherT>::evaluate() -> ResultType {
+            return invoke_matcher(matcher, arg) ? ResultType::Pass : ResultType::MatchFailed;
         }
 
         template<typename ArgT, typename MatcherT>
