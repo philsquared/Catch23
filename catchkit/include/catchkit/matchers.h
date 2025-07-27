@@ -25,21 +25,14 @@ namespace CatchKit {
             template <typename T> explicit(false) operator T() const;
         };
 
-        struct NullMatcher {
+        struct AnyMatcher {
             auto matches(auto&&) -> MatchResult;
             auto matches_lazy(auto&&) -> MatchResult;
-            auto matches_chained(auto&&) -> MatchResult;
-            auto matches_lazy_chained(auto&&) -> MatchResult;
         };
 
         // !TBD: This needs a solution for Matchers with overloads of matches
-        template<typename M>
-        concept IsEagerMatcher = requires(M m, CouldBeAnything something) {
-            { m.matches(something) } -> std::same_as<MatchResult>;
-        };
-
-        template<typename M, typename T>
-        concept IsEagerMatcherAcceptingType = requires(M m, T something) {
+        template<typename M, typename T=CouldBeAnything>
+        concept IsEagerMatcher = requires(M m, T something) {
             { m.matches(something) } -> std::same_as<MatchResult>;
         };
 
@@ -49,12 +42,12 @@ namespace CatchKit {
         };
 
         template<typename M>
-        concept IsChainedMatcher = requires(M m, CouldBeAnything something, NullMatcher matcher) {
+        concept IsEagerChainableMatcher = requires(M m, CouldBeAnything something, AnyMatcher matcher) {
             { m.matches_chained(something, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
-        concept IsLazyChainedMatcher = requires(M m, NullMatcher matcher) {
+        concept IsLazyChainableMatcher = requires(M m, AnyMatcher matcher) {
             { m.matches_lazy_chained([]{}, matcher) } -> std::same_as<MatchResult>;
         };
 
@@ -126,25 +119,32 @@ namespace CatchKit {
             return NotMatcher(m);
         }
 
+        // Matchers may be chained (a sort of Monadic bind) with the >>= operator.
+        // If chained the left operand must implement matches_chained or matches_lazy_chained
         template<typename M1, typename M2>
-        struct ChainedMatcher {
+        struct ChainedMatchers {
             M1 matcher1;
             M2 matcher2;
 
-            auto matches_lazy(auto const& arg) const -> MatchResult {
-                if constexpr (IsLazyChainedMatcher<M1>)
+            template<typename ArgT>
+            auto matches_lazy(ArgT const& arg) const -> MatchResult {
+                // MatchExprRef::evaluate will always detect us as a lazy matcher, so we need to repeat the logic
+                // of seeing if we're actually forwarding on to a lazy or eager matcher, with a lambda or not
+                if constexpr ( IsLazyChainableMatcher<M1> ) {
+                    static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
                     return matcher1.matches_lazy_chained(arg, matcher2);
-                else if constexpr (IsLazyMatcher<M1>)
-                    return matcher1.matches_chained(arg, matcher2);
+                }
+                else if constexpr ( IsEagerChainableMatcher<M1> )
+                    return matches(arg);
                 else
-                    static_assert(false, "Not a matcher");
+                    static_assert( false, "The LHS of >>= must be a chainable matcher" );
+                std::unreachable();
             }
-            auto matches(auto const& arg) const -> MatchResult {
-                return matcher1.matches_chained(arg, matcher2);
-            }
-            auto matches_chained(auto const& arg, auto const& chained_matcher) const -> MatchResult {
-                if constexpr( IsLazyMatcher<M1> )
-                    return matcher1.matches_lazy_chained(arg, matcher2);
+            template<typename ArgT>
+            auto matches(ArgT const& arg) const -> MatchResult {
+                static_assert( IsEagerChainableMatcher<M1>, "The LHS of >>= must be a chainable matcher" );
+                if constexpr( std::invocable<ArgT> )
+                    return matcher1.matches_chained(arg(), matcher2);
                 else
                     return matcher1.matches_chained(arg, matcher2);
             }
@@ -157,7 +157,7 @@ namespace CatchKit {
         template<IsMatcher M1, typename M2>
         auto operator >>= (M1&& m1, M2&& m2) {
             static_assert(IsMatcher<M2>, "Operand to >>= is not a matcher");
-            return ChainedMatcher{std::forward<M1>(m1), std::forward<M2>(m2)};
+            return ChainedMatchers{std::forward<M1>(m1), std::forward<M2>(m2)};
         }
 
         // Invokes the lambda and checks if it throws - potentially if it throws a specific type
@@ -306,14 +306,18 @@ namespace CatchKit {
     namespace ExceptionMatchers {
 
         struct HasMessage {
-            std::string what;
+            std::optional<std::string> what;
 
             auto matches(auto const& ex) const -> MatchResult {
-                return ex.what() == what;
+                return what ? ex.what() == *what : true;
             }
             template<typename ChainedMatcherT>
             auto matches_chained(auto const& ex, ChainedMatcherT const& chained_matcher ) const -> MatchResult {
                 static_assert(Detail::IsEagerMatcher<ChainedMatcherT>);
+
+                if( what && ex.what() != *what )
+                    return false;
+
                 return chained_matcher.matches(ex.what());
             }
 
@@ -361,7 +365,7 @@ namespace CatchKit {
                 return WithEqualsMatcher {message_to_match};
             }
             auto constexpr with_message2(std::string_view message_to_match) {
-                using Detail::operator>>=;
+                using Detail::operator >>=;
                 return *this >>= HasMessage() >>= StringMatchers::Equals(message_to_match);
             }
 
@@ -377,7 +381,7 @@ namespace CatchKit {
 
             template<typename ChainedMatcherT>
             [[nodiscard]] constexpr auto matches_lazy_chained(auto&& f, ChainedMatcherT const& chained_matcher) const -> MatchResult {
-                static_assert(Detail::IsEagerMatcherAcceptingType<ChainedMatcherT, E>,
+                static_assert(Detail::IsEagerMatcher<ChainedMatcherT, E>,
                     "The chained matcher must accept the type (or a super class of) that was detected as thrown");
                 if constexpr( std::is_void_v<E> ) {
                     try {
