@@ -25,6 +25,8 @@ namespace CatchKit {
         auto pointer_to_string(void const* p) -> std::string;
         void ignore( auto&& ) noexcept {}
 
+        auto parse_templated_name( std::string const& templated_name, std::string_view function_name ) -> std::string_view;
+        auto parse_templated_name( std::string const& templated_name, std::source_location location = std::source_location::current() ) -> std::string_view;
         auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified = false) -> std::string_view;
         auto unknown_enum_to_string(size_t enum_value) -> std::string;
 

@@ -59,6 +59,22 @@ namespace CatchKit {
             { m.describe() } -> std::convertible_to<std::string>;
         };
 
+        template<typename ArgT, typename MatcherT>
+        auto invoke_matcher(MatcherT const& matcher, ArgT&& arg) {
+            if constexpr( IsLazyMatcher<MatcherT> ) {
+                static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
+                return matcher.matches_lazy(arg);
+            }
+            else if constexpr( IsEagerMatcher<MatcherT> ) {
+                if constexpr( std::invocable<ArgT> )
+                    return matcher.matches(arg());
+                else
+                    return matcher.matches(arg);
+            }
+            else {
+                static_assert(false, "RHS of match statement is not a matcher");
+            }
+        }
 
         template<typename M1, typename M2>
         struct AndMatcher {
@@ -71,7 +87,7 @@ namespace CatchKit {
                 return matcher2.matches(value);
             }
             constexpr auto describe() const {
-                return std::format("AndMatcher"); // !TBD
+                return std::format("({} && {})", matcher1.describe(), matcher2.describe());
             }
         };
 
@@ -87,7 +103,7 @@ namespace CatchKit {
                 return matcher2.matches(value);
             }
             auto describe() const {
-                return std::format("OrMatcher"); // !TBD
+                return std::format("({} || {})", matcher1.describe(), matcher2.describe());
             }
         };
 
@@ -98,8 +114,12 @@ namespace CatchKit {
             MatchResult matches( auto const& value ) const {
                 return !base_matcher.matches(value);
             }
+            MatchResult matches_lazy( auto const& value ) const {
+                return !invoke_matcher(base_matcher, value);
+                // return !base_matcher.matches(value);
+            }
             auto describe() const {
-                return std::format("NotMatcher"); // !TBD
+                return std::format("!({})", base_matcher.describe());
             }
         };
 
@@ -127,7 +147,7 @@ namespace CatchKit {
             M2 matcher2;
 
             template<typename ArgT>
-            auto matches_lazy(ArgT const& arg) const -> MatchResult {
+            auto matches_lazy( ArgT const& arg ) const -> MatchResult {
                 // MatchExprRef::evaluate will always detect us as a lazy matcher, so we need to repeat the logic
                 // of seeing if we're actually forwarding on to a lazy or eager matcher, with a lambda or not
                 if constexpr ( IsLazyChainableMatcher<M1> ) {
@@ -148,7 +168,7 @@ namespace CatchKit {
             }
 
             auto describe() const -> std::string {
-                return "ChainedMatcher";
+                return std::format("({} >>= {})", matcher1.describe(), matcher2.describe());
             }
         };
 
@@ -169,23 +189,6 @@ namespace CatchKit {
         [[maybe_unused]] constexpr auto operator, ( MatchExprRef<ArgT, MatcherT>&& matcher_ref, std::string_view message ) noexcept {
             matcher_ref.message = message;
             return matcher_ref;
-        }
-
-        template<typename ArgT, typename MatcherT>
-        auto invoke_matcher(MatcherT const& matcher, ArgT&& arg) {
-            if constexpr( IsLazyMatcher<MatcherT> ) {
-                static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
-                return matcher.matches_lazy(arg);
-            }
-            else if constexpr( IsEagerMatcher<MatcherT> ) {
-                if constexpr( std::invocable<ArgT> )
-                    return matcher.matches(arg());
-                else
-                    return matcher.matches(arg);
-            }
-            else {
-                static_assert(false, "RHS of match statement is not a matcher");
-            }
         }
 
         template<typename ArgT, typename MatcherT>
@@ -284,20 +287,24 @@ namespace CatchKit {
             std::optional<std::string> what;
 
             auto matches(auto const& ex) const -> MatchResult {
-                return what ? ex.what() == *what : true;
+                return what ? Detail::get_exception_message(ex) == *what : true;
             }
             template<typename ChainedMatcherT>
             auto matches_chained(auto const& ex, ChainedMatcherT const& chained_matcher ) const -> MatchResult {
                 static_assert(Detail::IsEagerMatcher<ChainedMatcherT>);
 
-                if( what && ex.what() != *what )
+                std::string message = Detail::get_exception_message(ex);
+                if( what && message != *what )
                     return false;
 
-                return chained_matcher.matches(ex.what());
+                return chained_matcher.matches( message );
             }
 
             [[nodiscard]] auto describe() const -> std::string {
-                return {};
+                if( what )
+                    return std::format("has_message(\"{}\")", *what);
+                else
+                    return std::format("has_message()");
             }
         };
 
@@ -345,22 +352,11 @@ namespace CatchKit {
                 }
                 return false;
             }
-            constexpr auto describe() const {
-                // !TBD: should probably include description in MatchResult?
-                return std::format("throws()"); // !TBD: type and value?
-            }
-        };
-
-        template<typename E=void>
-        struct DoesntThrow {
-            Throws<E> throws;
-
-            template<typename ArgT>
-            [[nodiscard]] constexpr auto matches_lazy(ArgT&& f) const -> MatchResult {
-                return !throws.matches_lazy(std::forward<ArgT>(f));
-            }
-            constexpr auto describe() const {
-                return std::format("doesnt_throw()"); // !TBD: type and value?
+            [[nodiscard]] auto describe() const -> std::string{
+                if constexpr(std::is_void_v<E>)
+                    return "throws()";
+                else
+                    return std::format("throws<{}>()", Detail::parse_templated_name("E"));
             }
         };
 
@@ -391,7 +387,6 @@ namespace CatchKit {
                 return std::equal(match_vec.begin(), match_vec.end(), vec.begin());
             }
             constexpr auto describe() const {
-                // return std::format("equals({})", match_vec);
                 return std::format("equals(vec)"); // !TBD
             }
         };
@@ -435,11 +430,6 @@ namespace CatchKit {
 
         template<typename E=void>
         using throws = ExceptionMatchers::Throws<E>;
-
-        // !TBD: Get !throws working to avoid needing this
-        // - requires the composition matchers (esp Not) handling lazy matchers
-        template<typename E=void>
-        using doesnt_throw = ExceptionMatchers::DoesntThrow<E>;
 
         using Detail::operator &&;
         using Detail::operator ||;

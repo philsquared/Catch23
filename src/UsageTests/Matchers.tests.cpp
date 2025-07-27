@@ -11,11 +11,14 @@
 #include <list>
 #include <sstream>
 
-
+void non_throwing_function() {}
+void throwing_function(std::string const& message = {}) {
+    throw std::domain_error( message );
+}
 
 TEST("Chained matchers") {
 
-    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Get the message") );
+    // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message") );
 
@@ -24,6 +27,33 @@ TEST("Chained matchers") {
 
     // CHECK_THAT( "err", equals("err") >>= contains("stack") ); // Shouldnt compile
 
+}
+
+struct UnknownType {};
+
+TEST("throws matcher") {
+    SECTION("throws() matches if the expression throws anything")
+        CHECK_THAT(throwing_function(), throws() );
+
+    SECTION("throws<E>() matches if the expression throws a particular type") {
+        CHECK_THAT(throwing_function(), throws<std::domain_error>() );
+    }
+    SECTION("throws().with_message(message) matches if the expression throws an exception with a particular message") {
+        CHECK_THAT(throwing_function("hello"), throws().with_message("hello") );
+    }
+    SECTION("throws().with_message(message) matches with 'unknown exception type' if the exception type is unknown") {
+        CHECK_THAT( throw UnknownType(), throws().with_message("<unknown exception type>") );
+    }
+    SECTION("HasMessage() matches with 'unknown exception type' if an unknown exception type is applied directly") {
+        CHECK_THAT( UnknownType(), CatchKit::ExceptionMatchers::HasMessage("<unknown exception type>") );
+    }
+
+}
+TEST("!throws matcher succeeds when call doesn't throw") {
+    CHECK_THAT( non_throwing_function(), !throws() );
+}
+TEST("!throws matcher fails when call does throw") {
+    CHECK_THAT( throwing_function(), !throws() );
 }
 
 // The following test have been taken from the Catch2 test suite,
@@ -1036,8 +1066,8 @@ TEST_CASE( "Overloaded comma or address-of operators are not used",
 
     REQUIRE_THAT( &EvilMatcher(), throws<EvilAddressOfOperatorUsed>() );
 
-    REQUIRE_THAT( EvilMatcher() || ( EvilMatcher() && !EvilMatcher()), doesnt_throw() );
-    REQUIRE_THAT( ( EvilMatcher() && EvilMatcher() ) || !EvilMatcher(), doesnt_throw() );
+    REQUIRE_THAT( EvilMatcher() || ( EvilMatcher() && !EvilMatcher()), !throws() );
+    REQUIRE_THAT( ( EvilMatcher() && EvilMatcher() ) || !EvilMatcher(), !throws() );
 }
 
 // struct ImmovableMatcher : Catch::Matchers::MatcherGenericBase {
