@@ -25,9 +25,9 @@ namespace CatchKit {
             template <typename T> explicit(false) operator T() const;
         };
 
-        struct AnyMatcher {
-            auto matches(auto&&) -> MatchResult;
-            auto matches_lazy(auto&&) -> MatchResult;
+        struct AlwaysMatcher {
+            auto matches(auto&&) const -> MatchResult { return true; }
+            auto matches_lazy(auto&&) const -> MatchResult  { return true; }
         };
 
         // !TBD: This needs a solution for Matchers with overloads of matches
@@ -42,12 +42,12 @@ namespace CatchKit {
         };
 
         template<typename M>
-        concept IsEagerChainableMatcher = requires(M m, CouldBeAnything something, AnyMatcher matcher) {
+        concept IsEagerChainableMatcher = requires(M m, CouldBeAnything something, AlwaysMatcher matcher) {
             { m.matches_chained(something, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
-        concept IsLazyChainableMatcher = requires(M m, AnyMatcher matcher) {
+        concept IsLazyChainableMatcher = requires(M m, AlwaysMatcher matcher) {
             { m.matches_lazy_chained([]{}, matcher) } -> std::same_as<MatchResult>;
         };
 
@@ -160,37 +160,6 @@ namespace CatchKit {
             return ChainedMatchers{std::forward<M1>(m1), std::forward<M2>(m2)};
         }
 
-        // Invokes the lambda and checks if it throws - potentially if it throws a specific type
-        // and optionally converts the exception to a string and returns that.
-        template<typename E, bool return_message>
-        auto check_throws(auto f) -> std::optional<std::string> {
-            if constexpr( std::is_void_v<E> ) {
-                try {
-                    f();
-                }
-                catch(...) {
-                    if constexpr(return_message)
-                        return get_exception_message(std::current_exception());
-                    else
-                        return {""};
-                }
-            }
-            else {
-                try {
-                    f();
-                }
-                catch (E& e) {
-                    if constexpr(return_message)
-                        return get_exception_message(std::current_exception());
-                    else
-                        return {""};
-                }
-                catch (...) {
-                    return {};
-                }
-            }
-            return {};
-        }
 
         template<typename ArgT, IsMatcher MatcherT>
         [[maybe_unused]] constexpr auto operator, ( UnaryExprRef<ArgT>&& arg, MatcherT const& matcher ) noexcept {
@@ -325,64 +294,26 @@ namespace CatchKit {
                 return {};
             }
         };
-        static_assert(Detail::IsEagerMatcher<HasMessage>);
-        static_assert(Detail::IsMatcher<HasMessage>);
 
         template<typename E=void>
         struct Throws {
-            std::string message; // optional
-
-            template<typename MessageMatcher>
-            struct WithMatcher {
-                MessageMatcher const& message_matcher;
-                [[nodiscard]] constexpr MatchResult matches_lazy(auto f) const {
-                    if( auto result = Detail::check_throws<E, true>(f) )
-                        return message_matcher.matches(*result);
-                    return false;
-                }
-                constexpr auto describe() const {
-                    return std::format("throws().with_message_that( {} )", message_matcher.describe());
-                }
-            };
-            struct WithEqualsMatcher {
-                StringMatchers::Equals<> message_matcher;
-                [[nodiscard]] constexpr MatchResult matches_lazy(auto f) const {
-                    if( auto result = Detail::check_throws<E, true>(f) )
-                        return message_matcher.matches(*result);
-                    return false;
-                }
-                constexpr auto describe() const {
-                    return std::format("throws().with_message_that( {} )", message_matcher.describe());
-                }
-            };
-
-
             template<Detail::IsEagerMatcher MessageMatcher>
             auto constexpr with_message_that(MessageMatcher const& message_matcher ) {
-                return WithMatcher<MessageMatcher> {message_matcher};
+                using Detail::operator >>=;
+                return *this >>= HasMessage() >>= message_matcher;
             }
             auto constexpr with_message(std::string_view message_to_match) {
-                return WithEqualsMatcher {message_to_match};
-            }
-            auto constexpr with_message2(std::string_view message_to_match) {
                 using Detail::operator >>=;
                 return *this >>= HasMessage() >>= StringMatchers::Equals(message_to_match);
             }
 
-            [[nodiscard]] constexpr auto matches_lazy(auto f) const -> MatchResult {
-                if (message.empty())
-                    return Detail::check_throws<E, false>(f).has_value();
-
-                if(auto result = Detail::check_throws<E, true>(f))
-                    return *result == message;
-
-                return false;
+            template<typename ArgT>
+            [[nodiscard]] constexpr auto matches_lazy(ArgT&& f) const -> MatchResult {
+                return matches_lazy_chained(std::forward<ArgT>(f), Detail::AlwaysMatcher());
             }
 
             template<typename ChainedMatcherT>
             [[nodiscard]] constexpr auto matches_lazy_chained(auto&& f, ChainedMatcherT const& chained_matcher) const -> MatchResult {
-                static_assert(Detail::IsEagerMatcher<ChainedMatcherT, E>,
-                    "The chained matcher must accept the type (or a super class of) that was detected as thrown");
                 if constexpr( std::is_void_v<E> ) {
                     try {
                         f();
@@ -393,6 +324,8 @@ namespace CatchKit {
                     }
                 }
                 else {
+                    static_assert(Detail::IsEagerMatcher<ChainedMatcherT, E>,
+                        "The chained matcher must accept the type (or a super class of) that was detected as thrown");
                     try {
                         f();
                         return false;
@@ -414,8 +347,11 @@ namespace CatchKit {
 
         template<typename E=void>
         struct DoesntThrow {
-            [[nodiscard]] constexpr auto matches_lazy(auto f) const -> MatchResult {
-                return !Detail::check_throws<E, false>(f).has_value();
+            Throws<E> throws;
+
+            template<typename ArgT>
+            [[nodiscard]] constexpr auto matches_lazy(ArgT&& f) const -> MatchResult {
+                return !throws.matches_lazy(std::forward<ArgT>(f));
             }
             constexpr auto describe() const {
                 return std::format("doesnt_throw()"); // !TBD: type and value?

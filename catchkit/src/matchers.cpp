@@ -10,7 +10,8 @@ namespace CatchKit {
 
     // !TBD: test the others
     static_assert(Detail::IsMatcher<GenericMatchers::Equals<bool>>);
-    // static_assert(Detail::IsEagerMatcher<GenericMatchers::Equals<char[7]>>);
+    static_assert(Detail::IsEagerMatcher<ExceptionMatchers::HasMessage>);
+    static_assert(Detail::IsMatcher<ExceptionMatchers::HasMessage>);
 
     namespace StringMatchers {
 

@@ -15,7 +15,7 @@
 
 TEST("Chained matchers") {
 
-    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message2("Get the message") );
+    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message") );
 
