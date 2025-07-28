@@ -14,4 +14,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCHKIT_REPORT_ON_H
+#endif // CATCHKIT_REPORT_ON_H

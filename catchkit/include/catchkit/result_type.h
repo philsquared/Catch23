@@ -18,4 +18,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCHKIT_RESULT_TYPE_H
+#endif // CATCHKIT_RESULT_TYPE_H

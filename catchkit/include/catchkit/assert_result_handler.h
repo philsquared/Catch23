@@ -26,4 +26,4 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
-#endif //CATCHKIT_ASSERT_RESULT_HANDLER_H
+#endif // CATCHKIT_ASSERT_RESULT_HANDLER_H

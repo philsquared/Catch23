@@ -27,4 +27,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-#endif //CATCHKIT_ASSERTION_CONTEXT_H
+#endif // CATCHKIT_ASSERTION_CONTEXT_H

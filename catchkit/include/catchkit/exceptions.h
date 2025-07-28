@@ -23,4 +23,4 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
-#endif //CATCHKIT_EXCEPTIONS_H
+#endif // CATCHKIT_EXCEPTIONS_H

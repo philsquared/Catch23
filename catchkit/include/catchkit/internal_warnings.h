@@ -53,4 +53,4 @@
 
 #endif
 
-#endif //CATCHKIT_WARNINGS_H
+#endif // CATCHKIT_WARNINGS_H
