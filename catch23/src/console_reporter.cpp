@@ -61,7 +61,7 @@ namespace CatchKit {
                 context.location.file_name(),
                 context.location.line(),
                 context.location.column(),
-                assertion_info.passed() ? "PASSED" : "FAILED");
+                assertion_info.passed() ? "👍 PASSED" : "❌ FAILED");
 
         if( !context.original_expression.empty() )
             std::println( "for expression:" );
