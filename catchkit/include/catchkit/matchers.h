@@ -121,11 +121,11 @@ namespace CatchKit {
         template<typename E=void>
         struct Throws {
             template<Detail::IsEagerMatcher MessageMatcher>
-            auto constexpr with_message_that(MessageMatcher const& message_matcher ) {
+            auto constexpr with_message_that( MessageMatcher const& message_matcher ) {
                 using Detail::operator >>=;
                 return *this >>= HasMessage() >>= message_matcher;
             }
-            auto constexpr with_message(std::string_view message_to_match) {
+            auto constexpr with_message( std::string_view message_to_match ) {
                 using Detail::operator >>=;
                 return *this >>= HasMessage() >>= StringMatchers::Equals(message_to_match);
             }

@@ -100,37 +100,34 @@ namespace {
         }
     };
 
-    // static void doesNotThrow() {}
+    static void doesNotThrow() {}
 
     [[noreturn]] static void throwsSpecialException( int i ) {
         throw SpecialException{ i };
     }
 
-    // [[noreturn]] static void throwsAsInt( int i ) { throw i; }
+    [[noreturn]] static void throwsAsInt( int i ) { throw i; }
 
     [[noreturn]] static void throwsDerivedException() {
         throw DerivedException{};
     }
 
-    // class ExceptionMatcher
-    //     : public Catch::Matchers::MatcherBase<SpecialException> {
-    //     int m_expected;
-    //
-    // public:
-    //     ExceptionMatcher( int i ): m_expected( i ) {}
-    //
-    //     bool match( SpecialException const& se ) const override {
-    //         return se.i == m_expected;
-    //     }
-    //
-    //     std::string describe() const override {
-    //         std::ostringstream ss;
-    //         ss << "special exception has value of " << m_expected;
-    //         return ss.str();
-    //     }
-    // };
-    //
-    // using namespace Catch::Matchers;
+    class ExceptionMatcher {
+        int m_expected;
+
+    public:
+        ExceptionMatcher( int i ): m_expected( i ) {}
+
+        auto match( SpecialException const& se ) const -> CatchKit::MatchResult {
+            return se.i == m_expected;
+        }
+
+        auto describe() const -> std::string {
+            std::ostringstream ss;
+            ss << "special exception has value of " << m_expected;
+            return ss.str();
+        }
+    };
 
 #ifdef __DJGPP__
     static float nextafter( float from, float to ) {
@@ -449,37 +446,27 @@ TEST_CASE( "Vector matcher with elements without !=", "[matchers][vector][approv
     REQUIRE_THAT( lhs, !equals(rhs) );
 }
 
-// !TBD: these need a which_then() chainer for matchers against the exception object itself
-// - once we have that we can add the ExceptionMatcher in
 TEST_CASE( "Exception matchers that succeed",
            "[matchers][exceptions][!throws]" ) {
-    CHECK_THAT( throwsSpecialException( 1 ), throws<SpecialException>() ); // ExceptionMatcher{ 1 }
-    REQUIRE_THAT( throwsSpecialException( 2 ), throws<SpecialException>() ); // ExceptionMatcher{ 1 }
+    CHECK_THAT( throwsSpecialException( 1 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+    REQUIRE_THAT( throwsSpecialException( 2 ), throws<SpecialException>() >>= ExceptionMatcher{ 2 } );
 }
 
-// TEST_CASE( "Exception matchers that fail",
-//            "[matchers][exceptions][!throws][.failing]" ) {
-//     SECTION( "No exception" ) {
-//         CHECK_THROWS_MATCHES(
-//             doesNotThrow(), SpecialException, ExceptionMatcher{ 1 } );
-//         REQUIRE_THROWS_MATCHES(
-//             doesNotThrow(), SpecialException, ExceptionMatcher{ 1 } );
-//     }
-//     SECTION( "Type mismatch" ) {
-//         CHECK_THROWS_MATCHES(
-//             throwsAsInt( 1 ), SpecialException, ExceptionMatcher{ 1 } );
-//         REQUIRE_THROWS_MATCHES(
-//             throwsAsInt( 1 ), SpecialException, ExceptionMatcher{ 1 } );
-//     }
-//     SECTION( "Contents are wrong" ) {
-//         CHECK_THROWS_MATCHES( throwsSpecialException( 3 ),
-//                               SpecialException,
-//                               ExceptionMatcher{ 1 } );
-//         REQUIRE_THROWS_MATCHES( throwsSpecialException( 4 ),
-//                                 SpecialException,
-//                                 ExceptionMatcher{ 1 } );
-//     }
-// }
+TEST_CASE( "Exception matchers that fail",
+           "[matchers][exceptions][!throws][.failing]" ) {
+    SECTION( "No exception" ) {
+        CHECK_THAT( doesNotThrow(), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+        REQUIRE_THAT( doesNotThrow(), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+    }
+    SECTION( "Type mismatch" ) {
+        CHECK_THAT( throwsAsInt( 1 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+        REQUIRE_THAT( throwsAsInt( 1 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+    }
+    SECTION( "Contents are wrong" ) {
+        CHECK_THAT( throwsSpecialException( 3 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+        REQUIRE_THAT( throwsSpecialException( 4 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
+    }
+}
 //
 // TEST_CASE( "Floating point matchers: float", "[matchers][floating-point]" ) {
 //     SECTION( "Relative" ) {
