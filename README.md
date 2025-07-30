@@ -59,6 +59,19 @@ CHECK_THAT( throw std::domain_error("hello"),
     throws<std::domain_error>().with_message_that( starts_with<CaseInsensitive>("heL") && contains("ll") ));
 ```
 
+In the event of a failure in a composite matcher (composed with &&, ||, ! or the monadic bind, >>=) 
+a breakdown of any leaf matchers that contributed to that failure are also printed:
+
+```
+Matchers.tests.cpp:219:5: ❌ FAILED
+for expression:
+  CHECK_THAT( testStringForMatching(), contains( "string" ) && contains( "abc1" ) && contains( "substring" ) && contains( "contains" ) )
+with expansion:
+  (((contains("string") && contains("abc1")) && contains("substring")) && contains("contains")) failed to match because:
+    ✅ contains("string") matched
+    ❌ contains("abc1") failed to match
+```
+
 To write your own matcher you just need either a `match` or `lazy_match` member function (which can be a template) -
 as long as it returns `MatchResult` (which can be constructed from bool) and a `describe` member function which returns a string describing the matcher (much as in Catch2).
 
