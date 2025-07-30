@@ -59,7 +59,7 @@ CHECK_THAT( throw std::domain_error("hello"),
     throws<std::domain_error>().with_message_that( starts_with<CaseInsensitive>("heL") && contains("ll") ));
 ```
 
-To write your own matcher you just need either a `matches` or `matches_lazy` member function (which can be a template) -
+To write your own matcher you just need either a `match` or `lazy_match` member function (which can be a template) -
 as long as it returns `MatchResult` (which can be constructed from bool) and a `describe` member function which returns a string describing the matcher (much as in Catch2).
 
 A full description of writing custom matchers is beyond the scope of this teaser - but there's not a lot more to it.

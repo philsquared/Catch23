@@ -16,11 +16,11 @@ void throwing_function(std::string const& message = {}) {
     throw std::domain_error( message );
 }
 
-TEST("Chained matchers") {
+TEST("Bound matchers") {
 
     // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
-    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message") );
+    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message2") );
 
     std::domain_error err("on the stack");
     CHECK_THAT( err, CatchKit::ExceptionMatchers::HasMessage() >>= contains("stack") );
@@ -217,7 +217,7 @@ TEST_CASE( "Equals", "[matchers]" ) {
 TEST_CASE( "Matchers can be composed with the && operator",
            "[matchers][operators][operator&&]" ) {
     CHECK_THAT( testStringForMatching(),
-                contains( "string" ) && contains( "abc" ) &&
+                contains( "string" ) && contains( "abc1" ) &&
                 contains( "substring" ) && contains( "contains" ) );
 }
 
@@ -726,7 +726,7 @@ struct CheckedTestingMatcher {
     bool matchCalled = false;
     bool matchSucceeds = false;
 
-    auto matches( int ) -> CatchKit::MatchResult {
+    auto match( int ) -> CatchKit::MatchResult {
         matchCalled = true;
         return matchSucceeds;
     }
@@ -765,7 +765,7 @@ struct CheckedTestingGenericMatcher {
     bool matchCalled = false;
     bool matchSucceeds = false;
 
-    auto matches( int const& ) -> CatchKit::MatchResult {
+    auto match( int const& ) -> CatchKit::MatchResult {
         matchCalled = true;
         return matchSucceeds;
     }
@@ -806,7 +806,7 @@ struct EqualsRangeMatcher {
 
     EqualsRangeMatcher(Range const& range): m_range{ range } {}
 
-    auto matches( auto const& other ) const -> CatchKit::MatchResult {
+    auto match( auto const& other ) const -> CatchKit::MatchResult {
         using std::begin;
         using std::end;
 
@@ -1052,7 +1052,7 @@ struct EvilCommaOperatorUsed : std::exception {
 struct EvilMatcher {
     auto describe() const { return "equals: 45"; }
 
-    auto matches( int i ) const -> CatchKit::MatchResult { return i == 45; }
+    auto match( int i ) const -> CatchKit::MatchResult { return i == 45; }
 
     EvilMatcher const* operator&() const { throw EvilAddressOfOperatorUsed(); }
 

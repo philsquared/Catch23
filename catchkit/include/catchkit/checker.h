@@ -58,6 +58,12 @@ namespace CatchKit::Detail
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
+        template<typename ArgT, typename MatcherT> // !TBD Matcher concept
+        constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept {
+            // !TBD: Should we use only this path, or keep the decomp operator path, too?
+            return MatchExprRef{ arg, matcher, this };
+        }
+
         // To kick off an expression decomposition
         template<typename LhsT>
         [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, LhsT&& lhs ) noexcept {
@@ -144,13 +150,17 @@ namespace CatchKit::Detail
             asserter->accept_expr(*this);
     }
 
+    inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Pass : ResultType::MatchFailed; }
+
     // -------
 
-    void Asserter::accept_expr( auto& expr ) noexcept {
-        auto result = expr.evaluate();
+    inline auto to_result_type( ResultType result ) -> ResultType { return result; }
 
+    void Asserter::accept_expr( auto& expr ) noexcept {
+        auto raw_result = expr.evaluate();
+        auto result = to_result_type( raw_result );
         if( checker.result_handler.report_on == ReportOn::AllResults || result != ResultType::Pass ) {
-            checker.result_handler.on_assertion_result( result, expr.expand(result), expr.message );
+            checker.result_handler.on_assertion_result( result, expr.expand( raw_result ), expr.message );
         }
         else {
             checker.result_handler.on_assertion_result( result, {}, expr.message );
@@ -179,7 +189,7 @@ if(checker.should_decompose) { \
 
 #define CATCHKIT_ASSERT_THAT_INTERNAL(macro_name, checker, arg, match_expr) \
 do { using namespace CatchKit::Matchers; \
-    checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)) << [&]{ return arg; }, match_expr; \
+    checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)).that( [&]{ return arg; }, match_expr ); \
 } while( false )
 
 

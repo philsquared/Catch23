@@ -33,6 +33,8 @@ add_library(Catchkit STATIC
         include/catchkit/matchers.h
         include/catchkit/platform.h
         include/catchkit/report_on.h
+        src/internal_matchers.cpp
+        include/catchkit/internal_matchers.h
 )
 
 target_include_directories(Catchkit PUBLIC include)

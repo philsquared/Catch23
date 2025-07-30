@@ -68,13 +68,13 @@ namespace CatchKit {
 
         if( context.macro_name.empty() ) {
             if( !context.original_expression.empty() )
-                println( ColourIntent::OriginalExpression, "\t{}", context.original_expression );
+                println( ColourIntent::OriginalExpression, "  {}", context.original_expression );
         }
         else {
             if( !context.original_expression.empty() )
-                println( ColourIntent::OriginalExpression, "\t{}( {} )", context.macro_name, context.original_expression );
+                println( ColourIntent::OriginalExpression, "  {}( {} )", context.macro_name, context.original_expression );
             else
-                println( ColourIntent::OriginalExpression, "\tfor {}", context.macro_name );
+                println( ColourIntent::OriginalExpression, "  for {}", context.macro_name );
         }
 
         switch( assertion_info.result ) {
@@ -85,15 +85,31 @@ namespace CatchKit {
             std::println("due to a missing exception");
             break;
         default:
-            if(assertion_info.expression_info) {
+            if( assertion_info.expression_info ) {
                 std::println("with expansion:");
-                println(ColourIntent::ReconstructedExpression, "\t{}", *assertion_info.expression_info);
+                auto const& expr_info = *assertion_info.expression_info;
+                print( ColourIntent::ReconstructedExpression, "  {}", expr_info );
+                if( !expr_info.sub_expressions.empty() ) {
+                    std::println( " because:");
+                    for(auto const& sub_expr : expr_info.sub_expressions) {
+                        if( sub_expr.result )
+                            std::print("    ✅ ");
+                        else
+                            std::print("    ❌ ");
+                        print( ColourIntent::ReconstructedExpression, "{} ", sub_expr.description );
+                        if( sub_expr.result )
+                            std::println("matched");
+                        else
+                            std::println("failed to match");
+                    }
+                }
+                std::println();
             }
             break;
         }
         if (!assertion_info.message.empty()) {
             std::println("with message:");
-            println(ColourIntent::SecondaryText, "\t{}", assertion_info.message);
+            println(ColourIntent::SecondaryText, "  {}", assertion_info.message);
         }
     }
 

@@ -3,6 +3,7 @@
 
 int main() {
     CatchKit::ConsoleReporter reporter(CatchKit::ReportOn::FailuresOnly);
+    // CatchKit::ConsoleReporter reporter(CatchKit::ReportOn::AllResults);
 
     std::string only_run_test; // = "section within a generator";
 

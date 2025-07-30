@@ -8,10 +8,16 @@
 #include "operators.h"
 
 #include <string_view>
+#include <vector>
 #include <string>
 #include <format>
 
 namespace CatchKit::Detail {
+
+    struct SubExpressionInfo {
+        std::string description;
+        bool result;
+    };
 
     struct ExpressionInfo
     {
@@ -20,6 +26,8 @@ namespace CatchKit::Detail {
 
         Operators op;
         std::string_view op_str;
+
+        std::vector<SubExpressionInfo> sub_expressions = {};
     };
 
 } // namespace CatchKit::Detail
