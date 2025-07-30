@@ -23,8 +23,6 @@ add_library(Catchkit STATIC
         include/catchkit/expr_ref.h
         src/operator_to_string.cpp
         include/catchkit/operator_to_string.h
-        src/decomposer.cpp
-        include/catchkit/decomposer.h
         src/exceptions.cpp
         include/catchkit/exceptions.h
         src/stringify.cpp

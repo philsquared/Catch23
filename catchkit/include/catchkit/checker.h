@@ -10,7 +10,6 @@
 #include "expr_ref.h"
 #include "internal_warnings.h"
 #include "operator_to_string.h"
-#include "decomposer.h"
 #include "exceptions.h"
 #include "stringify.h"
 

@@ -16,20 +16,6 @@ namespace CatchKit::Detail {
 
     struct Asserter;
 
-    // Holds a unary expression - ie just evaluates to a single value
-    // Also used for the LHS of a binary expression during decomposition
-    template<typename T>
-    struct UnaryExprRef {
-        T& value;
-        Asserter* asserter = nullptr;
-        std::string message = {};
-
-        auto evaluate() -> ResultType;
-        auto expand( ResultType result ) -> ExpressionInfo;
-
-        ~UnaryExprRef();
-    };
-
     // Holds binary expression
     template<typename LhsT, typename RhsT, Operators Op>
     struct BinaryExprRef {
@@ -42,7 +28,70 @@ namespace CatchKit::Detail {
         auto expand( ResultType result ) -> ExpressionInfo;
 
         ~BinaryExprRef();
+
+        [[maybe_unused]] auto&& operator, ( std::string_view message ) noexcept {
+            this->message = message;
+            return *this;
+        }
+
     };
+
+    // Holds a unary expression - ie just evaluates to a single value
+    // Also used for the LHS of a binary expression during decomposition
+    template<typename T>
+    struct UnaryExprRef {
+        T& value;
+        Asserter* asserter;
+        std::string message = {};
+
+        auto evaluate() -> ResultType;
+        auto expand( ResultType result ) -> ExpressionInfo;
+
+        ~UnaryExprRef();
+
+        template<Operators Op, typename RhsT>
+        auto make_binary_expr( RhsT&& rhs ) noexcept {
+            return BinaryExprRef<T, std::remove_reference_t<RhsT>, Op>{ value, rhs, std::exchange(asserter, nullptr) };
+        }
+
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator == ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value == rhs; } );
+            return lhs.template make_binary_expr<Operators::Equals>( std::forward<RhsT>( rhs ) );
+        }
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator != ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value != rhs; } );
+            return lhs.template make_binary_expr<Operators::NotEqualTo>( std::forward<RhsT>( rhs ) );
+        }
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator < ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value < rhs; } );
+            return lhs.template make_binary_expr<Operators::LessThan>( std::forward<RhsT>( rhs ) );
+        }
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator > ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value > rhs; } );
+            return lhs.template make_binary_expr<Operators::GreaterThan>( std::forward<RhsT>( rhs ) );
+        }
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator <= ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value <= rhs; } );
+            return lhs.template make_binary_expr<Operators::LessThanOrEqual>( std::forward<RhsT>( rhs ) );
+        }
+        template<typename RhsT>
+        [[maybe_unused]] friend auto operator >= ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( requires{ lhs.value >= rhs; } );
+            return lhs.template make_binary_expr<Operators::GreaterThanOrEqual>( std::forward<RhsT>( rhs ) );
+        }
+
+        [[maybe_unused]] auto&& operator, ( std::string_view message ) noexcept {
+            this->message = message;
+            return *this;
+        }
+
+    };
+
 
     struct MatchResult;
 
