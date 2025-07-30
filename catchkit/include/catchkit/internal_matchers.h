@@ -60,8 +60,13 @@ namespace CatchKit {
         template<typename ArgT, typename MatcherT>
         auto invoke_matcher( MatcherT& matcher, ArgT&& arg ) -> MatchResult {
             if constexpr( IsLazyMatcher<MatcherT> ) {
-                static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
-                return matcher.lazy_match( arg ).set_address(&matcher);
+                if constexpr( std::invocable<ArgT> )
+                // static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
+                    return matcher.lazy_match( arg ).set_address(&matcher);
+                else if constexpr( IsEagerMatcher<MatcherT> )
+                    return matcher.match( arg ).set_address( &matcher );
+                else
+                    static_assert( false, "Lazy matchers must be matched against lambdas" );
             }
             else if constexpr( IsEagerMatcher<MatcherT> ) {
                 if constexpr( std::invocable<ArgT> )
@@ -124,6 +129,7 @@ namespace CatchKit {
             auto match( auto const& value ) const -> MatchResult {
                 return match_common( value );
             }
+            // !TBD: only include lazy_match if the base matcher is lazy
             auto lazy_match( auto const& value ) const -> MatchResult {
                 return match_common( value );
             }

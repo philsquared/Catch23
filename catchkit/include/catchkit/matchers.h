@@ -26,6 +26,22 @@ namespace CatchKit {
                 return std::format("equals( {} )", stringify(match_value));
             }
         };
+
+        template<typename PredicateT>
+        struct MatchesPredicate {
+            PredicateT pred;
+            std::string description;
+
+            explicit MatchesPredicate( PredicateT&& pred, std::string description )
+            : pred( std::move(pred) ), description( std::move(description) ) {}
+
+            auto match( auto const& arg ) const -> MatchResult {
+                return pred(arg);
+            }
+            auto describe() const -> std::string {
+                return description;
+            }
+        };
     }
 
     namespace StringMatchers {
@@ -241,6 +257,11 @@ namespace CatchKit {
 
         template<typename E=void>
         using throws = ExceptionMatchers::Throws<E>;
+
+        template<typename PredicateT>
+        auto matches_predicate(PredicateT&& pred, std::string description = "predicate") {
+            return GenericMatchers::MatchesPredicate<PredicateT>(std::forward<PredicateT>(pred), std::move(description));
+        }
 
     } // namespace Matchers
 
