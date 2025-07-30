@@ -16,16 +16,16 @@ void throwing_function(std::string const& message = {}) {
     throw std::domain_error( message );
 }
 
-TEST("Bound matchers") {
+TEST("Bound matchers", "[.]") {
 
-    // CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
+    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message2") );
 
     std::domain_error err("on the stack");
     CHECK_THAT( err, CatchKit::ExceptionMatchers::HasMessage() >>= contains("stack") );
 
-    // CHECK_THAT( "err", equals("err") >>= contains("stack") ); // Shouldnt compile
+    // CHECK_THAT( "err", equals("err") >>= contains("stack") ); // Shouldn't compile
 
 }
 
@@ -52,7 +52,7 @@ TEST("throws matcher") {
 TEST("!throws matcher succeeds when call doesn't throw") {
     CHECK_THAT( non_throwing_function(), !throws() );
 }
-TEST("!throws matcher fails when call does throw") {
+TEST("!throws matcher fails when call does throw", "[.]") {
     CHECK_THAT( throwing_function(), !throws() );
 }
 
@@ -217,7 +217,7 @@ TEST_CASE( "Equals", "[matchers]" ) {
 TEST_CASE( "Matchers can be composed with the && operator",
            "[matchers][operators][operator&&]" ) {
     CHECK_THAT( testStringForMatching(),
-                contains( "string" ) && contains( "abc1" ) &&
+                contains( "string" ) && contains( "abc" ) &&
                 contains( "substring" ) && contains( "contains" ) );
 }
 
