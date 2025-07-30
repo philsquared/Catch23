@@ -76,8 +76,8 @@ namespace {
         return "some completely different text that contains one common word";
     }
 
-    // static bool alwaysTrue( int ) { return true; }
-    // static bool alwaysFalse( int ) { return false; }
+    static bool alwaysTrue( int ) { return true; }
+    static bool alwaysFalse( int ) { return false; }
 
 #ifdef _MSC_VER
 #    pragma warning( disable : 4702 ) // Unreachable code -- MSVC 19 (VS 2015)
@@ -606,26 +606,26 @@ TEST_CASE( "Exception matchers that fail",
 //     REQUIRE_THAT( static_cast<double>(NAN), IsNaN() );
 // }
 //
-// TEST_CASE( "Arbitrary predicate matcher", "[matchers][generic]" ) {
-//     SECTION( "Function pointer" ) {
-//         REQUIRE_THAT( 1, Predicate<int>( alwaysTrue, "always true" ) );
-//         REQUIRE_THAT( 1, !Predicate<int>( alwaysFalse, "always false" ) );
-//     }
-//     SECTION( "Lambdas + different type" ) {
-//         REQUIRE_THAT( "Hello olleH",
-//                       Predicate<std::string>(
-//                           []( std::string const& str ) -> bool {
-//                               return str.front() == str.back();
-//                           },
-//                           "First and last character should be equal" ) );
-//
-//         REQUIRE_THAT(
-//             "This wouldn't pass",
-//             !Predicate<std::string>( []( std::string const& str ) -> bool {
-//                 return str.front() == str.back();
-//             } ) );
-//     }
-// }
+TEST_CASE( "Arbitrary predicate matcher", "[matchers][generic]" ) {
+    SECTION( "Function pointer" ) {
+        REQUIRE_THAT( 1, matches_predicate( alwaysTrue, "always true" ) );
+        REQUIRE_THAT( 1, !matches_predicate( alwaysFalse, "always false" ) );
+    }
+    SECTION( "Lambdas + different type" ) {
+        REQUIRE_THAT( "Hello olleH",
+                      matches_predicate(
+                          []( std::string const& str ) -> bool {
+                              return str.front() == str.back();
+                          },
+                          "First and last character should be equal" ) );
+
+        REQUIRE_THAT(
+            "This wouldn't pass",
+            !matches_predicate( []( std::string const& str ) -> bool {
+                return str.front() == str.back();
+            } ) );
+    }
+}
 //
 // TEST_CASE( "Regression test #1", "[matchers][vector]" ) {
 //     // At some point, UnorderedEqualsMatcher skipped
@@ -636,12 +636,12 @@ TEST_CASE( "Exception matchers that fail",
 //     CHECK_THAT( actual, !UnorderedEquals( expected ) );
 // }
 //
-// TEST_CASE( "Predicate matcher can accept const char*",
-//            "[matchers][compilation]" ) {
-//     REQUIRE_THAT( "foo", Predicate<const char*>( []( const char* const& ) {
-//                       return true;
-//                   } ) );
-// }
+TEST_CASE( "Predicate matcher can accept const char*",
+           "[matchers][compilation]" ) {
+    REQUIRE_THAT( "foo", matches_predicate( []( const char* const& ) {
+                      return true;
+                  } ) );
+}
 //
 // TEST_CASE( "Vector Approx matcher", "[matchers][approx][vector]" ) {
 //     using Catch::Matchers::Approx;
