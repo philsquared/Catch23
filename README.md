@@ -59,7 +59,7 @@ CHECK_THAT( throw std::domain_error("hello"),
     throws<std::domain_error>().with_message_that( starts_with<CaseInsensitive>("heL") && contains("ll") ));
 ```
 
-In the event of a failure in a composite matcher (composed with &&, ||, ! or the monadic bind, >>=) 
+In the event of a failure in a composite matcher (composed with `&&`, `||`, `!` or the monadic bind, `>>=`) 
 a breakdown of any leaf matchers that contributed to that failure are also printed:
 
 ```
@@ -105,7 +105,7 @@ check() << "hello", starts_with("hell") && ends_with("lo");
 require.handle_unexpected_exceptions( [&]{ require("this_throws()") << this_throws(); } );
 ```
 
-The first two examples work as-is, but any unexpected exceptions are not recoverable (the cancel the test),
+The first two examples work as-is, but any unexpected exceptions are not recoverable (they cancel the test),
 and we don't get the original expression captured as a string. The final example shows how we can get them back:
 `require.handle_unexpected_exceptions` gives us the exception handling, 
 and the string passed to the inner `require()` call serves the role of the expression string capture.
@@ -184,7 +184,7 @@ The features are there and working, but need more testing and fleshing out.
 Currently, the generators interface is looking like this (same idea as Catch2, but more streamlined implementation):
 
 ```c++
-auto value = GENERATE( 100, values_of<int>(.up_to=42) );
+auto value = GENERATE( 100, values_of<int>{.up_to=42} );
 ```
 
 The `100,` syntax is under consideration. Without it the default is 100 values.
@@ -203,7 +203,7 @@ struct values_of<std::string> {
 
 // ...
 
-auto str = GENERATE( values_of<std::string>(.max_len=255) );
+auto str = GENERATE( values_of<std::string>{.max_len=255} );
 ```
 
 The rest is, as they say, in the details...
