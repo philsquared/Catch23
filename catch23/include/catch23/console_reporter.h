@@ -18,7 +18,7 @@ namespace CatchKit {
         Counters assertion_totals;
 
     public:
-        explicit ConsoleReporter( ReportOn what_to_report_on )
+        explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailuresOnly )
         : what_to_report_on( what_to_report_on )
         {}
 
