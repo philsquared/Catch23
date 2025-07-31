@@ -14,6 +14,7 @@ add_executable(Catch23Test src/main.cpp src/UsageTests/Condition.tests.cpp
         src/UsageTests/Matchers.tests.cpp
         src/IntrospectionTests/ExecutionNodes.tests.cpp
         src/UsageTests/Section.tests.cpp
+        src/UsageTests/ToStringVector.tests.cpp
         src/UsageTests/Generator.tests.cpp
         src/IntrospectionTests/Meta.tests.cpp)
 
