@@ -133,6 +133,21 @@ CHECK_THAT( ints, equals(std::vector{1, 2, 3}),
     "It's as easy as that" );
 ```
 
+`CAPTURE` is also supported and works as in Catch2 (including being able to pass multiple variables), 
+except that it also captures the _type_ of the variable:
+
+```c++
+int x = 42;
+float y = 3.141;
+CAPTURE(x, y);
+```
+
+```
+captured variables:
+x : int = 42
+y : float = 3.140000
+```
+
 ## Separation of concerns
 
 Catch23 is actually two (will possibly be three) libraries!
@@ -147,6 +162,19 @@ Some of this maybe further split out but that is not clear, yet.
 At time of writing the test case support (with automatic registration) is there (you can use `TEST` or `TEST_CASE`).
 Tags are supported, but not yet parsed (except for "[." to hide tests).
 There is a minimal test runner and a basic ConsoleReporter. There is no command line interface.
+
+## In the main
+
+The test runner is minimal for now, and command line interface is non-existent. 
+But you can have main generated for you - at least a minimal version. Just put this in one implementation (cpp) file:
+
+```c++
+#define CATCH23_IMPL_MIN_MAIN
+#include "catch23.h"
+```
+
+If you use `CATCH23_IMPL`, instead, then you'll need to write your own main, and set up the test runner yourself. 
+Take a look at what `CATCH23_IMPL_MIN_MAIN` generates for ideas.
 
 ## What's next
 
