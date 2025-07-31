@@ -178,7 +178,8 @@ class LibPacker:
             f.write(f"#define {guard_name}\n\n")
             f.write("// Packed header\n\n")
             f.write("// System includes (for headers):\n")
-            for include in self.header_system_includes:
+            header_system_includes = sorted(list(self.header_system_includes))
+            for include in header_system_includes:
                 f.write(f"#include <{include}>\n")
             f.write("\n")
 
@@ -190,7 +191,7 @@ class LibPacker:
             f.write("#ifdef CATCHKIT_IMPL\n\n")
 
             f.write("// System includes (for impl):\n")
-            system_includes = self.src_system_includes.difference(self.header_system_includes)
+            system_includes = sorted(list(self.src_system_includes.difference(self.header_system_includes)))
             for include in system_includes:
                 f.write(f"#include <{include}>\n")
             f.write("\n")
