@@ -20,6 +20,7 @@ namespace CatchKit::Detail
         ResultDisposition result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
 
+        std::vector<VariableCapture*> variable_captures;
         Counters assertions;
 
     public:
@@ -30,6 +31,9 @@ namespace CatchKit::Detail
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
+
+        void add_variable_capture( VariableCapture* capture ) override;
+        void remove_variable_capture( VariableCapture* capture ) override;
 
         [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
         [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }

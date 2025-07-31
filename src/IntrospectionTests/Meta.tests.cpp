@@ -7,7 +7,6 @@
 
 #include "catchkit/matchers.h"
 
-
 TEST("A test that can run tests") {
 
     auto results = LOCAL_TEST() {
@@ -36,5 +35,14 @@ TEST("A test that can run tests") {
     CHECK( result2.expression_info->lhs == "2" );
     CHECK( result2.expression_info->rhs == "2" );
     CHECK( result2.expression_info->op == CatchKit::Detail::Operators::Equals );
+}
 
+TEST("Variables can be captured", "[.]") {
+    // !TBD: When we have richer reporting in the local test interface use that to check this
+    int x = 7, y = 42;
+    std::string s = "hello world";
+    float f = 3.14;
+    CAPTURE(x, y, s, f);
+
+    FAIL();
 }

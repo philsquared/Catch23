@@ -5,6 +5,8 @@
 #include "catch23/test_result_handler.h"
 #include "catchkit/assertion_context.h"
 
+#include "catchkit/variable_capture.h"
+
 #include <print>
 #include <cassert>
 
@@ -41,7 +43,20 @@ namespace CatchKit::Detail {
                         current_context.original_expression = current_context.original_expression.substr( 0, pos-3 );
                 }
             }
-            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, std::string(message) } );
+
+            std::string full_message(message);
+
+            // Add in any captured variables
+            // !TBD: improve formatting - or should we pass this through in a more fine grained way to the reporter?
+            if( !variable_captures.empty() ) {
+                if( !full_message.empty() )
+                    full_message += "\nwith";
+                full_message += "captured variables:";
+                for( auto var : variable_captures ) {
+                    full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
+                }
+            }
+            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, full_message } );
         }
     }
 
@@ -49,6 +64,13 @@ namespace CatchKit::Detail {
         if( last_result != ResultType::Pass && result_disposition == ResultDisposition::Abort ) {
             throw TestCancelled();
         }
+    }
+
+    void TestResultHandler::add_variable_capture( VariableCapture* capture ) {
+        variable_captures.push_back(capture);
+    }
+    void TestResultHandler::remove_variable_capture( VariableCapture* capture ) {
+        std::erase(variable_captures, capture);
     }
 
     auto get_execution_nodes_from_result_handler(ResultHandler& handler) -> ExecutionNodes& {

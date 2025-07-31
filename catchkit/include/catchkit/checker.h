@@ -12,6 +12,7 @@
 #include "operator_to_string.h"
 #include "exceptions.h"
 #include "stringify.h"
+#include "variable_capture.h"
 
 #include <utility>
 
