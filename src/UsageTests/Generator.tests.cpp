@@ -44,6 +44,15 @@ TEST("section within a generator", "[.]") {
     CHECK(results.size() <= 20);
 }
 
+TEST("vector generators") {
+    auto v = GENERATE(10,
+        values_of<std::vector<int>>{
+            .value_generator={.up_to=64}
+        } );
+
+    PASS();
+}
+
 #include "catch23/catch2_compat.h"
 
 // From Phil's Accelerated TDD workshop

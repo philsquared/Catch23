@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <source_location>
+#include <algorithm>
 
 namespace CatchKit {
 
@@ -94,6 +95,21 @@ namespace CatchKit {
         };
         template<typename T>
         from_values(std::initializer_list<T> values) -> from_values<T>;
+
+        // Vector generators
+
+        template<typename T>
+        struct values_of<std::vector<T>> {
+            size_t min_size = 0;
+            size_t max_size = 65;
+            values_of<T> value_generator;
+
+            [[nodiscard]] auto generate() const {
+                std::vector<T> values( generate_random_number(min_size, max_size) );
+                std::ranges::generate(values, [generator=value_generator]{ return generator.generate(); });
+                return values;
+            }
+        };
 
     } // namespace Detail
 
