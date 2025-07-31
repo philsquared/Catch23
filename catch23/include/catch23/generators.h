@@ -59,6 +59,14 @@ namespace CatchKit {
             auto shrink(T value, int strategy_index) -> std::optional<T>;
         };
 
+        template<IsBuiltInNumeric T>
+        struct inclusive_range_of {
+            T from {};
+            T to = std::numeric_limits<T>::max();
+
+            [[nodiscard]] auto generate_at(size_t index) const { return from + index; }
+            auto size() const { return to - from; }
+        };
 
         // String generator:
 
@@ -120,6 +128,7 @@ namespace CatchKit {
         // Built in matchers
         using Detail::values_of;
         using Detail::from_values;
+        using Detail::inclusive_range_of;
 
     } // namespace Generators
 
