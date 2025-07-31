@@ -119,7 +119,8 @@ class Packer:
 
 class LibPacker:
     def __init__(self):
-        self.system_includes = set()
+        self.src_system_includes = set()
+        self.header_system_includes = set()
         self.local_includes_seen = set()
         self.src_packers = []
         self.include_packers = []
@@ -133,7 +134,10 @@ class LibPacker:
 
     def _parse_prefix(self, packer: Packer, is_header: bool):
         packer.read_prefix(is_header)
-        self.system_includes = self.system_includes.union(set(packer.system_includes))
+        if is_header:
+            self.header_system_includes = self.header_system_includes.union(set(packer.system_includes))
+        else:
+            self.src_system_includes = self.src_system_includes.union(set(packer.system_includes))
         for include_spec in packer.local_includes:
             match include_spec.split('/'):
                 case [local_header]:
@@ -174,8 +178,8 @@ class LibPacker:
             f.write(f"#ifndef {guard_name}\n")
             f.write(f"#define {guard_name}\n\n")
             f.write("// Packed header\n\n")
-            f.write("// System includes:\n")
-            for include in self.system_includes:
+            f.write("// System includes (for headers):\n")
+            for include in self.header_system_includes:
                 f.write(f"#include <{include}>\n")
             f.write("\n")
 
@@ -184,11 +188,21 @@ class LibPacker:
                 packer.copy_to(f)
 
             f.write("// From source files:\n")
+            f.write("#ifdef CATCHKIT_IMPL\n\n")
+
+            f.write("// System includes (for impl):\n")
+            for include in self.header_system_includes:
+                f.write(f"#include <{include}>\n")
+            f.write("\n")
+
             for packer in self.src_packers:
                 packer.copy_to(f)
 
+            f.write("#endif // CATCHKIT_IMPL\n")
+
             f.write(f"\n#endif // {guard_name}\n")
 
+        print(f"Written: {to_filename}")
 
 lib_packer = LibPacker()
 lib_packer.parse_prefixes(from_dir="catchkit/src")
