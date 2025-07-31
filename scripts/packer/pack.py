@@ -100,7 +100,6 @@ class Packer:
         for i in range(0, self.main_content_starts_at):
             next(reader)
 
-        # line = next(reader) # !DBG
         guard_seen = False
 
         for line in reader:
@@ -191,7 +190,8 @@ class LibPacker:
             f.write("#ifdef CATCHKIT_IMPL\n\n")
 
             f.write("// System includes (for impl):\n")
-            for include in self.header_system_includes:
+            system_includes = self.src_system_includes.difference(self.header_system_includes)
+            for include in system_includes:
                 f.write(f"#include <{include}>\n")
             f.write("\n")
 
