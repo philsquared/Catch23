@@ -2,8 +2,8 @@
 // Created by Phil Nash on 31/07/2025.
 //
 
-#include "variable_capture.h"
-#include "checker.h"
+#include "catchkit/variable_capture.h"
+#include "catchkit/checker.h"
 
 namespace CatchKit::Detail {
 
