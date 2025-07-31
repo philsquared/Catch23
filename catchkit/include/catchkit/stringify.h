@@ -61,6 +61,9 @@ namespace CatchKit {
     #endif
 
     template<typename T>
+    [[nodiscard]] auto constexpr stringify(T const& value );
+
+    template<typename T>
     struct Stringifier {
         [[nodiscard]] static auto stringify( T const& value ) -> std::string {
 
@@ -86,33 +89,28 @@ namespace CatchKit {
         }
     };
 
-    template<>
-    struct Stringifier<std::string> {
-        [[nodiscard]] static constexpr auto stringify( std::string const& value ) -> std::string { return value; }
-        [[nodiscard]] static constexpr auto stringify( std::string&& value ) -> std::string { return std::move(value); }
-    };
-    template<>
-    struct Stringifier<std::string_view> {
-        [[nodiscard]] static constexpr auto stringify( std::string_view value ) -> std::string { return std::string( value ); }
-    };
-    template<>
-    struct Stringifier<char const*> {
-        [[nodiscard]] static constexpr auto stringify( char const* value ) -> std::string {
-            return value ? std::string( value ) : std::string("nullptr");
-        }
-    };
-    template<size_t size>
-    struct Stringifier<char[size]> {
-        [[nodiscard]] static constexpr auto stringify( char const* value ) -> std::string {
-            return value;
-        }
-    };
-
     template<typename T>
     requires requires{ !std::same_as<std::decay_t<T>, char>; }
     struct Stringifier<T*> {
         [[nodiscard]] static constexpr auto stringify( T* value ) -> std::string {
             return value ? Detail::pointer_to_string( value ) : std::string("nullptr");
+        }
+    };
+
+    template<typename T, typename A>
+    struct Stringifier<std::vector<T, A>> {
+        [[nodiscard]] static constexpr auto stringify( std::vector<T, A> const& values ) -> std::string {
+            std::string s = "[";
+            bool first = true;
+            for(auto&& val : values) {
+                if( !first )
+                    s += ", ";
+                else
+                    first = false;
+                s += CatchKit::stringify( val );
+            }
+            s += "]";
+            return s;
         }
     };
 
@@ -130,6 +128,8 @@ namespace CatchKit {
             return std::to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
             return "nullptr";
+        else if constexpr( std::is_convertible_v<T, std::string> )
+            return std::format("\"{}\"", value);
         else
             return Stringifier<T>::stringify( value );
     }
