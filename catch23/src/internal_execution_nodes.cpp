@@ -45,6 +45,7 @@ namespace CatchKit::Detail {
         state = States::Entered;
         set_current_node(this);
     }
+
     auto ExecutionNode::exit(bool early) -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
@@ -52,6 +53,7 @@ namespace CatchKit::Detail {
             assert(parent->state == States::Entered || parent->state == States::EnteredButDoneForThisLevel);
             parent->state = States::EnteredButDoneForThisLevel;
         }
+        bool all_children_are_complete = true;
         for(auto const& child : children) {
             if( child->state == States::Entered || child->state == States::EnteredButDoneForThisLevel )
                 child->exit();
@@ -60,6 +62,9 @@ namespace CatchKit::Detail {
             }
             if( child->state == States::ExitedEarly )
                 child->state = States::Completed;
+
+            if( child->state != States::Completed )
+                all_children_are_complete = false;
         }
         if( get_current_node() == this ) {
             set_current_node(parent);
@@ -67,6 +72,13 @@ namespace CatchKit::Detail {
 
         if( state == States::HasIncompleteChildren )
             return state;
+
+        if( state == States::EnteredButDoneForThisLevel ) {
+            if( !all_children_are_complete )
+                return state;
+        }
+
+        assert( state == States::Entered || state == States::EnteredButDoneForThisLevel );
 
         if( ++current_index != size ) {
             reset_children();

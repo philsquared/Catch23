@@ -64,8 +64,8 @@ namespace CatchKit {
             T from {};
             T to = std::numeric_limits<T>::max();
 
-            [[nodiscard]] auto generate_at(size_t index) const { return from + index; }
-            auto size() const { return to - from; }
+            [[nodiscard]] auto generate_at(size_t index) const { return from + static_cast<T>(index); }
+            auto size() const { assert(to > from); return 1 + to - from; }
         };
 
         // String generator:
