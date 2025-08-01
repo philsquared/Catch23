@@ -46,3 +46,27 @@ TEST("Variables can be captured", "[.]") {
 
     FAIL();
 }
+
+struct NonConstEqualsNonConstRef {
+    auto operator==(NonConstEqualsNonConstRef&) { return true; }
+};
+struct NonConstEqualsValue {
+    auto operator==(NonConstEqualsValue) { return true; }
+};
+
+// Note that this is not valid, so is not supported:
+struct NonConstEqualsConstRef {
+    auto operator==(NonConstEqualsConstRef const&) { return true; }
+};
+
+TEST("Types with non-const equality operators can be used") {
+    SECTION("with non-const-ref arg") {
+        NonConstEqualsNonConstRef nce;
+        CHECK(nce ==nce);
+    }
+    SECTION("with value arg") {
+        NonConstEqualsValue nce;
+        CHECK(nce ==nce);
+    }
+}
+
