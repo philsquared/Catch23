@@ -20,7 +20,10 @@ TEST("Bound matchers", "[.]") {
 
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
-    CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage() >>= contains("message2") );
+    CHECK_THAT( throw std::domain_error("Get the message"),
+                    throws<std::domain_error>()
+                        >>= CatchKit::ExceptionMatchers::HasMessage()
+                        >>= contains("message2") );
 
     std::domain_error err("on the stack");
     CHECK_THAT( err, CatchKit::ExceptionMatchers::HasMessage() >>= contains("stack") );
