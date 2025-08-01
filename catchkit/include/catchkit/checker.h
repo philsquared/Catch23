@@ -65,12 +65,10 @@ namespace CatchKit::Detail
         }
 
         // To kick off an expression decomposition
-        template<typename LhsT>
-        [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, LhsT&& lhs ) noexcept {
+        [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
-        template<typename LhsT>
-        [[maybe_unused]] friend constexpr auto operator << ( Asserter&& asserter, LhsT&& lhs ) noexcept {
+        [[maybe_unused]] friend constexpr auto operator << ( Asserter&& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
     };
