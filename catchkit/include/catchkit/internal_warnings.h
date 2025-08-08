@@ -17,6 +17,7 @@
 #define CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER     _Pragma( "clang diagnostic ignored \"-Wunused-parameter\"" )
 #define CATCHKIT_WARNINGS_SUPPRESS_FLOAT_RANGE          _Pragma( "clang diagnostic ignored \"-Wliteral-range\"" )
 #define CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION      _Pragma( "clang diagnostic ignored \"-Wnull-conversion\"" )
+#define CATCHKIT_WARNINGS_SUPPRESS_SHADOW               _Pragma( "clang diagnostic ignored \"-Wshadow\"" )
 
 #elif defined(__GNUC__) && !defined(__ICC) && !defined(__CUDACC__) // GCC
 #define CATCHKIT_WARNINGS_SUPPRESS_START                _Pragma( "GCC diagnostic push" )
@@ -28,6 +29,7 @@
 #define CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER     _Pragma( "GCC diagnostic ignored \"-Wunused-parameter\"" )
 #define CATCHKIT_WARNINGS_SUPPRESS_FLOAT_RANGE
 #define CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
+#define CATCHKIT_WARNINGS_SUPPRESS_SHADOW               _Pragma( "GCC diagnostic ignored \"-Wshadow\"" )
 
 #elif define(_MSC_VER)
 #define CATCHKIT_WARNINGS_SUPPRESS_START                __pragma( warning(push) )
@@ -39,6 +41,7 @@
 #define CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER
 #define CATCHKIT_WARNINGS_SUPPRESS_FLOAT_RANGE
 #define CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
+#define CATCHKIT_WARNINGS_SUPPRESS_SHADOW
 
 #else
 // !TBD Other compilers
@@ -50,6 +53,7 @@
 #define CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER
 #define CATCHKIT_WARNINGS_SUPPRESS_FLOAT_RANGE
 #define CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
+#define CATCHKIT_WARNINGS_SUPPRESS_SHADOW
 
 #endif
 

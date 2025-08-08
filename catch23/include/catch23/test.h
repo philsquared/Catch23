@@ -16,6 +16,7 @@
     static void fname(CatchKit::Checker&, CatchKit::Checker&); \
     namespace{ CatchKit::Detail::AutoReg CATCHKIT_INTERNAL_UNIQUE_NAME( autoRegistrar ) ( { &fname, { std::source_location::current(), __VA_ARGS__ } } ); } /* NOLINT */ \
     CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER \
+    CATCHKIT_WARNINGS_SUPPRESS_SHADOW \
     static void fname(CatchKit::Checker& check, CatchKit::Checker& require ) \
 
 #define TEST(...) CATCH23_TEST_INTERNAL(CATCHKIT_INTERNAL_UNIQUE_NAME(catch23_test), __VA_ARGS__)
