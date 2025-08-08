@@ -21,12 +21,12 @@ namespace CatchKit::Detail {
     }
 
 
-    auto values_of<std::string>::generate() const -> std::string {
-        auto len = generate_random_number(min_len, max_len);
+    auto values_of<std::string>::generate( RandomNumberGenerator& rng ) const -> std::string {
+        auto len = rng.generate( min_len, max_len );
         std::string str;
         str.resize(len);
-        for(size_t i = 0; i < len; ++i)
-            str[i] = charset[generate_random_number<size_t>(0, charset.length()-1)];
+        for( std::size_t i = 0; i < len; ++i )
+            str[i] = charset[rng.generate<std::size_t>( 0, charset.length()-1) ];
         return str;
     }
 

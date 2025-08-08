@@ -7,6 +7,7 @@
 
 #include "internal_execution_nodes.h"
 #include "test_result_handler.h"
+#include "random.h"
 
 #include "catchkit/checker.h"
 
@@ -17,17 +18,19 @@ namespace CatchKit {
 
     namespace Detail {
 
-        template<typename G>
-        concept IsSingleValueGenerator = requires(G g){ { g.generate() }; };
+        class RandomNumberGenerator;
 
         template<typename G>
-        concept IsMultiValueGenerator = requires(G const& g, size_t pos){ { g.generate_at(pos) }; };
+        concept IsSingleValueGenerator = requires(G g, RandomNumberGenerator& rng){ { g.generate(rng) }; };
 
         template<typename G>
-        concept IsSizedGenerator = requires(G const& g, size_t pos){ { g.size(pos) } -> std::same_as<size_t>; };
+        concept IsMultiValueGenerator = requires(G const& g, std::size_t pos, RandomNumberGenerator& rng){ { g.generate_at(pos, rng) }; };
 
         template<typename G>
-        auto size_of(G const& generator, size_t default_size = 100) {
+        concept IsSizedGenerator = requires(G const& g, std::size_t pos){ { g.size(pos) } -> std::same_as<std::size_t>; };
+
+        template<typename G>
+        auto size_of(G const& generator, std::size_t default_size = 100) {
             if constexpr( IsMultiValueGenerator<G> ) {
                 static_assert( !IsSizedGenerator<G>, "Generator has generate_at() but not size()");
                 return generator.size();
@@ -37,30 +40,33 @@ namespace CatchKit {
         }
 
         template<typename G>
-        auto generate_at(G const& generator, size_t pos) {
+        auto generate_at(G const& generator, std::size_t pos, RandomNumberGenerator& rng) {
             if constexpr( IsSingleValueGenerator<G> )
-                return generator.generate();
+                return generator.generate(rng);
             else if constexpr( IsMultiValueGenerator<G> )
-                return generator.generate_at(pos);
+                return generator.generate_at(pos, rng);
             else
-                return generate_value(generator);
+                static_assert(false, "not a generator");
         }
 
-        constexpr size_t default_repetitions = 100; // Make this runtime configurable?
+        constexpr std::size_t default_repetitions = 100; // Make this runtime configurable?
+
+        auto dummy_random_number_generator() -> RandomNumberGenerator&;
 
         // Typed generator holder node
         template<typename T>
         class GeneratorNode : public ExecutionNode {
             T generator;
-            using GeneratedType = decltype(generate_at(generator, 0));
+            using GeneratedType = decltype(generate_at(generator, 0, dummy_random_number_generator()));
             std::vector<GeneratedType> values;
 
         public:
             explicit GeneratorNode( NodeId&& id, T&& gen )
             : ExecutionNode(std::move(id), size_of(gen, default_repetitions)), generator(std::move(gen)) {
                 values.reserve(size);
-                for(size_t i=0; i < size; ++i) {
-                    values.emplace_back(generate_at(generator, i));
+                RandomNumberGenerator rng;
+                for(std::size_t i=0; i < size; ++i) {
+                    values.emplace_back(generate_at(generator, i, rng));
                 }
             }
 

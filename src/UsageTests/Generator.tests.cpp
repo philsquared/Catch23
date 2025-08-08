@@ -152,7 +152,7 @@ TEST_CASE("#1913 - GENERATEs can share a line", "[regression][generators]") {
 namespace {
     struct throwing_generator {
 
-        auto generate() const -> int {
+        auto generate(CatchKit::Detail::RandomNumberGenerator&) const -> int {
             throw std::logic_error("This should, actually, happen");
         }
     };

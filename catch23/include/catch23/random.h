@@ -16,16 +16,21 @@ namespace CatchKit::Detail {
     template<typename T>
     concept IsBuiltInNumeric = std::integral<T> || std::floating_point<T>;
 
-    // Returns a number between from and to, inclusive
-    template<IsBuiltInNumeric NumberT>
-    auto generate_random_number(NumberT from, NumberT to) -> NumberT {
+    class RandomNumberGenerator {
         std::random_device random_device;
-        std::mt19937 mt(random_device());
-        if constexpr(std::integral<NumberT>)
-            return std::uniform_int_distribution<NumberT>(from, to)(mt);
-        else
-            return std::uniform_real_distribution<NumberT>(from, to)(mt);
-    }
+        std::mt19937 mt; // !TBD Use Pcg?
+    public:
+        RandomNumberGenerator() : mt(random_device()) {}
+
+        // Returns a number between from and to, inclusive
+        template<IsBuiltInNumeric NumberT>
+        auto generate(NumberT from, NumberT to) -> NumberT {
+            if constexpr(std::integral<NumberT>)
+                return std::uniform_int_distribution<NumberT>(from, to)(mt);
+            else
+                return std::uniform_real_distribution<NumberT>(from, to)(mt);
+        }
+    };
 
 } // namespace CatchKit::Detail
 

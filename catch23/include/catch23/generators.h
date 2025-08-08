@@ -27,16 +27,16 @@ namespace CatchKit {
 
         template<typename T>
         struct multiple_values {
-            size_t multiple;
+            std::size_t multiple;
             values_of<T> value_generator;
 
-            auto generate_at(size_t) const { return value_generator.generate(); }
+            auto generate_at( std::size_t, RandomNumberGenerator& rng ) const { return value_generator.generate(rng); }
             auto size() const { return multiple; }
         };
 
 
         template<typename T>
-        constexpr auto operator, (size_t multiple, values_of<T>&& values) {
+        constexpr auto operator, ( std::size_t multiple, values_of<T>&& values ) {
             return multiple_values<T>{ multiple, std::move(values) };
         }
 
@@ -48,7 +48,7 @@ namespace CatchKit {
             T from {};
             T up_to = std::numeric_limits<T>::max();
 
-            [[nodiscard]] auto generate() const { return generate_random_number(from, up_to); }
+            [[nodiscard]] auto generate( RandomNumberGenerator& rng ) const { return rng.generate(from, up_to); }
 
             // Given a starting value, try different strategies to produce a simpler value that might
             // also fail. If it still passes this function will be called again with an incremented
@@ -64,7 +64,7 @@ namespace CatchKit {
             T from {};
             T to = std::numeric_limits<T>::max();
 
-            [[nodiscard]] auto generate_at(size_t index) const { return from + static_cast<T>(index); }
+            [[nodiscard]] auto generate_at( std::size_t index, RandomNumberGenerator& ) const { return from + static_cast<T>(index); }
             auto size() const { assert(to > from); return 1 + to - from; }
         };
 
@@ -83,11 +83,11 @@ namespace CatchKit {
 
         template<>
         struct values_of<std::string> {
-            size_t min_len = 0;
-            size_t max_len = 65;
+            std::size_t min_len = 0;
+            std::size_t max_len = 65;
             std::string_view charset = Charsets::word_chars; // Must be from string literal
 
-            [[nodiscard]] auto generate() const -> std::string;
+            [[nodiscard]] auto generate( RandomNumberGenerator& rng ) const -> std::string;
         };
 
 
@@ -97,7 +97,7 @@ namespace CatchKit {
         struct from_values {
             std::vector<T> values;
 
-            auto generate_at(size_t pos) const { return values[pos]; }
+            auto generate_at( std::size_t pos, RandomNumberGenerator& ) const { return values[pos]; }
             auto size() const { return values.size(); }
 
         };
@@ -108,13 +108,13 @@ namespace CatchKit {
 
         template<typename T>
         struct values_of<std::vector<T>> {
-            size_t min_size = 0;
-            size_t max_size = 65;
+            std::size_t min_size = 0;
+            std::size_t max_size = 65;
             values_of<T> value_generator;
 
-            [[nodiscard]] auto generate() const {
-                std::vector<T> values( generate_random_number(min_size, max_size) );
-                std::ranges::generate(values, [generator=value_generator]{ return generator.generate(); });
+            [[nodiscard]] auto generate( RandomNumberGenerator& rng ) const {
+                std::vector<T> values( rng.generate( min_size, max_size ) );
+                std::ranges::generate(values, [generator=value_generator, &rng]{ return generator.generate(rng); });
                 return values;
             }
         };
