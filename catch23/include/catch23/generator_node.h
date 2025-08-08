@@ -14,96 +14,92 @@
 #include <vector>
 #include <memory>
 
-namespace CatchKit {
+namespace CatchKit::Detail {
 
-    namespace Detail {
+    class RandomNumberGenerator;
 
-        class RandomNumberGenerator;
+    template<typename G>
+    concept IsSingleValueGenerator = requires(G g, RandomNumberGenerator& rng){ { g.generate(rng) }; };
 
-        template<typename G>
-        concept IsSingleValueGenerator = requires(G g, RandomNumberGenerator& rng){ { g.generate(rng) }; };
+    template<typename G>
+    concept IsMultiValueGenerator = requires(G const& g, std::size_t pos, RandomNumberGenerator& rng){ { g.generate_at(pos, rng) }; };
 
-        template<typename G>
-        concept IsMultiValueGenerator = requires(G const& g, std::size_t pos, RandomNumberGenerator& rng){ { g.generate_at(pos, rng) }; };
+    template<typename G>
+    concept IsSizedGenerator = requires(G const& g, std::size_t pos){ { g.size(pos) } -> std::same_as<std::size_t>; };
 
-        template<typename G>
-        concept IsSizedGenerator = requires(G const& g, std::size_t pos){ { g.size(pos) } -> std::same_as<std::size_t>; };
+    template<typename G>
+    auto size_of(G const& generator, std::size_t default_size = 100) {
+        if constexpr( IsMultiValueGenerator<G> ) {
+            static_assert( !IsSizedGenerator<G>, "Generator has generate_at() but not size()");
+            return generator.size();
+        }
+        else
+            return default_size;
+    }
 
-        template<typename G>
-        auto size_of(G const& generator, std::size_t default_size = 100) {
-            if constexpr( IsMultiValueGenerator<G> ) {
-                static_assert( !IsSizedGenerator<G>, "Generator has generate_at() but not size()");
-                return generator.size();
+    template<typename G>
+    auto generate_at(G const& generator, std::size_t pos, RandomNumberGenerator& rng) {
+        if constexpr( IsSingleValueGenerator<G> )
+            return generator.generate(rng);
+        else if constexpr( IsMultiValueGenerator<G> )
+            return generator.generate_at(pos, rng);
+        else
+            static_assert(false, "not a generator");
+    }
+
+    constexpr std::size_t default_repetitions = 100; // Make this runtime configurable?
+
+    auto dummy_random_number_generator() -> RandomNumberGenerator&;
+
+    // Typed generator holder node
+    template<typename T>
+    class GeneratorNode : public ExecutionNode {
+        T generator;
+        using GeneratedType = decltype(generate_at(generator, 0, dummy_random_number_generator()));
+        std::vector<GeneratedType> values;
+
+    public:
+        explicit GeneratorNode( NodeId&& id, T&& gen )
+        : ExecutionNode(std::move(id), size_of(gen, default_repetitions)), generator(std::move(gen)) {
+            values.reserve(size);
+            RandomNumberGenerator rng;
+            for(std::size_t i=0; i < size; ++i) {
+                values.emplace_back(generate_at(generator, i, rng));
             }
-            else
-                return default_size;
         }
 
-        template<typename G>
-        auto generate_at(G const& generator, std::size_t pos, RandomNumberGenerator& rng) {
-            if constexpr( IsSingleValueGenerator<G> )
-                return generator.generate(rng);
-            else if constexpr( IsMultiValueGenerator<G> )
-                return generator.generate_at(pos, rng);
-            else
-                static_assert(false, "not a generator");
+        GeneratedType& current_value() {
+            assert(current_index < values.size());
+            return values[current_index];
         }
+        // !TBD shrink?
+    };
 
-        constexpr std::size_t default_repetitions = 100; // Make this runtime configurable?
 
-        auto dummy_random_number_generator() -> RandomNumberGenerator&;
+    struct GeneratorAcquirer {
+        ExecutionNodes& execution_nodes;
+        NodeId id;
+        ExecutionNode* generator_node;
 
-        // Typed generator holder node
+        GeneratorAcquirer(Checker& checker, NodeId&& id)
+        :   execution_nodes(get_execution_nodes_from_result_handler(checker.result_handler)),
+            id(std::move(id)),
+            generator_node(execution_nodes.find_node(this->id))
+        {}
+
         template<typename T>
-        class GeneratorNode : public ExecutionNode {
-            T generator;
-            using GeneratedType = decltype(generate_at(generator, 0, dummy_random_number_generator()));
-            std::vector<GeneratedType> values;
+        void make_generator(T&& gen) {
+            generator_node = &execution_nodes.add_node( std::make_unique<GeneratorNode<T>>(std::move(id), std::forward<T>(gen)) );
+        }
+        template<typename T>
+        auto derived_node() {
+            assert(generator_node != nullptr);
+            generator_node->enter();
+            return static_cast<GeneratorNode<T>*>(generator_node);
+        }
+    };
 
-        public:
-            explicit GeneratorNode( NodeId&& id, T&& gen )
-            : ExecutionNode(std::move(id), size_of(gen, default_repetitions)), generator(std::move(gen)) {
-                values.reserve(size);
-                RandomNumberGenerator rng;
-                for(std::size_t i=0; i < size; ++i) {
-                    values.emplace_back(generate_at(generator, i, rng));
-                }
-            }
-
-            GeneratedType& current_value() {
-                assert(current_index < values.size());
-                return values[current_index];
-            }
-            // !TBD shrink?
-        };
-
-
-        struct GeneratorAcquirer {
-            ExecutionNodes& execution_nodes;
-            NodeId id;
-            ExecutionNode* generator_node;
-
-            GeneratorAcquirer(Checker& checker, NodeId&& id)
-            :   execution_nodes(get_execution_nodes_from_result_handler(checker.result_handler)),
-                id(std::move(id)),
-                generator_node(execution_nodes.find_node(this->id))
-            {}
-
-            template<typename T>
-            void make_generator(T&& gen) {
-                generator_node = &execution_nodes.add_node( std::make_unique<GeneratorNode<T>>(std::move(id), std::forward<T>(gen)) );
-            }
-            template<typename T>
-            auto derived_node() {
-                assert(generator_node != nullptr);
-                generator_node->enter();
-                return static_cast<GeneratorNode<T>*>(generator_node);
-            }
-        };
-
-    } // namespace Detail
-
-} // namespace CatchKit
+} // namespace CatchKit::Detail
 
 
 #endif // CATCH23_GENERATE_NODE_H
