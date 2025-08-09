@@ -57,15 +57,22 @@ namespace CatchKit::Detail {
         T generator;
         using GeneratedType = decltype(generate_at(generator, 0, dummy_random_number_generator()));
         std::vector<GeneratedType> values;
-
+        std::size_t size;
     public:
         explicit GeneratorNode( NodeId&& id, T&& gen )
-        : ExecutionNode(std::move(id), size_of(gen, default_repetitions)), generator(std::move(gen)) {
+        :   ExecutionNode(std::move(id)),
+            generator(std::move(gen)),
+            size(size_of(generator, default_repetitions))
+        {
             values.reserve(size);
             RandomNumberGenerator rng;
             for(std::size_t i=0; i < size; ++i) {
                 values.emplace_back(generate_at(generator, i, rng));
             }
+        }
+
+        auto move_next() -> bool override {
+            return ++current_index == size;
         }
 
         GeneratedType& current_value() {

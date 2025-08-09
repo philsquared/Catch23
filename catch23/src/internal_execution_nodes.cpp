@@ -46,6 +46,10 @@ namespace CatchKit::Detail {
         set_current_node(this);
     }
 
+    auto ExecutionNode::move_next() -> bool {
+        return ++current_index == 1;
+    }
+
     auto ExecutionNode::exit(bool early) -> States {
         assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
 
@@ -80,7 +84,7 @@ namespace CatchKit::Detail {
 
         assert( state == States::Entered || state == States::EnteredButDoneForThisLevel );
 
-        if( ++current_index != size ) {
+        if( !move_next() ) {
             reset_children();
             return state = States::Incomplete;
         }

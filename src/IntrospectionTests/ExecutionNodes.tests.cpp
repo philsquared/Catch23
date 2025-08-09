@@ -87,11 +87,14 @@ TEST("execution nodes with early returns") {
 
 struct TickTockNode : public CatchKit::Detail::ExecutionNode {
     explicit TickTockNode(CatchKit::Detail::NodeId&& id)
-    :   ExecutionNode(std::move(id), 2)
+    :   ExecutionNode(std::move(id))
     {}
 
     int current_value() {
         return current_index + 1;
+    }
+    auto move_next() -> bool override {
+        return ++current_index == 2;
     }
 };
 
@@ -100,7 +103,6 @@ TEST("TickTick Execution Nodes : one node - no children") {
 
     ExecutionNodes nodes({"root"});
     auto& root = nodes.get_root();
-    CHECK( root.get_size() == 1 );
 
     root.enter();
 
@@ -111,7 +113,6 @@ TEST("TickTick Execution Nodes : one node - no children") {
 
     auto node = nodes.find_node(a_id);
     REQUIRE( node );
-    CHECK( node->get_size() == 2 );
 
     node->enter();
     auto ttnode = dynamic_cast<TickTockNode*>(node);
@@ -145,7 +146,6 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
     nodes.add_node( std::make_unique<TickTockNode>(NodeId(a_id)) );
     auto node = nodes.find_node(a_id);
     REQUIRE( node );
-    CHECK( node->get_size() == 2 );
 
     node->enter();
     CHECK( node->get_state() == ExecutionNode::States::Entered );
@@ -154,7 +154,6 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
     nodes.add_node( std::make_unique<TickTockNode>(NodeId(b_id)) );
     auto b_node = nodes.find_node(b_id);
     REQUIRE( b_node );
-    CHECK( b_node->get_size() == 2 );
     b_node->enter();
     CHECK( b_node->get_current_index() == 0 );
 
@@ -216,7 +215,6 @@ TEST( "One TickTock node, one regular node" ) {
 
     nodes.add_node(NodeId(s_id));
     auto s_node = nodes.find_node(s_id);
-    CHECK( s_node->get_size() == 1 );
     s_node->enter();
     CHECK( s_node->get_current_index() == 0 );
 
@@ -256,7 +254,6 @@ TEST( "One regular node with a nested TickTock node" ) {
     // First go into the "section" node
     nodes.add_node(NodeId(s_id));
     auto s_node = nodes.find_node(s_id);
-    CHECK( s_node->get_size() == 1 );
     s_node->enter();
     CHECK( s_node->get_current_index() == 0 );
 

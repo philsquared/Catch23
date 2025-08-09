@@ -57,13 +57,12 @@ namespace CatchKit::Detail {
         auto set_current_node(ExecutionNode* node);
 
     protected:
-        const size_t size;
-        size_t current_index = 0;
+        std::size_t current_index = 0;
+        virtual auto move_next() -> bool; // `true` means we finished
 
     public:
-        explicit ExecutionNode( NodeId&& id, size_t size = 1 )
-        :   id(std::move(id)),
-            size(size)
+        explicit ExecutionNode( NodeId&& id )
+        :   id(std::move(id))
         {}
         virtual ~ExecutionNode() = default;
 
@@ -79,7 +78,6 @@ namespace CatchKit::Detail {
         [[nodiscard]] auto get_state() const { return state; }
         [[nodiscard]] auto get_parent() { return parent; }
         [[nodiscard]] auto get_parent_state() const { return parent ? parent->get_state() : States::None; }
-        [[nodiscard]] auto get_size() const { return size; }
         [[nodiscard]] auto get_current_index() const { return current_index; }
 
         void reset();
