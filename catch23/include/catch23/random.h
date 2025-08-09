@@ -17,10 +17,21 @@ namespace CatchKit::Detail {
     concept IsBuiltInNumeric = std::integral<T> || std::floating_point<T>;
 
     class RandomNumberGenerator {
-        std::random_device random_device;
-        std::mt19937 mt; // !TBD Use Pcg?
+        unsigned int seed;
+        std::mt19937 mt; // !TBD Use Pcg? Philox (C++26)?
     public:
-        RandomNumberGenerator() : mt(random_device()) {}
+        RandomNumberGenerator()
+        : RandomNumberGenerator(std::random_device()())
+        {}
+        RandomNumberGenerator(unsigned int seed)
+        :   seed(seed),
+            mt(seed)
+        {}
+
+        // resets to the initial seed
+        void reset() {
+            mt.seed(seed);
+        }
 
         // Returns a number between from and to, inclusive
         template<IsBuiltInNumeric NumberT>

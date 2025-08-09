@@ -49,35 +49,38 @@ namespace CatchKit::Detail {
 
     constexpr std::size_t default_repetitions = 100; // Make this runtime configurable?
 
-    auto dummy_random_number_generator() -> RandomNumberGenerator&;
-
     // Typed generator holder node
     template<typename T>
     class GeneratorNode : public ExecutionNode {
         T generator;
-        using GeneratedType = decltype(generate_at(generator, 0, dummy_random_number_generator()));
-        std::vector<GeneratedType> values;
+        RandomNumberGenerator rng;
         std::size_t size;
+        using GeneratedType = decltype(generate_at(generator, 0, rng));
+        GeneratedType current_generated_value;
     public:
         explicit GeneratorNode( NodeId&& id, T&& gen )
         :   ExecutionNode(std::move(id)),
             generator(std::move(gen)),
-            size(size_of(generator, default_repetitions))
-        {
-            values.reserve(size);
-            RandomNumberGenerator rng;
-            for(std::size_t i=0; i < size; ++i) {
-                values.emplace_back(generate_at(generator, i, rng));
-            }
-        }
+            size(size_of(generator, default_repetitions)),
+            current_generated_value( generate_value() )
+        {}
 
+        auto generate_value() {
+            return generate_at(generator, current_index, rng);
+        }
+        void move_first() override {
+            rng.reset();
+            current_generated_value = generate_value();
+        }
         auto move_next() -> bool override {
-            return ++current_index == size;
+            if( ++current_index == size )
+                return true;
+            current_generated_value = generate_value();
+            return false;
         }
 
         GeneratedType& current_value() {
-            assert(current_index < values.size());
-            return values[current_index];
+            return current_generated_value;
         }
         // !TBD shrink?
     };

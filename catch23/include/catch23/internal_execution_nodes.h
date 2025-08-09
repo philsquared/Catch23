@@ -58,8 +58,8 @@ namespace CatchKit::Detail {
 
     protected:
         std::size_t current_index = 0;
+        virtual void move_first() {}
         virtual auto move_next() -> bool; // `true` means we finished
-
     public:
         explicit ExecutionNode( NodeId&& id )
         :   id(std::move(id))

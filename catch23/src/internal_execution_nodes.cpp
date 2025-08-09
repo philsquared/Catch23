@@ -31,6 +31,7 @@ namespace CatchKit::Detail {
         if( state != States::NotEntered ) {
             state = States::NotEntered;
             current_index = 0;
+            move_first();
             reset_children();
         }
     }
