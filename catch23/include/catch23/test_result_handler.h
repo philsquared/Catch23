@@ -13,6 +13,8 @@ namespace CatchKit::Detail
 {
     class TestCancelled {};
 
+    enum class ShrinkingMode { Normal, Shrinking };
+
     class TestResultHandler : public ResultHandler {
         Reporter& reporter;
         AssertionContext current_context;
@@ -22,6 +24,8 @@ namespace CatchKit::Detail
 
         std::vector<VariableCapture*> variable_captures;
         Counters assertions;
+        ShrinkingMode shrinking_mode = ShrinkingMode::Normal;
+        int shrink_count;
 
     public:
         explicit TestResultHandler(Reporter& reporter);
@@ -31,6 +35,9 @@ namespace CatchKit::Detail
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
+
+        void on_shrink_start();
+        void on_shrink_end();
 
         void add_variable_capture( VariableCapture* capture ) override;
         void remove_variable_capture( VariableCapture* capture ) override;

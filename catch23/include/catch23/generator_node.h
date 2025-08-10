@@ -59,10 +59,13 @@ namespace CatchKit::Detail {
     concept IsGeneratorShrinkable = requires(G& g, get_generated_type<G> val){ { g.shrink(val) }; };
 
 
+    // This is a dummy implementation that saves us having to constexpr guard calls that aren't taken
     template<typename GeneratorType, typename GeneratedType>
     struct Shrinker {
+        GeneratedType original_failing_value;
         explicit Shrinker(GeneratorType const&, GeneratedType const&) {}
-        [[nodiscard]] auto next_shrink() const -> bool { return true; }
+        [[nodiscard]] auto shrinking() const -> bool { return false; }
+        void next_shrink() const { /* not called */ }
     };
 
     template<IsGeneratorShrinkable GeneratorType, typename GeneratedType>
@@ -71,29 +74,26 @@ namespace CatchKit::Detail {
         GeneratedType original_failing_value;
         std::generator<GeneratedType> shrink_generator;
         using iterator = decltype(shrink_generator.begin());
-        std::optional<iterator> it;
+        iterator it;
 
         Shrinker(GeneratorType& generator, GeneratedType& current_value)
         :   current_value(current_value),
             original_failing_value(current_value),
-            shrink_generator( generator.shrink( original_failing_value ) )
-        {}
+            shrink_generator( generator.shrink( original_failing_value ) ),
+            it( shrink_generator.begin() )
+        {
+            if( shrinking() )
+                current_value = *it;
+        }
 
-        [[nodiscard]] auto next_shrink() -> bool {
-            if( !it )
-                it = shrink_generator.begin();
-            else {
-                assert( it != shrink_generator.end() );
-                ++(*it);
-            }
-            if( *it == shrink_generator.end() )
-                return true;
-            auto new_value = **it;
-            if( new_value == current_value )
-                return next_shrink();
-            current_value = new_value;
-            std::println("Trying shrunk value: {}", current_value); // !DBG
-            return false;
+        [[nodiscard]] auto shrinking() const -> bool {
+            return it != shrink_generator.end();
+        }
+        void next_shrink() {
+            assert( shrinking() );
+            ++it;
+            if( shrinking() )
+                current_value = *it;
         }
     };
 
@@ -150,12 +150,20 @@ namespace CatchKit::Detail {
 
         auto shrink() -> bool override {
             assert(shrinker);
-            return shrinker->next_shrink();
+            if( !shrinker->shrinking() )
+                return true;
+            shrinker->next_shrink();
+            return !shrinker->shrinking();
         }
 
         void stop_shrinking() override {
             assert(shrinker);
+            current_generated_value = shrinker->original_failing_value;
             shrinker.reset();
+            current_index = size-1;
+        }
+        auto current_value_as_string() -> std::string override {
+            return stringify(current_generated_value);
         }
     };
 

@@ -12,15 +12,12 @@ TEST("Generators", "[.]") {
     CHECK( i < 50 ); // Half of these should fail
 }
 
-TEST("Two generators", "[/.]") {
+TEST("Two generators", "[.]") {
     auto i = GENERATE(10, values_of<int>{ .up_to=16 });
     auto j = GENERATE(10, values_of<int>{ .up_to=32 });
 
     CAPTURE( i, j );
-    if( i > 4 && j > 4 )
-        CHECK( i < j ); // about 25% of these should fail
-    else
-        PASS();
+    CHECK( i < j ); // about 25% of these should fail
 }
 
 TEST("string generators") {

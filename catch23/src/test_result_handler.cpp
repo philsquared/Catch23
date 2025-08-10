@@ -23,13 +23,31 @@ namespace CatchKit::Detail {
         reporter.on_assertion_start( context );
     }
 
+    void TestResultHandler::on_shrink_start() {
+        shrinking_mode = ShrinkingMode::Shrinking;
+        std::println("Attempting to shrink to simpler values...");
+        shrink_count = 0;
+    }
+    void TestResultHandler::on_shrink_end() {
+        shrinking_mode = ShrinkingMode::Normal;
+        std::println("\nFound value(s) after {} shrinks", shrink_count);
+    }
+
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
+        last_result = result;
+        if( shrinking_mode == ShrinkingMode::Shrinking ) {
+            shrink_count++;
+            if( result == ResultType::Pass )
+                std::print("✅");
+            else
+                std::print("❌");
+            return;
+        }
         if( result == ResultType::Pass )
             assertions.passed_explicitly++;
         else
             assertions.failed++;
 
-        last_result = result;
         // !TBD: We should need to check this again
         // - go back to having two on_assertion_result methods - one that takes just a result,
         // the other takes the full, expanded, data (probably no need for optional)
