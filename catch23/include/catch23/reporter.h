@@ -60,6 +60,12 @@ namespace CatchKit {
 
         virtual void on_assertion_start( AssertionContext const& context ) = 0;
         virtual void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) = 0;
+
+        virtual void on_shrink_start() = 0;
+        virtual void on_shrink_found( std::vector<std::string> const& values, int shrinks ) = 0;
+        virtual void on_no_shrink_found( int shrinks ) = 0;
+        virtual void on_shrink_result( ResultType result ) = 0;
+
     };
 
 } // namespace CatchKit

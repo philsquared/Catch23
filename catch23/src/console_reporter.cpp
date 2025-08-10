@@ -52,8 +52,8 @@ namespace CatchKit {
         assertion_totals += assertions;
     }
 
-    void ConsoleReporter::on_assertion_start( AssertionContext const& ) {
-    }
+    void ConsoleReporter::on_assertion_start( AssertionContext const& ) {}
+
     void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) {
         lazy_print_test_header();
         println( assertion_info.passed() ? ColourIntent::Success : ColourIntent::Error,
@@ -111,6 +111,26 @@ namespace CatchKit {
             std::println("with message:");
             println(ColourIntent::SecondaryText, "  {}", assertion_info.message);
         }
+    }
+
+    void ConsoleReporter::on_shrink_start() {
+        std::println("Attempting to shrink to simpler values..."); // !TBD
+    }
+    void ConsoleReporter::on_no_shrink_found( int shrinks ) {
+        std::println("\nNo simpler values found after {} shrinks", shrinks);
+    }
+    void ConsoleReporter::on_shrink_result( ResultType result ) {
+        if( result == ResultType::Pass )
+            std::print("✅");
+        else
+            std::print("❌");
+    }
+    void ConsoleReporter::on_shrink_found( std::vector<std::string> const& values, int shrinks ) {
+        std::println("\nFound simpler value(s) after {} shrinks:", shrinks);
+        for (auto const& value : values) {
+            std::println("  {}", value);
+        }
+        std::println("Final run with these values:");
     }
 
     void ConsoleReporter::on_test_run_end() {

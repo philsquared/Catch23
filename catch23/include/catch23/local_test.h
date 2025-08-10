@@ -36,6 +36,11 @@ namespace CatchKit {
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {
             results.emplace_back(context, assertion_info);
         }
+        void on_shrink_start() override {}
+        void on_shrink_found( std::vector<std::string> const&, int ) override {}
+        void on_no_shrink_found( int ) override {}
+        void on_shrink_result( ResultType ) override {}
+
         std::vector<FullAssertionInfo> results;
     };
 

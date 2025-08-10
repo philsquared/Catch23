@@ -7,7 +7,6 @@
 
 #include "catchkit/variable_capture.h"
 
-#include <print>
 #include <cassert>
 
 namespace CatchKit::Detail {
@@ -25,21 +24,17 @@ namespace CatchKit::Detail {
 
     void TestResultHandler::on_shrink_start() {
         shrinking_mode = ShrinkingMode::Shrinking;
-        std::println("Attempting to shrink to simpler values...");
+        reporter.on_shrink_start();
         shrink_count = 0;
     }
     void TestResultHandler::on_shrink_found( std::vector<std::string> const& values ) {
         if( values.empty() ) {
-            std::println("\nNo simpler values found after {} shrinks", shrink_count);
+            reporter.on_no_shrink_found( shrink_count );
             shrinking_mode = ShrinkingMode::NotShrunk;
             return;
         }
         shrinking_mode = ShrinkingMode::Shrunk;
-        std::println("\nFound simpler value(s) after {} shrinks:", shrink_count);
-        for (auto const& value : values) {
-            std::println("  {}", value);
-        }
-        std::println("Final run with these values:");
+        reporter.on_shrink_found( values, shrink_count );
     }
 
     void TestResultHandler::on_shrink_end() {
@@ -50,10 +45,7 @@ namespace CatchKit::Detail {
         last_result = result;
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
-            if( result == ResultType::Pass )
-                std::print("✅");
-            else
-                std::print("❌");
+            reporter.on_shrink_result(result);
             return;
         }
         if( shrinking_mode == ShrinkingMode::NotShrunk )
