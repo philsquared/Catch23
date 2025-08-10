@@ -33,7 +33,7 @@ namespace CatchKit::Detail {
     struct ShrinkableNode {
         virtual void start_shrinking() = 0;
         virtual void rebase_shrink() = 0;
-        virtual void stop_shrinking() = 0;
+        virtual auto stop_shrinking() -> bool = 0;
         virtual auto shrink() -> bool = 0;
         virtual auto current_value_as_string() -> std::string = 0;
     };

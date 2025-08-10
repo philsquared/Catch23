@@ -52,7 +52,7 @@ namespace CatchKit::Detail {
 
         auto& root_node = *node;
 
-        ExecutionNode::States leaf_state = leaf_node->freeze();
+        leaf_node->freeze();
         root_node.exit();
         std::vector<std::string> shrunk_values;
         shrunk_values.reserve( shrinkables.size() );
@@ -69,29 +69,16 @@ namespace CatchKit::Detail {
                 leaf_node->freeze();
                 root_node.exit();
             }
-            shrinkable->stop_shrinking();
-            shrunk_values.push_back( shrinkable->current_value_as_string() );
+            if( shrinkable->stop_shrinking() )
+                shrunk_values.push_back( shrinkable->current_value_as_string() );
         }
-        test_handler.on_shrink_end();
+        test_handler.on_shrink_found(shrunk_values);
 
         root_node.enter();
         invoke_test(test, test_handler);
         root_node.exit();
 
-
-
-        // Put node states back where they should be (this could be cleaner)
-        // leaf_node->unfreeze(leaf_state);
-        // std::vector<ExecutionNode*> node_path;
-        // for(node = leaf_node->get_parent(); node->get_parent(); node = node->get_parent())
-        //     node_path.push_back( node );
-        // root_node.enter();
-        // for(std::size_t i = node_path.size(); i > 0; --i) {
-        //     node_path[i-1]->enter();
-        // }
-        // root_node.exit();
-
-        // test_handler.on_shrink_end();
+        test_handler.on_shrink_end();
 
         return true;
     }

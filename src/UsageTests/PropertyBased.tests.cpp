@@ -11,7 +11,7 @@ TEST("Two PBT generators", "[/.]") {
     auto j = GENERATE(10, values_of<int>{ .up_to=32 });
 
     CAPTURE( i, j );
-    if( (i == 3 || i > 11) && j > 4 )
+    if( (i == 3 || i > 11) && j > 5 )
         FAIL();
     else
         PASS();

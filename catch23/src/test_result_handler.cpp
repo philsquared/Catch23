@@ -28,9 +28,22 @@ namespace CatchKit::Detail {
         std::println("Attempting to shrink to simpler values...");
         shrink_count = 0;
     }
+    void TestResultHandler::on_shrink_found( std::vector<std::string> const& values ) {
+        if( values.empty() ) {
+            std::println("\nNo simpler values found after {} shrinks", shrink_count);
+            shrinking_mode = ShrinkingMode::NotShrunk;
+            return;
+        }
+        shrinking_mode = ShrinkingMode::Shrunk;
+        std::println("\nFound simpler value(s) after {} shrinks:", shrink_count);
+        for (auto const& value : values) {
+            std::println("  {}", value);
+        }
+        std::println("Final run with these values:");
+    }
+
     void TestResultHandler::on_shrink_end() {
         shrinking_mode = ShrinkingMode::Normal;
-        std::println("\nFound value(s) after {} shrinks", shrink_count);
     }
 
     void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
@@ -43,10 +56,15 @@ namespace CatchKit::Detail {
                 std::print("❌");
             return;
         }
-        if( result == ResultType::Pass )
-            assertions.passed_explicitly++;
-        else
-            assertions.failed++;
+        if( shrinking_mode == ShrinkingMode::NotShrunk )
+            return;
+
+        if( shrinking_mode != ShrinkingMode::Shrunk ) {
+            if( result == ResultType::Pass )
+                assertions.passed_explicitly++;
+            else
+                assertions.failed++;
+        }
 
         // !TBD: We should need to check this again
         // - go back to having two on_assertion_result methods - one that takes just a result,

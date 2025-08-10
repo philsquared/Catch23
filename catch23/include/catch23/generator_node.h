@@ -106,6 +106,7 @@ namespace CatchKit::Detail {
         std::size_t size;
         using GeneratedType = get_generated_type<GeneratorType>;
         GeneratedType current_generated_value;
+        std::optional<GeneratedType> pre_shrunk_value;
         std::optional<Shrinker<GeneratorType, GeneratedType>> shrinker;
     public:
         explicit GeneratorNode( NodeId&& id, GeneratorType&& gen )
@@ -141,6 +142,7 @@ namespace CatchKit::Detail {
 
         // ShrinkableNode interface:
         void start_shrinking() override {
+            pre_shrunk_value = current_generated_value;
             shrinker.emplace( generator, current_generated_value );
         }
         void rebase_shrink() override {
@@ -156,11 +158,15 @@ namespace CatchKit::Detail {
             return !shrinker->shrinking();
         }
 
-        void stop_shrinking() override {
+        auto stop_shrinking() -> bool override {
             assert(shrinker);
             current_generated_value = shrinker->original_failing_value;
+            bool shrunk = (pre_shrunk_value != current_generated_value);
             shrinker.reset();
+            pre_shrunk_value.reset();
             current_index = size-1;
+            return shrunk;
+
         }
         auto current_value_as_string() -> std::string override {
             return stringify(current_generated_value);
