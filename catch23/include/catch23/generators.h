@@ -9,8 +9,8 @@
 #include "random.h"
 
 #include <vector>
-#include <source_location>
 #include <algorithm>
+#include <generator>
 
 namespace CatchKit {
 
@@ -32,8 +32,12 @@ namespace CatchKit {
 
             auto generate_at( std::size_t, RandomNumberGenerator& rng ) const { return value_generator.generate(rng); }
             auto size() const { return multiple; }
-        };
 
+            template<typename U>
+            auto shrink(U&& value) -> std::generator<T> requires IsGeneratorShrinkable<values_of<T>> {
+                return value_generator.shrink(std::forward<U>(value));
+            }
+        };
 
         template<typename T>
         constexpr auto operator, ( std::size_t multiple, values_of<T>&& values ) {
@@ -50,13 +54,33 @@ namespace CatchKit {
 
             [[nodiscard]] auto generate( RandomNumberGenerator& rng ) const { return rng.generate(from, up_to); }
 
-            // Given a starting value, try different strategies to produce a simpler value that might
-            // also fail. If it still passes this function will be called again with an incremented
-            // strategy number, and this will repeat until either a failure is found
-            // or the function returns an empty optional
+            auto shrink(T value) -> std::generator<T> {
+                if( value > 0 ) {
+                    co_yield 0;
 
-            // Could use coroutines to "simplify" this?
-            auto shrink(T value, int strategy_index) -> std::optional<T>;
+                    if( value > 1 )
+                        co_yield 1;
+                    if( value > 2 )
+                        co_yield 2;
+                    if( value > 5 )
+                        co_yield value/2; // If this works we quickly descend towards zero
+
+                    while( value > 3 )
+                        co_yield --value;
+                }
+                else {
+                    if constexpr( std::is_signed_v<T> ) {
+                        if( value < -1 )
+                            co_yield -1;
+                        if( value < -2 )
+                            co_yield -2;
+                        if( value < -5 )
+                            co_yield value/2;
+                        while( value < -3 )
+                            co_yield ++value;
+                    }
+                }
+            }
         };
 
         template<IsBuiltInNumeric T>

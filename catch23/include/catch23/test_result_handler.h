@@ -37,7 +37,7 @@ namespace CatchKit::Detail
 
         [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
         [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }
-        [[nodiscard]] auto passed() const { return last_result == CatchKit::ResultType::Pass; }
+        [[nodiscard]] auto passed() const { return last_result == ResultType::Pass; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }
 

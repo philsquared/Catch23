@@ -5,6 +5,8 @@
 #ifndef CATCH23_GENERATE_NODE_H
 #define CATCH23_GENERATE_NODE_H
 
+#include <generator>
+
 #include "internal_execution_nodes.h"
 #include "test_result_handler.h"
 #include "random.h"
@@ -13,10 +15,9 @@
 
 #include <vector>
 #include <memory>
+#include <print> // !TBD !DBG
 
 namespace CatchKit::Detail {
-
-    class RandomNumberGenerator;
 
     template<typename G>
     concept IsSingleValueGenerator = requires(G g, RandomNumberGenerator& rng){ { g.generate(rng) }; };
@@ -25,12 +26,12 @@ namespace CatchKit::Detail {
     concept IsMultiValueGenerator = requires(G const& g, std::size_t pos, RandomNumberGenerator& rng){ { g.generate_at(pos, rng) }; };
 
     template<typename G>
-    concept IsSizedGenerator = requires(G const& g, std::size_t pos){ { g.size(pos) } -> std::same_as<std::size_t>; };
+    concept IsGeneratorSized = requires(G const& g, std::size_t pos){ { g.size(pos) } -> std::same_as<std::size_t>; };
 
     template<typename G>
     auto size_of(G const& generator, std::size_t default_size = 100) {
         if constexpr( IsMultiValueGenerator<G> ) {
-            static_assert( !IsSizedGenerator<G>, "Generator has generate_at() but not size()");
+            static_assert( !IsGeneratorSized<G>, "Generator has generate_at() but not size()");
             return generator.size();
         }
         else
@@ -49,30 +50,85 @@ namespace CatchKit::Detail {
 
     constexpr std::size_t default_repetitions = 100; // Make this runtime configurable?
 
+    auto make_dummy_rng() -> RandomNumberGenerator&;
+
+    template<typename GeneratorType>
+    using get_generated_type = decltype(generate_at(std::declval<GeneratorType>(), 0, make_dummy_rng()));
+
+    template<typename G>
+    concept IsGeneratorShrinkable = requires(G& g, get_generated_type<G> val){ { g.shrink(val) }; };
+
+
+    template<typename GeneratorType, typename GeneratedType>
+    struct Shrinker {
+        explicit Shrinker(GeneratorType const&, GeneratedType const&) {}
+        [[nodiscard]] auto next_shrink() const -> bool { return true; }
+    };
+
+    template<IsGeneratorShrinkable GeneratorType, typename GeneratedType>
+    struct Shrinker<GeneratorType, GeneratedType> {
+        GeneratedType& current_value;
+        GeneratedType original_failing_value;
+        std::generator<GeneratedType> shrink_generator;
+        using iterator = decltype(shrink_generator.begin());
+        std::optional<iterator> it;
+
+        Shrinker(GeneratorType& generator, GeneratedType& current_value)
+        :   current_value(current_value),
+            original_failing_value(current_value),
+            shrink_generator( generator.shrink( original_failing_value ) )
+        {}
+
+        [[nodiscard]] auto next_shrink() -> bool {
+            if( !it )
+                it = shrink_generator.begin();
+            else {
+                assert( it != shrink_generator.end() );
+                ++(*it);
+            }
+            if( *it == shrink_generator.end() )
+                return true;
+            auto new_value = **it;
+            if( new_value == current_value )
+                return next_shrink();
+            current_value = new_value;
+            std::println("Trying shrunk value: {}", current_value); // !DBG
+            return false;
+        }
+    };
+
+
     // Typed generator holder node
-    template<typename T>
-    class GeneratorNode : public ExecutionNode {
-        T generator;
+    template<typename GeneratorType>
+    class GeneratorNode : public ExecutionNode, public ShrinkableNode {
+        GeneratorType generator;
         RandomNumberGenerator rng;
         std::size_t size;
-        using GeneratedType = decltype(generate_at(generator, 0, rng));
+        using GeneratedType = get_generated_type<GeneratorType>;
         GeneratedType current_generated_value;
+        std::optional<Shrinker<GeneratorType, GeneratedType>> shrinker;
     public:
-        explicit GeneratorNode( NodeId&& id, T&& gen )
+        explicit GeneratorNode( NodeId&& id, GeneratorType&& gen )
         :   ExecutionNode(std::move(id)),
             generator(std::move(gen)),
             size(size_of(generator, default_repetitions)),
             current_generated_value( generate_value() )
-        {}
+        {
+            if( IsGeneratorShrinkable<GeneratorType> ) {
+                shrinkable = this;
+            }
+        }
 
         auto generate_value() {
             return generate_at(generator, current_index, rng);
         }
         void move_first() override {
+            assert( !shrinker );
             rng.reset();
             current_generated_value = generate_value();
         }
         auto move_next() -> bool override {
+            assert( !shrinker );
             if( ++current_index == size )
                 return true;
             current_generated_value = generate_value();
@@ -82,7 +138,25 @@ namespace CatchKit::Detail {
         GeneratedType& current_value() {
             return current_generated_value;
         }
-        // !TBD shrink?
+
+        // ShrinkableNode interface:
+        void start_shrinking() override {
+            shrinker.emplace( generator, current_generated_value );
+        }
+        void rebase_shrink() override {
+            assert( shrinker );
+            shrinker.emplace( generator, current_generated_value );
+        }
+
+        auto shrink() -> bool override {
+            assert(shrinker);
+            return shrinker->next_shrink();
+        }
+
+        void stop_shrinking() override {
+            assert(shrinker);
+            shrinker.reset();
+        }
     };
 
 

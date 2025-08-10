@@ -30,6 +30,13 @@ namespace CatchKit::Detail {
 
     class ExecutionNodes;
 
+    struct ShrinkableNode {
+        virtual void start_shrinking() = 0;
+        virtual void rebase_shrink() = 0;
+        virtual void stop_shrinking() = 0;
+        virtual auto shrink() -> bool = 0;
+    };
+
     class ExecutionNode {
     public:
         enum class States {
@@ -40,6 +47,7 @@ namespace CatchKit::Detail {
             ExitedEarly, // through an early return or exception - including test cancellation
             HasIncompleteChildren,
             Incomplete, // Children are complete, but there are more local levels (e.g. generator values)
+            Frozen, // Held in place during a shrink
             Completed
         };
 
@@ -48,7 +56,6 @@ namespace CatchKit::Detail {
 
         NodeId id;
         ExecutionNodes* container = nullptr;
-
         ExecutionNode* parent = nullptr;
         std::vector<std::unique_ptr<ExecutionNode>> children;
         States state = States::None;
@@ -57,6 +64,7 @@ namespace CatchKit::Detail {
         auto set_current_node(ExecutionNode* node);
 
     protected:
+        ShrinkableNode* shrinkable = nullptr; // May be set by derived class
         std::size_t current_index = 0;
         virtual void move_first() {}
         virtual auto move_next() -> bool; // `true` means we finished
@@ -79,12 +87,16 @@ namespace CatchKit::Detail {
         [[nodiscard]] auto get_parent() { return parent; }
         [[nodiscard]] auto get_parent_state() const { return parent ? parent->get_state() : States::None; }
         [[nodiscard]] auto get_current_index() const { return current_index; }
+        [[nodiscard]] auto get_shrinkable() const { return shrinkable; }
 
         void reset();
         void reset_children();
 
         void enter();
         auto exit(bool early = false) -> States;
+
+        auto freeze() -> States;
+        void unfreeze(States state);
     };
 
     class ExecutionNodes {
@@ -99,13 +111,14 @@ namespace CatchKit::Detail {
             root.container = this;
         }
 
-        auto find_node(NodeId const& id) -> ExecutionNode* {
-            return current_node->find_child(id);
-        }
         auto add_node(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode&;
         auto add_node(NodeId&& id) -> ExecutionNode&;
 
-        auto& get_root() { return root; }
+        [[nodiscard]] auto& get_root() { return root; }
+        [[nodiscard]] auto get_current_node() const { return current_node; }
+        [[nodiscard]] auto find_node(NodeId const& id) -> ExecutionNode* {
+            return current_node->find_child(id);
+        }
     };
 
 } // namespace CatchKit::Detail

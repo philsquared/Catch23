@@ -109,4 +109,13 @@ namespace CatchKit::Detail {
         return new_node;
     }
 
+    auto ExecutionNode::freeze() -> States {
+        States prev_state = state;
+        state = States::Frozen;
+        return prev_state;
+    }
+    void ExecutionNode::unfreeze(States prev_state) {
+        state = prev_state;
+    }
+
 } // namespace CatchKit::Detail

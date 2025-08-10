@@ -5,21 +5,12 @@
 #include "catch23/runner.h"
 #include "catch23/internal_execution_nodes.h"
 
+#include <print> // !DBG
+
 namespace CatchKit::Detail {
 
-    void run_test( Test const& test, TestResultHandler& test_handler ) {
-        Reporter& reporter = test_handler.get_reporter();
-
-        ExecutionNodes execution_nodes({test.test_info.name, test.test_info.location});
-        auto& root_node = execution_nodes.get_root();
-        test_handler.set_execution_nodes(&execution_nodes);
-
-        do {
-            root_node.enter();
-            assert(root_node.get_state() != ExecutionNode::States::Completed);
-
-            reporter.on_test_start(test.test_info);
-
+    namespace {
+        void invoke_test( Test const& test, TestResultHandler& test_handler ) {
             Checker check{
                 .result_handler=test_handler,
                 .result_disposition=ResultDisposition::Continue };
@@ -44,10 +35,80 @@ namespace CatchKit::Detail {
                 test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
                 test_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
             }
-            root_node.exit();
+        }
+    }
+    auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) -> bool {
+
+        std::vector<ShrinkableNode*> shrinkables;
+        auto node = leaf_node;
+        for(; node->get_parent(); node = node->get_parent())
+            if( auto shrinkable = node->get_shrinkable())
+                shrinkables.push_back( shrinkable );
+
+        if( shrinkables.empty() )
+            return false;
+
+        auto& root_node = *node;
+
+        ExecutionNode::States leaf_state = leaf_node->freeze();
+        root_node.exit();
+        for( auto& shrinkable : shrinkables ) {
+            shrinkable->start_shrinking();
+            while( !shrinkable->shrink() ) {
+                root_node.enter();
+
+                invoke_test(test, test_handler);
+
+                if(!test_handler.passed())
+                    shrinkable->rebase_shrink(); // Resets on current failing number
+
+                leaf_node->freeze();
+                root_node.exit();
+            }
+            shrinkable->stop_shrinking();
+        }
+
+        // Put node states back where they should be (this could be cleaner)
+        leaf_node->unfreeze(leaf_state);
+        std::vector<ExecutionNode*> node_path;
+        for(node = leaf_node->get_parent(); node->get_parent(); node = node->get_parent())
+            node_path.push_back( node );
+        root_node.enter();
+        for(std::size_t i = node_path.size(); i > 0; --i) {
+            node_path[i-1]->enter();
+        }
+        root_node.exit();
+
+        return true;
+    }
+
+    void run_test( Test const& test, TestResultHandler& test_handler ) {
+        Reporter& reporter = test_handler.get_reporter();
+
+        ExecutionNodes execution_nodes({test.test_info.name, test.test_info.location});
+        auto& root_node = execution_nodes.get_root();
+        test_handler.set_execution_nodes(&execution_nodes);
+
+        do {
+            reporter.on_test_start(test.test_info);
+
+            root_node.enter();
+            assert(root_node.get_state() != ExecutionNode::States::Completed);
+
+            invoke_test(test, test_handler);
+
+            auto current_execution_node = execution_nodes.get_current_node();
+            if( !test_handler.passed() ) {
+                if( !try_shrink(test, test_handler, current_execution_node) )
+                    root_node.exit(); // !TBD: refactor so we don't have to do this?
+            }
+            else
+                root_node.exit();
+
 
             reporter.on_test_end(test.test_info, test_handler.get_assertion_counts() );
             test_handler.reset_assertion_counts();
+
         }
         while(root_node.get_state() != ExecutionNode::States::Completed);
 
