@@ -114,10 +114,10 @@ namespace CatchKit {
     }
 
     void ConsoleReporter::on_shrink_start() {
-        std::println("Attempting to shrink to simpler values..."); // !TBD
+        std::println("Attempting to find a simpler counterexample by \"shrinking\"...");
     }
     void ConsoleReporter::on_no_shrink_found( int shrinks ) {
-        std::println("\nNo simpler values found after {} shrinks", shrinks);
+        std::println("\nNo simpler counterexample found after {} shrinks", shrinks);
     }
     void ConsoleReporter::on_shrink_result( ResultType result ) {
         if( result == ResultType::Pass )
@@ -126,7 +126,7 @@ namespace CatchKit {
             std::print("❌");
     }
     void ConsoleReporter::on_shrink_found( std::vector<std::string> const& values, int shrinks ) {
-        std::println("\nFound simpler value(s) after {} shrinks:", shrinks);
+        std::println("\nFalsifiable after {} shrinks:", shrinks);
         for (auto const& value : values) {
             std::println("  {}", value);
         }
