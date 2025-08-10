@@ -37,7 +37,7 @@ namespace CatchKit::Detail {
             }
         }
     }
-    auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) -> bool {
+    auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {
 
         std::vector<ShrinkableNode*> shrinkables;
         auto node = leaf_node;
@@ -46,7 +46,7 @@ namespace CatchKit::Detail {
                 shrinkables.push_back( shrinkable );
 
         if( shrinkables.empty() )
-            return false;
+            return;
 
         test_handler.on_shrink_start();
 
@@ -76,11 +76,9 @@ namespace CatchKit::Detail {
 
         root_node.enter();
         invoke_test(test, test_handler);
-        root_node.exit();
-
+        // don't do final exit as it will happen in caller
         test_handler.on_shrink_end();
 
-        return true;
     }
 
     void run_test( Test const& test, TestResultHandler& test_handler ) {
@@ -99,12 +97,10 @@ namespace CatchKit::Detail {
             invoke_test(test, test_handler);
 
             auto current_execution_node = execution_nodes.get_current_node();
-            if( !test_handler.passed() ) {
-                if( !try_shrink(test, test_handler, current_execution_node) )
-                    root_node.exit(); // !TBD: refactor so we don't have to do this?
-            }
-            else
-                root_node.exit();
+            if( !test_handler.passed() )
+                try_shrink(test, test_handler, current_execution_node);
+
+            root_node.exit();
 
 
             reporter.on_test_end(test.test_info, test_handler.get_assertion_counts() );
