@@ -31,7 +31,7 @@ std::pair<int, int> sd(int N) {
 }
 
 // This is based on an actual Codility exercise
-TEST("sparse decomposition") {
+TEST("sparse decomposition", "[.]") {
     int N = GENERATE(values_of<int>());
     auto&& [a, b] = sd(N);
 

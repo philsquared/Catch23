@@ -82,14 +82,11 @@ std::string left_pad(std::string const& input_string, int min_len) {
 TEST_CASE("left pad properties", "[/.]") {
     // check.result_handler.report_on = CatchKit::ReportOn::AllResults;
 
-    auto min_len = GENERATE(10, values_of<size_t>{0, 256});
-    auto input_string = GENERATE(10, values_of<std::string>{.min_len=0, .max_len=256});
+    auto min_len = GENERATE(values_of<std::size_t>{0, 65});
+    auto input_string = GENERATE(values_of<std::string>{.min_len=0, .max_len=65});
     auto output_string = left_pad(input_string, min_len);
 
-    // CAPTURE(input_string);
-    // CAPTURE(output_string);
-    // CAPTURE(min_len);
-
+    CAPTURE(input_string, output_string, min_len);
     REQUIRE(output_string.length() >= min_len);
     REQUIRE(output_string.length() >= input_string.length());
     REQUIRE(output_string.find(input_string) != std::string::npos);

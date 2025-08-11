@@ -132,10 +132,17 @@ namespace CatchKit {
     }
     void ConsoleReporter::on_shrink_found( std::vector<std::string> const& values, int shrinks ) {
         std::println("\nFalsifiable after {} shrinks:", shrinks);
-        for (auto const& value : values) {
-            std::println("  {}", value);
+        if( values.size() > 1 ) {
+            int i = 0;
+            for (auto const& value : values) {
+                std::println("  value {}: {}", ++i, value);
+            }
+            std::println("Final run with these values:");
         }
-        std::println("Final run with these values:");
+        else {
+            std::println("  value: {}", values[0]);
+            std::println("Final run with this value:");
+        }
     }
 
     void ConsoleReporter::on_test_run_end() {
