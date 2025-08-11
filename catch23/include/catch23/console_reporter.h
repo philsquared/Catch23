@@ -35,7 +35,7 @@ namespace CatchKit {
         void on_shrink_start() override;
         void on_shrink_found( std::vector<std::string> const& values, int shrinks ) override;
         void on_no_shrink_found( int shrinks ) override;
-        void on_shrink_result( ResultType result ) override;
+        void on_shrink_result( ResultType result, int shrinks_so_far ) override;
 
         void on_test_run_end();
     };

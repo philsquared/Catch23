@@ -119,11 +119,16 @@ namespace CatchKit {
     void ConsoleReporter::on_no_shrink_found( int shrinks ) {
         std::println("\nNo simpler counterexample found after {} shrinks", shrinks);
     }
-    void ConsoleReporter::on_shrink_result( ResultType result ) {
-        if( result == ResultType::Pass )
-            std::print("✅");
-        else
-            std::print("❌");
+    void ConsoleReporter::on_shrink_result( ResultType result, int shrinks_so_far ) {
+        const int shrink_print_width = 37;
+        if( shrinks_so_far < shrink_print_width ) {
+            if( result == ResultType::Pass )
+                std::print("✅");
+            else
+                std::print("❌");
+        }
+        else if( shrinks_so_far == shrink_print_width )
+            std::print("... ");
     }
     void ConsoleReporter::on_shrink_found( std::vector<std::string> const& values, int shrinks ) {
         std::println("\nFalsifiable after {} shrinks:", shrinks);

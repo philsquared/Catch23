@@ -45,7 +45,7 @@ namespace CatchKit::Detail {
         last_result = result;
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
-            reporter.on_shrink_result(result);
+            reporter.on_shrink_result(result, shrink_count);
             return;
         }
         if( shrinking_mode == ShrinkingMode::NotShrunk )
