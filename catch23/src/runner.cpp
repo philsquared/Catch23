@@ -5,8 +5,6 @@
 #include "catch23/runner.h"
 #include "catch23/internal_execution_nodes.h"
 
-#include <print> // !DBG
-
 namespace CatchKit::Detail {
 
     namespace {
@@ -58,7 +56,7 @@ namespace CatchKit::Detail {
         shrunk_values.reserve( shrinkables.size() );
         for( auto& shrinkable : shrinkables ) {
             shrinkable->start_shrinking();
-            while( !shrinkable->shrink() ) {
+            while( shrinkable->shrink() ) {
                 root_node.enter();
 
                 invoke_test(test, test_handler);

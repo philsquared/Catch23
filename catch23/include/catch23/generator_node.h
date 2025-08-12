@@ -15,7 +15,7 @@
 
 #include <vector>
 #include <memory>
-#include <print> // !TBD !DBG
+#include <set>
 
 namespace CatchKit::Detail {
 
@@ -63,9 +63,8 @@ namespace CatchKit::Detail {
     template<typename GeneratorType, typename GeneratedType>
     struct Shrinker {
         GeneratedType original_failing_value;
-        explicit Shrinker(GeneratorType const&, GeneratedType const&) {}
-        [[nodiscard]] auto shrinking() const -> bool { return false; }
-        void next_shrink() const { /* not called */ }
+        explicit Shrinker(GeneratorType const&, GeneratedType const&, std::set<GeneratedType>&) {}
+        [[nodiscard]] auto shrink() const -> bool { return false; }
     };
 
     template<IsGeneratorShrinkable GeneratorType, typename GeneratedType>
@@ -75,25 +74,27 @@ namespace CatchKit::Detail {
         std::generator<GeneratedType> shrink_generator;
         using iterator = decltype(shrink_generator.begin());
         iterator it;
+        std::set<GeneratedType>& cache;
 
-        Shrinker(GeneratorType& generator, GeneratedType& current_value)
+        Shrinker(GeneratorType& generator, GeneratedType& current_value, std::set<GeneratedType>& cache)
         :   current_value(current_value),
             original_failing_value(current_value),
             shrink_generator( generator.shrink( original_failing_value ) ),
-            it( shrink_generator.begin() )
-        {
-            if( shrinking() )
-                current_value = *it;
-        }
+            it( shrink_generator.begin() ),
+            cache(cache)
+        {}
 
-        [[nodiscard]] auto shrinking() const -> bool {
-            return it != shrink_generator.end();
-        }
-        void next_shrink() {
-            assert( shrinking() );
-            ++it;
-            if( shrinking() )
+        [[nodiscard]] auto shrink() -> bool {
+            while( it != shrink_generator.end() ) {
                 current_value = *it;
+                ++it;
+                if( !cache.contains( current_value ) ) {
+                    if( cache.size() < 10 )
+                        cache.insert( current_value );
+                    return true;
+                }
+            }
+            return false;
         }
     };
 
@@ -108,6 +109,7 @@ namespace CatchKit::Detail {
         GeneratedType current_generated_value;
         std::optional<GeneratedType> pre_shrunk_value;
         std::optional<Shrinker<GeneratorType, GeneratedType>> shrinker;
+        std::set<GeneratedType> cache;
     public:
         explicit GeneratorNode( NodeId&& id, GeneratorType&& gen )
         :   ExecutionNode(std::move(id)),
@@ -143,19 +145,16 @@ namespace CatchKit::Detail {
         // ShrinkableNode interface:
         void start_shrinking() override {
             pre_shrunk_value = current_generated_value;
-            shrinker.emplace( generator, current_generated_value );
+            shrinker.emplace( generator, current_generated_value, cache );
         }
         void rebase_shrink() override {
             assert( shrinker );
-            shrinker.emplace( generator, current_generated_value );
+            shrinker.emplace( generator, current_generated_value, cache );
         }
 
         auto shrink() -> bool override {
             assert(shrinker);
-            if( !shrinker->shrinking() )
-                return true;
-            shrinker->next_shrink();
-            return !shrinker->shrinking();
+            return shrinker->shrink();
         }
 
         auto stop_shrinking() -> bool override {

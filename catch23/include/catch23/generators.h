@@ -62,8 +62,13 @@ namespace CatchKit {
                         co_yield 1;
                     if( value > 2 )
                         co_yield 2;
-                    if( value > 5 )
-                        co_yield value/2; // If this works we quickly descend towards zero
+                    if( value > 8 ) {
+                        co_yield value/3; // If this works we quickly descend towards zero
+                        co_yield 2*value/3;
+                    }
+                    if( value > 20 ) {
+                        co_yield value-10;
+                    }
 
                     while( value > 3 )
                         co_yield --value;
@@ -74,8 +79,8 @@ namespace CatchKit {
                             co_yield -1;
                         if( value < -2 )
                             co_yield -2;
-                        if( value < -5 )
-                            co_yield value/2;
+                        if( value < -8 )
+                            co_yield value/3;
                         while( value < -3 )
                             co_yield ++value;
                     }
