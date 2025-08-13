@@ -78,7 +78,7 @@ namespace CatchKit {
             Strategies strategy = Strategies::SimpleValues;
 
             void rebase() {
-                if( strategy == Strategies::SimpleValues )
+                // if( strategy == Strategies::SimpleValues )
                     strategy = Strategies::BinaryDescent;
             }
             auto shrink( values_of<T>& generator, T value ) -> std::generator<T> {

@@ -68,35 +68,44 @@ namespace CatchKit::Detail {
     struct Shrinker {
         GeneratedType original_failing_value;
         explicit Shrinker(GeneratorType const&, GeneratedType const&, std::set<GeneratedType>&) {}
+        void rebase(){}
         [[nodiscard]] auto shrink() const -> bool { return false; }
     };
 
     template<IsGeneratorShrinkable GeneratorType, typename GeneratedType>
     struct Shrinker<GeneratorType, GeneratedType> {
+        GeneratorType& generator;
         GeneratedType& current_value;
         GeneratedType original_failing_value;
         shrinker_for<GeneratorType> shrinker;
-        std::generator<GeneratedType> shrink_generator;
-        using iterator = decltype(shrink_generator.begin());
+        std::optional<std::generator<GeneratedType>> shrink_generator;
+        using iterator = decltype(shrink_generator->begin());
         iterator it;
         std::set<GeneratedType>& cache;
 
         Shrinker(GeneratorType& generator, GeneratedType& current_value, std::set<GeneratedType>& cache)
-        :   current_value(current_value),
+        :   generator(generator),
+            current_value(current_value),
             original_failing_value(current_value),
             shrink_generator( shrinker.shrink( generator, original_failing_value ) ),
-            it( shrink_generator.begin() ),
+            it( shrink_generator->begin() ),
             cache(cache)
         {}
-
+        void rebase() {
+            original_failing_value = current_value;
+            shrink_generator.reset();
+            shrinker.rebase();
+            shrink_generator = shrinker.shrink( generator, original_failing_value );
+            it = shrink_generator->begin();
+        }
         [[nodiscard]] auto shrink() -> bool {
-            while( it != shrink_generator.end() ) {
+            while( it != shrink_generator->end() ) {
                 current_value = *it;
                 ++it;
                 if( !cache.contains( current_value ) ) {
                     if( cache.size() < 10 )
                         cache.insert( current_value );
-                    std::print("trying: {}", current_value);
+                    // std::print("trying: {} ", current_value);
                     return true;
                 }
             }
@@ -155,7 +164,8 @@ namespace CatchKit::Detail {
         }
         void rebase_shrink() override {
             assert( shrinker );
-            shrinker.emplace( generator, current_generated_value, cache );
+            shrinker->rebase();
+            // shrinker.emplace( generator, current_generated_value, cache );
         }
 
         auto shrink() -> bool override {
