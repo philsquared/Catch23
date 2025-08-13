@@ -206,6 +206,18 @@ namespace CatchKit {
         using Detail::from_values;
         using Detail::inclusive_range_of;
 
+        // To use generators without macros
+        // !TBD This doesn't currently work due to the check instance not
+        // being set globally
+        template<typename G>
+        auto generate(G&& g, std::source_location loc = std::source_location::current()) {
+            Detail::GeneratorAcquirer acquirer(check, {"", loc});
+            if( !acquirer.generator_node )
+                acquirer.make_generator(std::forward<G>(g));
+            return acquirer.derived_node<G>()->current_value();
+        }
+
+
     } // namespace Generators
 
 } // namespace CatchKit
