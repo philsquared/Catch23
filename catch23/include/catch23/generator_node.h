@@ -16,8 +16,12 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <print> // !DBG
 
 namespace CatchKit::Detail {
+
+    template<typename G>
+    struct shrinker_for;
 
     template<typename G>
     concept IsSingleValueGenerator = requires(G g, RandomNumberGenerator& rng){ { g.generate(rng) }; };
@@ -56,7 +60,7 @@ namespace CatchKit::Detail {
     using get_generated_type = decltype(generate_at(std::declval<GeneratorType>(), 0, make_dummy_rng()));
 
     template<typename G>
-    concept IsGeneratorShrinkable = requires(G& g, get_generated_type<G> val){ { g.shrink(val) }; };
+    concept IsGeneratorShrinkable = requires(G& g, get_generated_type<G> val){ { shrinker_for<G>().shrink(g, val) }; };
 
 
     // This is a dummy implementation that saves us having to constexpr guard calls that aren't taken
@@ -71,6 +75,7 @@ namespace CatchKit::Detail {
     struct Shrinker<GeneratorType, GeneratedType> {
         GeneratedType& current_value;
         GeneratedType original_failing_value;
+        shrinker_for<GeneratorType> shrinker;
         std::generator<GeneratedType> shrink_generator;
         using iterator = decltype(shrink_generator.begin());
         iterator it;
@@ -79,7 +84,7 @@ namespace CatchKit::Detail {
         Shrinker(GeneratorType& generator, GeneratedType& current_value, std::set<GeneratedType>& cache)
         :   current_value(current_value),
             original_failing_value(current_value),
-            shrink_generator( generator.shrink( original_failing_value ) ),
+            shrink_generator( shrinker.shrink( generator, original_failing_value ) ),
             it( shrink_generator.begin() ),
             cache(cache)
         {}
@@ -91,6 +96,7 @@ namespace CatchKit::Detail {
                 if( !cache.contains( current_value ) ) {
                     if( cache.size() < 10 )
                         cache.insert( current_value );
+                    std::print("trying: {}", current_value);
                     return true;
                 }
             }

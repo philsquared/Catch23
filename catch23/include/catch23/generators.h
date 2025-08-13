@@ -39,6 +39,14 @@ namespace CatchKit {
             }
         };
 
+        template<typename T> requires IsGeneratorShrinkable<values_of<T>>
+        struct shrinker_for<multiple_values<T>> : shrinker_for<values_of<T>> {
+            template<typename U>
+            auto shrink( multiple_values<T>& generator, U&& value ) -> std::generator<T> {
+                return shrinker_for<values_of<T>>::shrink( generator.value_generator, std::forward<U>(value) );
+            }
+        };
+
         template<typename T>
         constexpr auto operator, ( std::size_t multiple, values_of<T>&& values ) {
             return multiple_values<T>{ multiple, std::move(values) };
@@ -54,35 +62,74 @@ namespace CatchKit {
 
             [[nodiscard]] auto generate( RandomNumberGenerator& rng ) const { return rng.generate(from, up_to); }
 
-            auto shrink(T value) -> std::generator<T> {
+        };
+
+        template<IsBuiltInNumeric T>
+        struct shrinker_for<values_of<T>> {
+
+            enum class Strategies {
+                SimpleValues,
+                BinaryDescent,
+                Ladder1000,
+                Ladder100,
+                Ladder10,
+                Ladder1
+            };
+            Strategies strategy = Strategies::SimpleValues;
+
+            void rebase() {
+                if( strategy == Strategies::SimpleValues )
+                    strategy = Strategies::BinaryDescent;
+            }
+            auto shrink( values_of<T>& generator, T value ) -> std::generator<T> {
                 if( value > 0 ) {
-                    co_yield 0;
+                    switch( strategy ) {
+                    case Strategies::SimpleValues:
+                        co_yield 0;
 
-                    if( value > 1 )
-                        co_yield 1;
-                    if( value > 2 )
-                        co_yield 2;
-                    if( value > 8 ) {
-                        co_yield value/3; // If this works we quickly descend towards zero
-                        co_yield 2*value/3;
+                        if( value > 1 )
+                            co_yield 1;
+                        if( value > 2 )
+                            co_yield 2;
+                        strategy = Strategies::BinaryDescent;
+                        [[fallthrough]];
+                    case Strategies::BinaryDescent:
+                        if( value > 8 )
+                            co_yield value/2;
+                        strategy = Strategies::Ladder1000;
+                        [[fallthrough]];
+                    case Strategies::Ladder1000:
+                        if( value > 2000 )
+                            co_yield value-1000;
+                        strategy = Strategies::Ladder100;
+                        [[fallthrough]];
+                    case Strategies::Ladder100:
+                        if( value > 200 )
+                            co_yield value-100;
+                        strategy = Strategies::Ladder10;
+                        [[fallthrough]];
+                    case Strategies::Ladder10:
+                        if( value > 20 )
+                            co_yield value-10;
+                        strategy = Strategies::Ladder1;
+                        [[fallthrough]];
+                    default:
+                        if( value > 3 )
+                            co_yield --value;
                     }
-                    if( value > 20 ) {
-                        co_yield value-10;
-                    }
-
-                    while( value > 3 )
-                        co_yield --value;
                 }
                 else {
                     if constexpr( std::is_signed_v<T> ) {
-                        if( value < -1 )
-                            co_yield -1;
-                        if( value < -2 )
-                            co_yield -2;
-                        if( value < -8 )
-                            co_yield value/3;
-                        while( value < -3 )
-                            co_yield ++value;
+                        if( strategy == Strategies::SimpleValues ) {
+                            co_yield -value;
+
+                            // Explicitly yield a positive 0 for floating point, too
+                            if constexpr( std::is_floating_point_v<T> )
+                                co_yield 0;
+                        }
+                        // Mirror positive shrinks
+                        for(T i: shrink(generator, -value))
+                            co_yield -i;
                     }
                 }
             }
