@@ -21,7 +21,10 @@ namespace CatchKit::Detail {
 
         // !TBD When we can use stacktrace do something like this:
         // https://godbolt.org/z/jM4TnaMEW
+        if( last_result == ResultType::Pass )
+            return;
 
+        // Redundant?
         auto os = stdout;
         if (last_result != ResultType::Pass )
             os = stderr;

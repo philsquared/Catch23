@@ -195,7 +195,7 @@ namespace CatchKit::Detail {
         ExecutionNode* generator_node;
 
         GeneratorAcquirer(Checker& checker, NodeId&& id)
-        :   execution_nodes(get_execution_nodes_from_result_handler(checker.result_handler)),
+        :   execution_nodes(get_execution_nodes_from_result_handler(*checker.result_handler)),
             id(std::move(id)),
             generator_node(execution_nodes.find_node(this->id))
         {}

@@ -23,6 +23,6 @@ namespace CatchKit::Detail {
 
 } // namespace CatchKit::Detail
 
-#define SECTION(name) if( auto section_info = try_enter_section(CatchKit::Detail::get_execution_nodes_from_result_handler(check.result_handler), name) )
+#define SECTION(name) if( auto section_info = try_enter_section(CatchKit::Detail::get_execution_nodes_from_result_handler(*check.result_handler), name) )
 
 #endif // CATCH23_SECTIONS_H

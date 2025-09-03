@@ -10,8 +10,8 @@ namespace {
     constinit CatchKit::Detail::ResultHandler* current_assertion_handler = &default_assertion_handler;
 }
 
-constinit CatchKit::Checker check(default_assertion_handler, CatchKit::ResultDisposition::Continue);
-constinit CatchKit::Checker require(default_assertion_handler, CatchKit::ResultDisposition::Abort);
+constinit CatchKit::Checker check( &default_assertion_handler, CatchKit::ResultDisposition::Continue );
+constinit CatchKit::Checker require( &default_assertion_handler, CatchKit::ResultDisposition::Abort );
 
 namespace CatchKit::Detail {
 
@@ -26,7 +26,7 @@ namespace CatchKit::Detail {
     }
 
     auto Checker::operator()(AssertionContext&& context) -> Asserter {
-        result_handler.on_assertion_start(result_disposition, std::move(context));
+        result_handler->on_assertion_start(result_disposition, std::move(context));
         return Asserter{*this};
     }
 

@@ -10,11 +10,15 @@ namespace CatchKit::Detail {
     namespace {
         void invoke_test( Test const& test, TestResultHandler& test_handler ) {
             Checker check{
-                .result_handler=test_handler,
+                .result_handler=&test_handler,
                 .result_disposition=ResultDisposition::Continue };
             Checker require{
-                .result_handler=test_handler,
+                .result_handler=&test_handler,
                 .result_disposition=ResultDisposition::Abort };
+
+            Checker old_check = ::check, old_require = ::require;
+            ::check = check;
+            ::require = require;
 
             try {
                 test.test_fun(check, require);
@@ -33,6 +37,8 @@ namespace CatchKit::Detail {
                 test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
                 test_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
             }
+            ::check = old_check;
+            ::require = old_require;
         }
     }
     auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {

@@ -8,7 +8,7 @@
 namespace CatchKit::Detail {
 
     VariableCapture::VariableCapture(std::string_view name, std::string_view type, Checker& checker)
-    : name(name), type(type), result_handler(checker.result_handler) {
+    : name(name), type(type), result_handler(*checker.result_handler) {
         result_handler.add_variable_capture(this);
     }
     VariableCapture::~VariableCapture() {

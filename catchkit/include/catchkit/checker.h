@@ -21,7 +21,7 @@ namespace CatchKit::Detail
     struct Asserter;
 
     struct Checker {
-        ResultHandler& result_handler;
+        ResultHandler* result_handler;
         ResultDisposition result_disposition;
         bool should_decompose = true;
 
@@ -33,14 +33,14 @@ namespace CatchKit::Detail
         Checker& checker;
 
         ~Asserter() noexcept(false) {
-            checker.result_handler.on_assertion_end(); // This may throw to cancel the test
+            checker.result_handler->on_assertion_end(); // This may throw to cancel the test
         }
         void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
                 expr_call(*this);
             }
             catch(...) {
-                checker.result_handler.on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
+                checker.result_handler->on_assertion_result( ResultType::UnexpectedException, {}, get_exception_message(std::current_exception()) );
             }
         }
 
@@ -53,8 +53,8 @@ namespace CatchKit::Detail
         }
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
             bool is_failure = !result;
-            if( checker.result_handler.report_on == ReportOn::AllResults || is_failure ) {}
-                checker.result_handler.on_assertion_result(is_failure ? ResultType::ExpressionFailed : ResultType::Pass, {}, message);
+            if( checker.result_handler->report_on == ReportOn::AllResults || is_failure ) {}
+                checker.result_handler->on_assertion_result(is_failure ? ResultType::ExpressionFailed : ResultType::Pass, {}, message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
@@ -157,11 +157,11 @@ namespace CatchKit::Detail
     void Asserter::accept_expr( auto& expr ) noexcept {
         auto raw_result = expr.evaluate();
         auto result = to_result_type( raw_result );
-        if( checker.result_handler.report_on == ReportOn::AllResults || result != ResultType::Pass ) {
-            checker.result_handler.on_assertion_result( result, expr.expand( raw_result ), expr.message );
+        if( checker.result_handler->report_on == ReportOn::AllResults || result != ResultType::Pass ) {
+            checker.result_handler->on_assertion_result( result, expr.expand( raw_result ), expr.message );
         }
         else {
-            checker.result_handler.on_assertion_result( result, {}, expr.message );
+            checker.result_handler->on_assertion_result( result, {}, expr.message );
         }
     }
 
