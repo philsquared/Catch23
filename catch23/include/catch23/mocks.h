@@ -275,9 +275,6 @@ namespace CatchKit::Mocks {
     };
 
     template<typename T, int C>
-    struct MethodImpl {};
-
-    template<typename T, int C>
     struct MethodInfo {};
 
     template<typename T, int C>
@@ -373,13 +370,11 @@ namespace CatchKit::Mocks {
 #define MOCK(InterfaceType) \
     namespace for_##InterfaceType { \
         using BaseType = InterfaceType; \
-        template<int C> struct MethodImpl {}; \
         template<int C> struct MethodInfo {}; \
-        struct NamedMockBase : CatchKit::Mocks::MockBase { NamedMockBase() : MockBase( #InterfaceType ) {} }; \
+        struct NamedMockBase : BaseType, CatchKit::Mocks::MockBase { NamedMockBase() : MockBase( #InterfaceType ) {} }; \
     } \
     namespace CatchKit::Mocks { \
         template<> struct MethodStartCounter<InterfaceType> { static constexpr int value = __COUNTER__; }; \
-        template<int C> struct MethodImpl<InterfaceType, C> : for_##InterfaceType::MethodImpl<C> {}; \
         template<int C> struct MethodInfo<InterfaceType, C> : for_##InterfaceType::MethodInfo<C> {}; \
     } \
     namespace for_##InterfaceType { \
@@ -388,14 +383,14 @@ namespace CatchKit::Mocks {
     namespace for_##InterfaceType
 
 #define MOCK_METHOD_IMPL(counter, qualifiers, return_type, name, ...) \
-    template<> struct MethodImpl<counter-start_counter> : virtual BaseType, virtual NamedMockBase { \
+    struct MethodImpl_for_##name : virtual NamedMockBase { \
         return_type name ( ADD_ARG_NAMES(__VA_ARGS__) ) qualifiers final; \
     }; \
-    template<> struct MethodInfo<counter-start_counter> : MethodImpl<counter-start_counter> { \
+    template<> struct MethodInfo<counter-start_counter> : MethodImpl_for_##name { \
         CatchKit::Mocks::Method<return_type __VA_OPT__(,) __VA_ARGS__> name; \
         MethodInfo() : name( #name, this ) {} \
     }; \
-    return_type MethodImpl<counter-start_counter>::name ( ADD_ARG_NAMES(__VA_ARGS__) ) qualifiers { \
+    return_type MethodImpl_for_##name::name ( ADD_ARG_NAMES(__VA_ARGS__) ) qualifiers { \
         return static_cast<MethodInfo<counter-start_counter> const*>(this)->name.invoke(FORWARD_ARGS(__VA_ARGS__)); \
     }
 
