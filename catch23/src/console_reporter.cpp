@@ -77,41 +77,38 @@ namespace CatchKit {
                 println( ColourIntent::OriginalExpression, "  for {}", context.macro_name );
         }
 
-        switch( assertion_info.result ) {
-        case ResultType::UnexpectedException:
+        if( assertion_info.expression_type == ExpressionType::Exception ) {
             std::println("due to an unexpected exception");
-            break;
-        case ResultType::MissingException:
-            std::println("due to a missing exception");
-            break;
-        default:
-            if( assertion_info.expression_info ) {
-                std::println("with expansion:");
-                auto const& expr_info = *assertion_info.expression_info;
-                print( ColourIntent::ReconstructedExpression, "  {}", expr_info );
-                if( expr_info.expression_type == Detail::ExpressionType::Match ) {
-                    if( assertion_info.passed() )
-                        std::print(" - matched");
-                    else
-                        std::print(" - failed to match");
-                }
-                if( !expr_info.sub_expressions.empty() ) {
-                    std::println( " because:");
-                    for(auto const& sub_expr : expr_info.sub_expressions) {
-                        if( sub_expr.result )
-                            std::print("    ✅ ");
-                        else
-                            std::print("    ❌ ");
-                        print( ColourIntent::ReconstructedExpression, "{} ", sub_expr.description );
-                        if( sub_expr.result )
-                            std::println("matched");
-                        else
-                            std::println("failed to match");
-                    }
-                }
-                std::println();
+            // !TBD:
+            // case ResultType::MissingException:
+            //     std::println("due to a missing exception");
+            //     break;
+        }
+        else if( assertion_info.expression_info ) {
+            std::println("with expansion:");
+            auto const& expr_info = *assertion_info.expression_info;
+            print( ColourIntent::ReconstructedExpression, "  {}", expr_info );
+            if( assertion_info.expression_type == ExpressionType::Match ) {
+                if( assertion_info.passed() )
+                    std::print(" - matched");
+                else
+                    std::print(" - failed to match");
             }
-            break;
+            if( !expr_info.sub_expressions.empty() ) {
+                std::println( " because:");
+                for(auto const& sub_expr : expr_info.sub_expressions) {
+                    if( sub_expr.result )
+                        std::print("    ✅ ");
+                    else
+                        std::print("    ❌ ");
+                    print( ColourIntent::ReconstructedExpression, "{} ", sub_expr.description );
+                    if( sub_expr.result )
+                        std::println("matched");
+                    else
+                        std::println("failed to match");
+                }
+            }
+            std::println();
         }
         if (!assertion_info.message.empty()) {
             std::println("with message:");
@@ -128,7 +125,7 @@ namespace CatchKit {
     void ConsoleReporter::on_shrink_result( ResultType result, int shrinks_so_far ) {
         const int shrink_print_width = 37;
         if( shrinks_so_far < shrink_print_width ) {
-            if( result == ResultType::Pass )
+            if( result == ResultType::Passed )
                 std::print("✅");
             else
                 std::print("❌");

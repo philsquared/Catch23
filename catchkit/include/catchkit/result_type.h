@@ -9,12 +9,13 @@ namespace CatchKit {
 
     enum class ResultType {
         Unknown,
-        Pass,
-        ExpressionFailed,
-        MatchFailed,
-        UnexpectedException,
-        MissingException
+        Passed,
+        Failed
     };
+
+    inline bool operator! (ResultType result) {
+        return result == ResultType::Failed;
+    }
 
 } // namespace CatchKit
 

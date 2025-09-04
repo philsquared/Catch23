@@ -41,7 +41,7 @@ namespace CatchKit::Detail {
         shrinking_mode = ShrinkingMode::Normal;
     }
 
-    void TestResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
+    void TestResultHandler::on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
         last_result = result;
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
@@ -52,7 +52,7 @@ namespace CatchKit::Detail {
             return;
 
         if( shrinking_mode != ShrinkingMode::Shrunk ) {
-            if( result == ResultType::Pass )
+            if( result == ResultType::Passed )
                 assertions.passed_explicitly++;
             else
                 assertions.failed++;
@@ -61,21 +61,21 @@ namespace CatchKit::Detail {
         // !TBD: We should need to check this again
         // - go back to having two on_assertion_result methods - one that takes just a result,
         // the other takes the full, expanded, data (probably no need for optional)
-        if( report_on == ReportOn::AllResults || result != ResultType::Pass ) {
+        if( report_on == ReportOn::AllResults || result != ResultType::Passed ) {
             if( !message.empty() ) {
                 // Attempt to string out an inline message
                 // note: this is quite brittle, so if it seems to have stopped working
                 // check that this logic still matches usage
-                if( auto pos = current_context.original_expression.find(message); pos != std::string::npos ) {
-                    if( pos > 3 && current_context.original_expression[pos-3] == ',' )
-                        current_context.original_expression = current_context.original_expression.substr( 0, pos-3 );
+                if( auto pos = current_context.original_expression.rfind(message); pos != std::string::npos ) {
+                    assert( pos > 3 && current_context.original_expression[pos-3] == ',' );
+                    current_context.original_expression = current_context.original_expression.substr( 0, pos-3 );
                 }
             }
 
             std::string full_message(message);
 
             // Add in any captured variables
-            // !TBD: improve formatting - or should we pass this through in a more fine grained way to the reporter?
+            // !TBD: improve formatting - or should we pass this through in a more fine-grained way to the reporter?
             if( !variable_captures.empty() ) {
                 if( !full_message.empty() )
                     full_message += "\nwith";
@@ -84,12 +84,12 @@ namespace CatchKit::Detail {
                     full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
                 }
             }
-            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, full_message } );
+            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_type, expression_info, full_message } );
         }
     }
 
     void TestResultHandler::on_assertion_end() {
-        if( last_result != ResultType::Pass && result_disposition == ResultDisposition::Abort ) {
+        if( last_result != ResultType::Passed && result_disposition == ResultDisposition::Abort ) {
             throw TestCancelled();
         }
     }

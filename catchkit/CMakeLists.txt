@@ -35,6 +35,7 @@ add_library(Catchkit STATIC
         include/catchkit/internal_matchers.h
         src/variable_capture.cpp
         include/catchkit/variable_capture.h
+        include/catchkit/expression_type.h
 )
 
 target_include_directories(Catchkit PUBLIC include)

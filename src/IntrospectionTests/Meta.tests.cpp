@@ -22,7 +22,7 @@ TEST("A test that can run tests") {
 
     auto const& result1 = results[0].info;
     CHECK( result1.message.empty() );
-    CHECK( !result1.passed() );
+    CHECK( result1.failed() );
     REQUIRE( result1.expression_info );
     CHECK( result1.expression_info->lhs == "42" );
     CHECK( result1.expression_info->rhs == "54" );

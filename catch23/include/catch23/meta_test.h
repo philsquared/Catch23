@@ -16,8 +16,8 @@ namespace CatchKit {
         AssertionContext context;
         AssertionInfo info;
 
-        auto passed() const { return info.passed(); }
-        auto failed() const { return info.failed(); }
+        auto passed() const { return info.result == ResultType::Passed; }
+        auto failed() const { return info.result == ResultType::Failed; }
     };
 
     class MetaTestReporter : public Reporter {

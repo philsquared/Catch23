@@ -6,6 +6,7 @@
 #define CATCHKIT_EXPR_REF_H
 
 #include "result_type.h"
+#include "expression_type.h"
 #include "expression_info.h"
 
 #include <vector>
@@ -23,6 +24,7 @@ namespace CatchKit::Detail {
         RhsT& rhs;
         Asserter* asserter = nullptr;
         std::string message = {};
+        static constexpr ExpressionType expression_type = ExpressionType::Binary;
 
         auto evaluate() -> ResultType;
         auto expand( ResultType result ) -> ExpressionInfo;
@@ -43,6 +45,7 @@ namespace CatchKit::Detail {
         T& value;
         Asserter* asserter;
         std::string message = {};
+        static constexpr ExpressionType expression_type = ExpressionType::Unary;
 
         auto evaluate() -> ResultType;
         auto expand( ResultType result ) -> ExpressionInfo;
@@ -101,6 +104,7 @@ namespace CatchKit::Detail {
         MatcherT const& matcher;
         Asserter* asserter = nullptr;
         std::string message = {};
+        static constexpr ExpressionType expression_type = ExpressionType::Match;
 
         auto evaluate() -> MatchResult;
         auto expand( MatchResult const& result ) -> ExpressionInfo;

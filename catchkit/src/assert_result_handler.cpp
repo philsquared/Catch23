@@ -16,17 +16,17 @@ namespace CatchKit::Detail {
         this->result_disposition = result_disposition;
     }
 
-    void AssertResultHandler::on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
+    void AssertResultHandler::on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
         last_result = result;
 
         // !TBD When we can use stacktrace do something like this:
         // https://godbolt.org/z/jM4TnaMEW
-        if( last_result == ResultType::Pass )
+        if( last_result == ResultType::Passed )
             return;
 
         // Redundant?
         auto os = stdout;
-        if (last_result != ResultType::Pass )
+        if (last_result != ResultType::Passed )
             os = stderr;
 
         std::println(os, "{}:{}:{}: in function '{}'",
@@ -39,29 +39,29 @@ namespace CatchKit::Detail {
             macro_name = "assertion";
         if ( !current_context.original_expression.empty() )
             std::println(os, "{} {} for expression:\n\t{}",
-                macro_name, (result == ResultType::Pass) ? "passed" : "failed",
+                macro_name, (result == ResultType::Passed) ? "passed" : "failed",
                 current_context.original_expression);
         else
             std::println(os, "{} {}",
-                macro_name, (result == ResultType::Pass) ? "passed" : "failed");
-        switch( result ) {
-            case ResultType::UnexpectedException:
+                macro_name, (result == ResultType::Passed) ? "passed" : "failed");
+
+        if( result == ResultType::Failed ) {
+            if( expression_type == ExpressionType::Exception ) {
                 std::println(os, "due to an unexpected exception");
-                break;
-            case ResultType::MissingException:
-                std::println(os, "due to a missing exception");
-                break;
-            default:
-                if(expression_info)
-                    std::println(os, "with expansion:\n\t{}", *expression_info );
-                break;
+                // !TBD: distinguish
+                // std::println(os, "due to a missing exception");
+            // TBD: other types
+            }
         }
+        if(expression_info)
+            std::println(os, "with expansion:\n\t{}", *expression_info );
+
         if (!message.empty()) {
             std::println(os, "with message:\n\t{}", message);
         }
     }
     void AssertResultHandler::on_assertion_end() {
-        if ( last_result != ResultType::Pass && result_disposition == ResultDisposition::Abort ) {
+        if ( last_result != ResultType::Passed && result_disposition == ResultDisposition::Abort ) {
             std::terminate();
         }
     }

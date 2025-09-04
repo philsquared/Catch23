@@ -19,22 +19,21 @@ namespace CatchKit::Detail {
         bool result;
     };
 
-    enum class ExpressionType {
-        Unary,
-        Binary,
-        Match,
-        Expectation
-    };
 
-    struct ExpressionInfo
-    {
+    // !TBD: This could do with a rethink.
+    // It has evolved to be several different things, depending on expression type.
+    // ExpressionType has now been added, which is a start.
+    // Current thinking:
+    // - Expand ExpressionType to include most of the things in ResultType, like exceptions.
+    // - Moved ExpressionType into AssertionInfo and have ResultType just be a pass/ fail
+    // - Have different ExpressionInfo types for different types of expression and hold them in a variant
+    struct ExpressionInfo {
         std::string lhs;
         std::string rhs;
 
         Operators op;
         std::string_view op_str;
 
-        ExpressionType expression_type;
         std::vector<SubExpressionInfo> sub_expressions = {};
     };
 

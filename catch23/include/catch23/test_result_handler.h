@@ -33,7 +33,7 @@ namespace CatchKit::Detail
         auto operator=(TestResultHandler&&) = delete; // non-copyable, non-moveable
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
-        void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
+        void on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
 
         void on_shrink_start();
@@ -45,7 +45,7 @@ namespace CatchKit::Detail
 
         [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
         [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }
-        [[nodiscard]] auto passed() const { return last_result == ResultType::Pass; }
+        [[nodiscard]] auto passed() const { return last_result == ResultType::Passed; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }
 

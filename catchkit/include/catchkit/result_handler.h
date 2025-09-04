@@ -5,6 +5,7 @@
 #ifndef CATCHKIT_VIOLATION_HANDLER_H
 #define CATCHKIT_VIOLATION_HANDLER_H
 
+#include "expression_type.h"
 #include "result_type.h"
 #include "expression_info.h"
 #include "report_on.h"
@@ -26,7 +27,7 @@ namespace CatchKit::Detail
         virtual ~ResultHandler();
 
         virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) = 0;
-        virtual void on_assertion_result( ResultType result, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) = 0;
+        virtual void on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) = 0;
         virtual void on_assertion_end() = 0;
 
         virtual void add_variable_capture(VariableCapture*) { /* do nothing by default */ };

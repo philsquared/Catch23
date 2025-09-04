@@ -9,6 +9,7 @@
 
 #include "catchkit/expression_info.h"
 #include "catchkit/result_type.h"
+#include "catchkit/expression_type.h"
 #include "catchkit/assertion_context.h"
 #include "catchkit/report_on.h"
 
@@ -18,11 +19,12 @@ namespace CatchKit {
 
     struct AssertionInfo {
         ResultType result;
+        ExpressionType expression_type;
         std::optional<ExpressionInfo> expression_info;
         std::string message;
 
-        [[nodiscard]] auto passed() const { return result == ResultType::Pass; }
-        [[nodiscard]] auto failed() const { return result != ResultType::Pass; }
+        [[nodiscard]] auto passed() const { return result == ResultType::Passed; }
+        [[nodiscard]] auto failed() const { return result != ResultType::Passed; }
     };
 
     struct Counters {

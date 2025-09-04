@@ -23,7 +23,7 @@ TEST("execution nodes") {
     CHECK( node.get_state() == ExecutionNode::States::Entered );
 
     CHECK( node.exit() == ExecutionNode::States::Completed,
-        "When we exit immediately should completes" );
+        "When we exit immediately should complete" );
 
     CHECK( nodes.get_root().exit() == ExecutionNode::States::Completed );
 
