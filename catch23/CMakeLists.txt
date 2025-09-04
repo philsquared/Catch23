@@ -36,6 +36,8 @@ add_library(Catch23 STATIC
         include/catch23/print.h
         src/main.cpp
         include/catch23/main.h
+        include/catch23/mocks.h
+        src/mocks.cpp
 )
 
 target_include_directories(Catch23 PUBLIC include)
