@@ -9,7 +9,6 @@
 
 #include "catchkit/expression_info.h"
 #include "catchkit/result_type.h"
-#include "catchkit/expression_type.h"
 #include "catchkit/assertion_context.h"
 #include "catchkit/report_on.h"
 

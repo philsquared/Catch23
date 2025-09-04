@@ -5,7 +5,6 @@
 #ifndef CATCHKIT_VIOLATION_HANDLER_H
 #define CATCHKIT_VIOLATION_HANDLER_H
 
-#include "expression_type.h"
 #include "result_type.h"
 #include "expression_info.h"
 #include "report_on.h"
