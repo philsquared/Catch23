@@ -19,6 +19,13 @@ namespace CatchKit::Detail {
         bool result;
     };
 
+    enum class ExpressionType {
+        Unary,
+        Binary,
+        Match,
+        Expectation
+    };
+
     struct ExpressionInfo
     {
         std::string lhs;
@@ -27,6 +34,7 @@ namespace CatchKit::Detail {
         Operators op;
         std::string_view op_str;
 
+        ExpressionType expression_type;
         std::vector<SubExpressionInfo> sub_expressions = {};
     };
 

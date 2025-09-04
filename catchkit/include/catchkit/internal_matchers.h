@@ -257,8 +257,10 @@ namespace CatchKit {
             if constexpr ( IsCompositeMatcher<MatcherT>) {
                 collect_subexpressions(matcher, sub_expressions, result);
             }
-            std::string expanded = matcher.describe() + (result ? " matched" : " failed to match" );
-            return ExpressionInfo{ expanded, stringify(arg), Operators::None, {}, std::move(sub_expressions) };
+            std::string arg_as_string;
+            if constexpr (!std::is_void_v<decltype(arg())>)
+                arg_as_string = stringify(arg());
+            return ExpressionInfo{ arg_as_string, matcher.describe(), Operators::None, {}, ExpressionType::Match, std::move(sub_expressions) };
         }
 
     } // namespace Detail

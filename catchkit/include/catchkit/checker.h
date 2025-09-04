@@ -102,7 +102,7 @@ namespace CatchKit::Detail
     }
     template<typename T>
     auto UnaryExprRef<T>::expand(ResultType) -> ExpressionInfo {
-        return ExpressionInfo{ {std::string(stringify(value))}, {}, Operators::None, {} };
+        return ExpressionInfo{ {std::string(stringify(value))}, {}, Operators::None, {}, ExpressionType::Unary };
     }
 
     template<typename LhsT, typename RhsT, Operators Op>
@@ -139,7 +139,8 @@ namespace CatchKit::Detail
             std::string( stringify(lhs) ),
             std::string( stringify(rhs) ),
             Op,
-            operator_to_string<Op>() };
+            operator_to_string<Op>(),
+            ExpressionType::Binary };
     }
 
     template<typename ArgT, typename MatcherT>

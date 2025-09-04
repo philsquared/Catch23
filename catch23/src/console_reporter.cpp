@@ -89,6 +89,12 @@ namespace CatchKit {
                 std::println("with expansion:");
                 auto const& expr_info = *assertion_info.expression_info;
                 print( ColourIntent::ReconstructedExpression, "  {}", expr_info );
+                if( expr_info.expression_type == Detail::ExpressionType::Match ) {
+                    if( assertion_info.passed() )
+                        std::print(" - matched");
+                    else
+                        std::print(" - failed to match");
+                }
                 if( !expr_info.sub_expressions.empty() ) {
                     std::println( " because:");
                     for(auto const& sub_expr : expr_info.sub_expressions) {
