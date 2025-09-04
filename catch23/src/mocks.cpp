@@ -1,9 +1,12 @@
 //
 // Created by Phil Nash on 02/09/2025.
 //
-#include "Catch23/mocks.h"
+#include "catch23/mocks.h"
+
+#include "catchkit/checker.h"
 
 #include <format>
+#include <utility>
 
 namespace CatchKit::Mocks {
 
@@ -11,13 +14,19 @@ namespace CatchKit::Mocks {
 
     void return_void() {}
 
-    static void fail(std::source_location location, std::string const& message) {
-        auto _ = require("", location);
-        require.result_handler->on_assertion_result(
-            ResultType::MatchFailed,
-            {},
-            message );
-        // require.result_handler->on_assertion_end();
+    [[noreturn]] static void fail(std::source_location location, std::string const& message) {
+        {
+            // This is the only part that is dependent on CatchKit/ Catch23
+            // We could isolate it more and make it more substitutable for use with other frameworks?
+            auto _ = require("", location);
+            require.result_handler->on_assertion_result(
+                ResultType::MatchFailed,
+                {},
+                message );
+        }
+        // The destructor of the asserter should detect that we failed and throw an exception
+        // so we should never reach here
+        std::unreachable();
     }
 
     auto MethodBase::get_root_expectation() -> ExpectationsBase* {

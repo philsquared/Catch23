@@ -5,14 +5,13 @@
 #ifndef CATCH23_MOCKS_H
 #define CATCH23_MOCKS_H
 
-#include "catchkit/checker.h"
-
 #include <type_traits>
 #include <variant>
 #include <functional>
-#include <generator>
 #include <memory>
-#include <generator>
+#include <ranges>
+#include <cassert>
+#include <source_location>
 
 // Macros for taking a set of types and adding names, just getting names, or just getting the types
 #define ARG_NAME_0()
@@ -109,7 +108,7 @@ namespace CatchKit::Mocks {
         std::source_location location;
 
         auto get_root_expectation() -> ExpectationsBase*;
-        void fail(std::string const& message) const;
+        [[noreturn]] void fail(std::string const& message) const;
         auto get_qualified_name() const -> std::string;
 
         template<typename T> T try_make_default_return_value() const {
@@ -117,8 +116,7 @@ namespace CatchKit::Mocks {
                 if constexpr( std::is_default_constructible_v<std::decay_t<T>> )
                     return T();
                 else {
-                    FAIL(name + ": unable to make default return type");
-                    std::unreachable();
+                    fail(get_qualified_name() + ": unable to make default return type");
                 }
             }
         }
@@ -161,7 +159,7 @@ namespace CatchKit::Mocks {
         }
 
         auto invoke(Args&&... args) -> Ret {
-            REQUIRE( is_wildcard == false );
+            assert( is_wildcard == false );
             invocations++;
             verify_within_max();
             if( handlers.empty() )
@@ -226,7 +224,7 @@ namespace CatchKit::Mocks {
         std::vector<std::unique_ptr<IExpectation>> expectations;
 
         void set( ExpectationsBase* root ) final {
-            REQUIRE( expectations.size() > 0 );
+            assert( expectations.size() > 0 );
             for( auto const& exp : expectations ) {
                 exp->set( root );
             }
@@ -248,7 +246,7 @@ namespace CatchKit::Mocks {
             }
             else {
                 // !TBD
-                FAIL();
+                assert(false);
             }
         }
         void verify() const final {
@@ -349,7 +347,6 @@ namespace CatchKit::Mocks {
             else {
                 fail(get_qualified_name() + " called, but no expectations set. Did you forget to call set()?");
             }
-            std::unreachable(); // !TBD make fail noreturn?
        }
     };
 
