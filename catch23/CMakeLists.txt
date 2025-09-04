@@ -28,8 +28,8 @@ add_library(Catch23 STATIC
         src/sections.cpp
         include/catch23/sections.h
         include/catch23/random.h
-        src/local_test.cpp
-        include/catch23/local_test.h
+        src/meta_test.cpp
+        include/catch23/meta_test.h
         src/generator_node.cpp
         include/catch23/generator_node.h
         include/catch23/print.cpp

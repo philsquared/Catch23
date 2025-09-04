@@ -6,6 +6,8 @@
 // (mostly using matchers instead of Approx)
 
 #include "catch23/catch2_compat.h"
+#include "catch23/meta_test.h"
+
 #include "catchkit/internal_warnings.h"
 
 #include <string>
@@ -20,8 +22,8 @@ namespace {
         double double_pi = 3.1415926535;
     };
 
-    static const char* returnsConstNull() { return nullptr; }
-    static char* returnsNull() { return nullptr; }
+    const char* returnsConstNull() { return nullptr; }
+    char* returnsNull() { return nullptr; }
 
 } // end unnamed namespace
 
@@ -63,6 +65,13 @@ TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
 
     double x = 1.1 + 0.1 + 0.1;
     CHECK_THAT( x, is_close_to( 1.301 ) );
+}
+
+TEST_CASE( "'Equality checks that should fail' should fail" ) {
+    auto results = RUN_TEST("Equality checks that should fail");
+
+    REQUIRE( results.failed() );
+    CHECK( results.failures() == 13 );
 }
 
 // !TBD: [!mayfail], SECTION

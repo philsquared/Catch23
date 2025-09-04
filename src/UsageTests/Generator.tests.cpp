@@ -4,7 +4,7 @@
 
 #include "catch23/test.h"
 #include "catch23/generators.h"
-#include "catch23/local_test.h"
+#include "catch23/meta_test.h"
 
 TEST("Generators", "[.]") {
     auto i = GENERATE(values_of<int>()); // Defaults to 100 values

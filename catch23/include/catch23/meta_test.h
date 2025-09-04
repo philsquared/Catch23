@@ -2,8 +2,8 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#ifndef CATCH23_LOCAL_TEST_H
-#define CATCH23_LOCAL_TEST_H
+#ifndef CATCH23_META_TEST_H
+#define CATCH23_META_TEST_H
 
 #include "internal_test.h"
 #include "test_result_handler.h"
@@ -61,6 +61,7 @@ namespace CatchKit {
         auto message() const {
             return !all_results.empty() ? all_results.back().info.message : std::string();
         }
+        auto failures() const -> int;
     };
 
     class MetaTestRunner {
@@ -73,6 +74,8 @@ namespace CatchKit {
     public:
         explicit MetaTestRunner(std::string name = "local test", std::source_location location = std::source_location::current());
         auto run( Detail::Test const& test ) && -> MetaTestResults;
+        auto run_test_by_name( std::string const& name ) && -> MetaTestResults;
+
         auto operator << ( std::invocable<Checker&, Checker&> auto const& test_fun ) && {
             return std::move(*this).run(Detail::Test{test_fun, {location, std::move(name)}});
         }
@@ -81,5 +84,6 @@ namespace CatchKit {
 } // namespace CatchKit
 
 #define LOCAL_TEST(...) CatchKit::MetaTestRunner(__VA_ARGS__) << [](CatchKit::Checker& check, CatchKit::Checker&)
+#define RUN_TEST(name) CatchKit::MetaTestRunner(name).run_test_by_name( name )
 
-#endif // CATCH23_LOCAL_TEST_H
+#endif // CATCH23_META_TEST_H
