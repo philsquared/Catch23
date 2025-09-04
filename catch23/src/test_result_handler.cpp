@@ -61,7 +61,7 @@ namespace CatchKit::Detail {
         // !TBD: We should need to check this again
         // - go back to having two on_assertion_result methods - one that takes just a result,
         // the other takes the full, expanded, data (probably no need for optional)
-        if( report_on == ReportOn::AllResults || result != ResultType::Passed ) {
+        if( report_on == ReportOn::AllResults || !result ) {
             if( !message.empty() ) {
                 // Attempt to string out an inline message
                 // note: this is quite brittle, so if it seems to have stopped working

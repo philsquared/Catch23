@@ -144,7 +144,6 @@ namespace CatchKit::Detail
         return BinaryExpressionInfo{
             std::string( stringify(lhs) ),
             std::string( stringify(rhs) ),
-            Op,
             operator_to_string<Op>() };
     }
 

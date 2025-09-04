@@ -28,8 +28,7 @@ namespace CatchKit {
         std::string lhs;
         std::string rhs;
 
-        Detail::Operators op;
-        std::string_view op_str;
+        std::string_view op;
     };
     struct MatchExpressionInfo {
         std::string candidate_value;

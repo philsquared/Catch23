@@ -27,7 +27,7 @@ TEST("A test that can run tests") {
     REQUIRE( expr1 );
     CHECK( expr1->lhs == "42" );
     CHECK( expr1->rhs == "54" );
-    CHECK( expr1->op == CatchKit::Detail::Operators::Equals );
+    CHECK( expr1->op == "==" );
 
     auto const& result2 = results[1].info;
     CHECK( result2.message.empty() );
@@ -36,7 +36,7 @@ TEST("A test that can run tests") {
     REQUIRE( expr2 );
     CHECK( expr2->lhs == "2" );
     CHECK( expr2->rhs == "2" );
-    CHECK( expr2->op == CatchKit::Detail::Operators::Equals );
+    CHECK( expr2->op == "==" );
 }
 
 TEST("Variables can be captured", "[.]") {

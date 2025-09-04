@@ -20,6 +20,7 @@ namespace CatchKit {
         ResultType result;
         ExpressionInfo expression_info;
         std::string message;
+        // !TBD: include variable captures, here?
 
         [[nodiscard]] auto passed() const { return result == ResultType::Passed; }
         [[nodiscard]] auto failed() const { return result != ResultType::Passed; }

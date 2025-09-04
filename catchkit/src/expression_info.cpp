@@ -14,7 +14,7 @@ std::format_context::iterator std::formatter<CatchKit::ExpressionInfo>::format(c
             if constexpr(std::is_same_v<T, UnaryExpressionInfo>)
                 return std::format_to( ctx.out(), "{}", expr.value );
             if constexpr(std::is_same_v<T, BinaryExpressionInfo>)
-                return std::format_to( ctx.out(), "{} {} {}", expr.lhs, expr.op_str, expr.rhs );
+                return std::format_to( ctx.out(), "{} {} {}", expr.lhs, expr.op, expr.rhs );
             if constexpr(std::is_same_v<T, MatchExpressionInfo>)
                 return std::format_to( ctx.out(), "{} {}", expr.candidate_value, expr.matcher );
             if constexpr(std::is_same_v<T, ExceptionExpressionInfo>)
