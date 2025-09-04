@@ -11,6 +11,8 @@
 #include <list>
 #include <sstream>
 
+#include "catch23/meta_test.h"
+
 void non_throwing_function() {}
 void throwing_function(std::string const& message = {}) {
     throw std::domain_error( message );
@@ -18,18 +20,31 @@ void throwing_function(std::string const& message = {}) {
 
 TEST("Bound matchers", "[.]") {
 
+    // These tests are for the matcher binding mechanism.
+    // For exception matching in general see the subsequent tests
+
+    // Using with_message implements the bound matcher internally:
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>().with_message("Don't get the message") );
+
+    // You can write a bound matcher manually by composing with >>=
     CHECK_THAT( throw std::domain_error("Get the message"), throws<std::domain_error>() >>= CatchKit::ExceptionMatchers::HasMessage("Get the message") );
+
+    // You can compose multiple bound matchers with >>=
     CHECK_THAT( throw std::domain_error("Get the message"),
                     throws<std::domain_error>()
                         >>= CatchKit::ExceptionMatchers::HasMessage()
                         >>= contains("message2") );
 
+    // The HasMessage matcher takes a value, so doesn't have to be composed with throws<>
     std::domain_error err("on the stack");
     CHECK_THAT( err, CatchKit::ExceptionMatchers::HasMessage() >>= contains("stack") );
 
-    // CHECK_THAT( "err", equals("err") >>= contains("stack") ); // Shouldn't compile
+    // The following shouldn't compile because equals() is not a bindable matcher
+    // CHECK_THAT( "err", equals("err") >>= contains("stack") );
+}
 
+TEST("Meta: Bound matchers", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Bound matchers" ).failures() == 2 );
 }
 
 struct UnknownType {};
@@ -59,7 +74,11 @@ TEST("!throws matcher fails when call does throw", "[.]") {
     CHECK_THAT( throwing_function(), !throws() );
 }
 
-// The following test have been taken from the Catch2 test suite,
+TEST("Meta: !throws matcher fails when call does throw", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "!throws matcher fails when call does throw" ).failures() == 1 );
+}
+
+// The following tests have been taken from the Catch2 test suite,
 // with modifications to allow for the new matcher syntax and semantics
 
 
@@ -163,20 +182,31 @@ TEST_CASE( "Contains string matcher", "[.][failing][matchers]" ) {
                 contains<CaseInsensitive>( "not there" ) );
     CHECK_THAT( testStringForMatching(), contains( "STRING" ) );
 }
-
+TEST("Meta: Contains string matcher", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Contains string matcher" ).failures() == 2 );
+}
 TEST_CASE( "StartsWith string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), starts_with( "This String" ) );
     CHECK_THAT( testStringForMatching(), starts_with<CaseInsensitive>( "string" ) );
+}
+TEST("Meta: StartsWith string matcher", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "StartsWith string matcher" ).failures() == 2 );
 }
 
 TEST_CASE( "EndsWith string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), ends_with( "Substring" ) );
     CHECK_THAT( testStringForMatching(), ends_with<CaseInsensitive>( "this" ) );
 }
+TEST("Meta: EndsWith string matcher", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "EndsWith string matcher" ).failures() == 2 );
+}
 
 TEST_CASE( "Equals string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), equals( "this string contains 'ABC' as a substring" ) );
     CHECK_THAT( testStringForMatching(), equals<CaseInsensitive>( "something else" ) );
+}
+TEST("Meta: Equals string matcher", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Equals string matcher" ).failures() == 2 );
 }
 
 TEST_CASE( "Equals", "[matchers]" ) {
@@ -240,6 +270,9 @@ TEST_CASE( "Matchers can be composed with both && and || - failing",
     CHECK_THAT( testStringForMatching(),
                 ( contains( "string" ) || contains( "different" ) ) && contains( "random" ) );
 }
+TEST("Meta: Matchers can be composed with both && and || - failing", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Matchers can be composed with both && and || - failing" ).failures() == 1 );
+}
 
 TEST_CASE( "Matchers can be negated (Not) with the ! operator",
            "[matchers][operators][not]" ) {
@@ -250,10 +283,13 @@ TEST_CASE( "Matchers can be negated (Not) with the ! operator - failing",
            "[matchers][operators][not][.failing]" ) {
     CHECK_THAT( testStringForMatching(), !contains( "substring" ) );
 }
+TEST("Meta: Matchers can be negated (Not) with the ! operator - failing", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Matchers can be negated (Not) with the ! operator - failing" ).failures() == 1 );
+}
 
 template <typename T> struct CustomAllocator : private std::allocator<T> {
-    using size_type = size_t;
-    using difference_type = ptrdiff_t;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = T*;
     using const_pointer = const T*;
     using reference = T&;
@@ -470,6 +506,10 @@ TEST_CASE( "Exception matchers that fail",
         REQUIRE_THAT( throwsSpecialException( 4 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
     }
 }
+TEST("Meta: Exception matchers that fail", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME( "Exception matchers that fail" ).failures() == 6 );
+}
+
 //
 // TEST_CASE( "Floating point matchers: float", "[matchers][floating-point]" ) {
 //     SECTION( "Relative" ) {
