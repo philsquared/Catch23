@@ -4,7 +4,7 @@
 
 #include "catch23/mocks.h"
 #include "catch23/test.h"
-#include "catch23/local_test.h"
+#include "catch23/meta_test.h"
 #include "catchkit/matchers.h"
 
 
