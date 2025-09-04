@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <format>
+#include <variant>
 
 namespace CatchKit::Detail {
 
@@ -20,22 +21,38 @@ namespace CatchKit::Detail {
     };
 
 
-    // !TBD: This could do with a rethink.
-    // It has evolved to be several different things, depending on expression type.
-    // ExpressionType has now been added, which is a start.
-    // Current thinking:
-    // - Expand ExpressionType to include most of the things in ResultType, like exceptions.
-    // - Moved ExpressionType into AssertionInfo and have ResultType just be a pass/ fail
-    // - Have different ExpressionInfo types for different types of expression and hold them in a variant
-    struct ExpressionInfo {
+    struct UnaryExpressionInfo {
+        std::string value;
+    };
+    struct BinaryExpressionInfo {
         std::string lhs;
         std::string rhs;
 
         Operators op;
         std::string_view op_str;
-
-        std::vector<SubExpressionInfo> sub_expressions = {};
     };
+    struct MatchExpressionInfo {
+        std::string candidate_value;
+        std::string matcher;
+
+        std::vector<SubExpressionInfo> sub_expressions;
+    };
+    struct ExceptionExpressionInfo {
+        std::string exception_message;
+        enum class Type { Expected, Unexpected, Missing };
+        Type type;
+    };
+    struct ExpectationExpressionInfo {
+        // !TBD
+    };
+
+    using ExpressionInfo = std::variant<
+        std::monostate,
+        UnaryExpressionInfo,
+        BinaryExpressionInfo,
+        MatchExpressionInfo,
+        ExceptionExpressionInfo,
+        ExpectationExpressionInfo>;
 
 } // namespace CatchKit::Detail
 

@@ -3,12 +3,32 @@
 //
 
 #include "catchkit/expression_info.h"
+#include "catchkit/expression_type.h"
+
+#include <cassert>
+
+namespace CatchKit::Detail {
+    template<ExpressionType Type>
+    using ExpressionAlternate = std::remove_reference_t<decltype(std::get<static_cast<std::size_t>(Type)>(ExpressionInfo()))>;
+
+    static_assert( std::same_as<ExpressionAlternate<ExpressionType::Unary>, UnaryExpressionInfo> );
+    static_assert( std::same_as<ExpressionAlternate<ExpressionType::Binary>, BinaryExpressionInfo> );
+
+} // namespace CatchKit::Detail
 
 std::format_context::iterator std::formatter<CatchKit::Detail::ExpressionInfo>::format(const CatchKit::Detail::ExpressionInfo& expr, std::format_context& ctx) const {
-    if( expr.op != CatchKit::Detail::Operators::None )
-        return std::format_to(ctx.out(), "{} {} {}", expr.lhs, expr.op_str, expr.rhs);
-    if( expr.rhs.empty() )
-        return std::format_to(ctx.out(), "{}", expr.lhs);
+    using namespace CatchKit::Detail;
 
-    return std::format_to(ctx.out(), "{} {}", expr.lhs, expr.rhs);
+    return std::visit(
+        [&]<typename T>(T const& expr) -> std::format_context::iterator {
+            if constexpr(std::is_same_v<T, UnaryExpressionInfo>)
+                return std::format_to( ctx.out(), "{}", expr.value );
+            if constexpr(std::is_same_v<T, BinaryExpressionInfo>)
+                return std::format_to( ctx.out(), "{} {} {}", expr.lhs, expr.op_str, expr.rhs );
+            if constexpr(std::is_same_v<T, MatchExpressionInfo>)
+                return std::format_to( ctx.out(), "{} {}", expr.candidate_value, expr.matcher );
+            if constexpr(std::is_same_v<T, ExceptionExpressionInfo>)
+                return std::format_to( ctx.out(), "{}", expr.exception_message );
+            assert(false);
+    }, expr);
 }

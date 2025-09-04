@@ -8,6 +8,7 @@
 namespace CatchKit {
 
     enum class ExpressionType {
+        Unknown,
         Unary,
         Binary,
         Match,

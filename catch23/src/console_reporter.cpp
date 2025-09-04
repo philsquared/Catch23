@@ -7,6 +7,7 @@
 #include "catch23/test_info.h"
 
 #include "catchkit/assertion_context.h"
+#include "catchkit/expression_info.h"
 
 namespace CatchKit {
 
@@ -94,20 +95,21 @@ namespace CatchKit {
                 else
                     std::print(" - failed to match");
             }
-            if( !expr_info.sub_expressions.empty() ) {
-                std::println( " because:");
-                for(auto const& sub_expr : expr_info.sub_expressions) {
-                    if( sub_expr.result )
-                        std::print("    ✅ ");
-                    else
-                        std::print("    ❌ ");
-                    print( ColourIntent::ReconstructedExpression, "{} ", sub_expr.description );
-                    if( sub_expr.result )
-                        std::println("matched");
-                    else
-                        std::println("failed to match");
+            if( auto const* match_expr = std::get_if<Detail::MatchExpressionInfo>(&expr_info) )
+                if( !match_expr->sub_expressions.empty() ) {
+                    std::println( " because:");
+                    for(auto const& sub_expr : match_expr->sub_expressions) {
+                        if( sub_expr.result )
+                            std::print("    ✅ ");
+                        else
+                            std::print("    ❌ ");
+                        print( ColourIntent::ReconstructedExpression, "{} ", sub_expr.description );
+                        if( sub_expr.result )
+                            std::println("matched");
+                        else
+                            std::println("failed to match");
+                    }
                 }
-            }
             std::println();
         }
         if (!assertion_info.message.empty()) {

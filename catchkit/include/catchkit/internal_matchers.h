@@ -260,7 +260,7 @@ namespace CatchKit {
             std::string arg_as_string;
             if constexpr (!std::is_void_v<decltype(arg())>)
                 arg_as_string = stringify(arg());
-            return ExpressionInfo{ arg_as_string, matcher.describe(), Operators::None, {}, std::move(sub_expressions) };
+            return MatchExpressionInfo{ arg_as_string, matcher.describe(), std::move(sub_expressions) };
         }
 
     } // namespace Detail

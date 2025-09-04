@@ -24,17 +24,21 @@ TEST("A test that can run tests") {
     CHECK( result1.message.empty() );
     CHECK( result1.failed() );
     REQUIRE( result1.expression_info );
-    CHECK( result1.expression_info->lhs == "42" );
-    CHECK( result1.expression_info->rhs == "54" );
-    CHECK( result1.expression_info->op == CatchKit::Detail::Operators::Equals );
+    auto expr1 = std::get_if<CatchKit::Detail::BinaryExpressionInfo>( &(*result1.expression_info) );
+    REQUIRE( expr1 );
+    CHECK( expr1->lhs == "42" );
+    CHECK( expr1->rhs == "54" );
+    CHECK( expr1->op == CatchKit::Detail::Operators::Equals );
 
     auto const& result2 = results[1].info;
     CHECK( result2.message.empty() );
     CHECK( result2.passed() );
     REQUIRE( result2.expression_info );
-    CHECK( result2.expression_info->lhs == "2" );
-    CHECK( result2.expression_info->rhs == "2" );
-    CHECK( result2.expression_info->op == CatchKit::Detail::Operators::Equals );
+    auto expr2 = std::get_if<CatchKit::Detail::BinaryExpressionInfo>( &(*result2.expression_info) );
+    REQUIRE( expr2 );
+    CHECK( expr2->lhs == "2" );
+    CHECK( expr2->rhs == "2" );
+    CHECK( expr2->op == CatchKit::Detail::Operators::Equals );
 }
 
 TEST("Variables can be captured", "[.]") {
