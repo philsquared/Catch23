@@ -84,6 +84,6 @@ namespace CatchKit {
 } // namespace CatchKit
 
 #define LOCAL_TEST(...) CatchKit::MetaTestRunner(__VA_ARGS__) << [](CatchKit::Checker& check, CatchKit::Checker&)
-#define RUN_TEST(name) CatchKit::MetaTestRunner(name).run_test_by_name( name )
+#define RUN_TEST_BY_NAME(name) CatchKit::MetaTestRunner(name).run_test_by_name( name )
 
 #endif // CATCH23_META_TEST_H

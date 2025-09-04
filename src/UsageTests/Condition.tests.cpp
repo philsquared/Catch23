@@ -67,11 +67,8 @@ TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
     CHECK_THAT( x, is_close_to( 1.301 ) );
 }
 
-TEST_CASE( "'Equality checks that should fail' should fail" ) {
-    auto results = RUN_TEST("Equality checks that should fail");
-
-    REQUIRE( results.failed() );
-    CHECK( results.failures() == 13 );
+TEST_CASE( "Meta: Equality checks that should fail", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME("Equality checks that should fail").failures() == 13 );
 }
 
 // !TBD: [!mayfail], SECTION
@@ -116,6 +113,10 @@ TEST_CASE( "Inequality checks that should fail", "[.][failing][!shouldfail]" )
     CHECK_THAT( data.double_pi, !is_close_to( 3.1415926535 ) );
     CHECK( data.str_hello != "hello" );
     CHECK( data.str_hello.size() != 5 );
+}
+
+TEST_CASE( "Meta: Inequality checks that should fail", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME("Inequality checks that should fail").failures() == 5 );
 }
 
 // Ordering comparison tests
@@ -173,6 +174,10 @@ TEST_CASE( "Ordering comparison checks that should fail", "[.][failing]" )
 
     CHECK( data.str_hello >= "z" );
     CHECK( data.str_hello <= "a" );
+}
+
+TEST_CASE( "Meta: Ordering comparison checks that should fail", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME("Ordering comparison checks that should fail").failures() == 19 );
 }
 
 // Comparisons with int literals
@@ -313,4 +318,7 @@ TEST_CASE( "'Not' checks that should fail", "[.][failing]" )
 
     CHECK( !(1 == 1) );
     CHECK_FALSE( 1 == 1 );
+}
+TEST_CASE( "Meta: 'Not' checks that should fail", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME("'Not' checks that should fail").failures() == 8 );
 }
