@@ -2,7 +2,7 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#include "catch23/local_test.h"
+#include "catch23/meta_test.h"
 #include "catch23/test.h"
 
 #include "catchkit/matchers.h"
