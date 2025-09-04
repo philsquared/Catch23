@@ -13,7 +13,7 @@
 #include <format>
 #include <variant>
 
-namespace CatchKit::Detail {
+namespace CatchKit {
 
     struct SubExpressionInfo {
         std::string description;
@@ -28,7 +28,7 @@ namespace CatchKit::Detail {
         std::string lhs;
         std::string rhs;
 
-        Operators op;
+        Detail::Operators op;
         std::string_view op_str;
     };
     struct MatchExpressionInfo {
@@ -54,18 +54,12 @@ namespace CatchKit::Detail {
         ExceptionExpressionInfo,
         ExpectationExpressionInfo>;
 
-} // namespace CatchKit::Detail
-
-namespace CatchKit {
-
-    using Detail::ExpressionInfo;
-
-}
+} // namespace CatchKit
 
 template<>
-struct std::formatter<CatchKit::Detail::ExpressionInfo> {
+struct std::formatter<CatchKit::ExpressionInfo> {
     constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-    std::format_context::iterator format(const CatchKit::Detail::ExpressionInfo& expr, std::format_context& ctx) const;
+    std::format_context::iterator format(const CatchKit::ExpressionInfo& expr, std::format_context& ctx) const;
 };
 
 #endif // CATCHKIT_EXPRESSION_INFO_H

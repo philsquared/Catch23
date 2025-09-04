@@ -33,7 +33,7 @@ namespace CatchKit::Detail
         auto operator=(TestResultHandler&&) = delete; // non-copyable, non-moveable
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
-        void on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) override;
+        void on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
 
         void on_shrink_start();

@@ -19,8 +19,7 @@ namespace CatchKit {
 
     struct AssertionInfo {
         ResultType result;
-        ExpressionType expression_type;
-        std::optional<ExpressionInfo> expression_info;
+        ExpressionInfo expression_info;
         std::string message;
 
         [[nodiscard]] auto passed() const { return result == ResultType::Passed; }

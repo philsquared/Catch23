@@ -3,6 +3,9 @@
 //
 
 #include "catch23/console_reporter.h"
+
+#include <cassert>
+
 #include "catch23/print.h"
 #include "catch23/test_info.h"
 
@@ -77,25 +80,30 @@ namespace CatchKit {
             else
                 println( ColourIntent::OriginalExpression, "  for {}", context.macro_name );
         }
+        auto const& expr_info = assertion_info.expression_info;
 
-        if( assertion_info.expression_type == ExpressionType::Exception ) {
-            std::println("due to an unexpected exception");
-            // !TBD:
-            // case ResultType::MissingException:
-            //     std::println("due to a missing exception");
-            //     break;
-        }
-        else if( assertion_info.expression_info ) {
+        if( !std::holds_alternative<std::monostate>( expr_info ) ) {
+            if( auto except_expr = std::get_if<ExceptionExpressionInfo>( &expr_info ) ) {
+                switch( except_expr->type ) {
+                case ExceptionExpressionInfo::Type::Unexpected:
+                    std::println("due to an unexpected exception");
+                    break;
+                case ExceptionExpressionInfo::Type::Missing:
+                    std::println("due to a missing exception");
+                    break;
+                default:
+                    assert( false );
+                }
+            }
             std::println("with expansion:");
-            auto const& expr_info = *assertion_info.expression_info;
             print( ColourIntent::ReconstructedExpression, "  {}", expr_info );
-            if( assertion_info.expression_type == ExpressionType::Match ) {
+
+            if( auto const* match_expr = std::get_if<MatchExpressionInfo>(&expr_info) ) {
                 if( assertion_info.passed() )
                     std::print(" - matched");
                 else
                     std::print(" - failed to match");
-            }
-            if( auto const* match_expr = std::get_if<Detail::MatchExpressionInfo>(&expr_info) )
+
                 if( !match_expr->sub_expressions.empty() ) {
                     std::println( " because:");
                     for(auto const& sub_expr : match_expr->sub_expressions) {
@@ -110,6 +118,7 @@ namespace CatchKit {
                             std::println("failed to match");
                     }
                 }
+            }
             std::println();
         }
         if (!assertion_info.message.empty()) {

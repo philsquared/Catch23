@@ -23,8 +23,7 @@ TEST("A test that can run tests") {
     auto const& result1 = results[0].info;
     CHECK( result1.message.empty() );
     CHECK( result1.failed() );
-    REQUIRE( result1.expression_info );
-    auto expr1 = std::get_if<CatchKit::Detail::BinaryExpressionInfo>( &(*result1.expression_info) );
+    auto expr1 = std::get_if<CatchKit::BinaryExpressionInfo>( &result1.expression_info );
     REQUIRE( expr1 );
     CHECK( expr1->lhs == "42" );
     CHECK( expr1->rhs == "54" );
@@ -33,8 +32,7 @@ TEST("A test that can run tests") {
     auto const& result2 = results[1].info;
     CHECK( result2.message.empty() );
     CHECK( result2.passed() );
-    REQUIRE( result2.expression_info );
-    auto expr2 = std::get_if<CatchKit::Detail::BinaryExpressionInfo>( &(*result2.expression_info) );
+    auto expr2 = std::get_if<CatchKit::BinaryExpressionInfo>( &result2.expression_info );
     REQUIRE( expr2 );
     CHECK( expr2->lhs == "2" );
     CHECK( expr2->rhs == "2" );

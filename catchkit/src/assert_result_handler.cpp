@@ -16,7 +16,7 @@ namespace CatchKit::Detail {
         this->result_disposition = result_disposition;
     }
 
-    void AssertResultHandler::on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {;
+    void AssertResultHandler::on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) {;
         last_result = result;
 
         // !TBD When we can use stacktrace do something like this:
@@ -46,15 +46,21 @@ namespace CatchKit::Detail {
                 macro_name, (result == ResultType::Passed) ? "passed" : "failed");
 
         if( result == ResultType::Failed ) {
-            if( expression_type == ExpressionType::Exception ) {
-                std::println(os, "due to an unexpected exception");
-                // !TBD: distinguish
-                // std::println(os, "due to a missing exception");
-            // TBD: other types
+            if( auto except_expr = std::get_if<ExceptionExpressionInfo>( &expression_info ) ) {
+                switch( except_expr->type ) {
+                    case ExceptionExpressionInfo::Type::Missing:
+                        std::println(os, "due to a missing exception");
+                        break;
+                case ExceptionExpressionInfo::Type::Unexpected:
+                    std::println(os, "due to an unexpected exception");
+                    break;
+                default:
+                    assert( false );
+                }
             }
         }
-        if(expression_info)
-            std::println(os, "with expansion:\n\t{}", *expression_info );
+        if(!std::holds_alternative<std::monostate>(expression_info))
+            std::println(os, "with expansion:\n\t{}", expression_info );
 
         if (!message.empty()) {
             std::println(os, "with message:\n\t{}", message);

@@ -40,7 +40,13 @@ namespace CatchKit::Detail
                 expr_call(*this);
             }
             catch(...) {
-                checker.result_handler->on_assertion_result( ResultType::Failed, ExpressionType::Exception, {}, get_exception_message(std::current_exception()) );
+                checker.result_handler->on_assertion_result(
+                    ResultType::Failed,
+                    ExceptionExpressionInfo{
+                        get_exception_message(
+                            std::current_exception()),
+                            ExceptionExpressionInfo::Type::Unexpected },
+                        {} );
             }
         }
 
@@ -54,7 +60,7 @@ namespace CatchKit::Detail
         void simple_assert(auto const& result, std::string_view message = {}) noexcept {
             bool is_failure = !result;
             if( checker.result_handler->report_on == ReportOn::AllResults || is_failure ) {}
-                checker.result_handler->on_assertion_result(is_failure ? ResultType::Failed : ResultType::Passed, ExpressionType::Binary, {}, message);
+                checker.result_handler->on_assertion_result(is_failure ? ResultType::Failed : ResultType::Passed, std::monostate(), message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
@@ -158,10 +164,10 @@ namespace CatchKit::Detail
         auto raw_result = expr.evaluate();
         auto result = to_result_type( raw_result );
         if( checker.result_handler->report_on == ReportOn::AllResults || result == ResultType::Failed ) {
-            checker.result_handler->on_assertion_result( result, expr.expression_type, expr.expand( raw_result ), expr.message );
+            checker.result_handler->on_assertion_result( result, expr.expand( raw_result ), expr.message );
         }
         else {
-            checker.result_handler->on_assertion_result( result, expr.expression_type, {}, expr.message );
+            checker.result_handler->on_assertion_result( result, std::monostate(), expr.message );
         }
     }
 

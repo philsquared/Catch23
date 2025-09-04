@@ -41,7 +41,7 @@ namespace CatchKit::Detail {
         shrinking_mode = ShrinkingMode::Normal;
     }
 
-    void TestResultHandler::on_assertion_result( ResultType result, ExpressionType expression_type, std::optional<ExpressionInfo> const& expression_info, std::string_view message ) {
+    void TestResultHandler::on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) {
         last_result = result;
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
@@ -84,7 +84,7 @@ namespace CatchKit::Detail {
                     full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
                 }
             }
-            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_type, expression_info, full_message } );
+            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, full_message } );
         }
     }
 

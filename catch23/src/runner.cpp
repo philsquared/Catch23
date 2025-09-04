@@ -34,7 +34,12 @@ namespace CatchKit::Detail {
                     .message = {},
                     .location = test_handler.get_current_context().location };
                 test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
-                test_handler.on_assertion_result( ResultType::Failed, ExpressionType::Exception, {}, get_exception_message(std::current_exception()) );
+                test_handler.on_assertion_result(
+                    ResultType::Failed,
+                    ExceptionExpressionInfo{
+                        get_exception_message(std::current_exception()),
+                        ExceptionExpressionInfo::Type::Unexpected },
+                    {} );
             }
             ::check = old_check;
             ::require = old_require;

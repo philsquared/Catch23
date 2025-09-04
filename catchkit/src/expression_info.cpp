@@ -13,11 +13,14 @@ namespace CatchKit::Detail {
 
     static_assert( std::same_as<ExpressionAlternate<ExpressionType::Unary>, UnaryExpressionInfo> );
     static_assert( std::same_as<ExpressionAlternate<ExpressionType::Binary>, BinaryExpressionInfo> );
+    static_assert( std::same_as<ExpressionAlternate<ExpressionType::Match>, MatchExpressionInfo> );
+    static_assert( std::same_as<ExpressionAlternate<ExpressionType::Exception>, ExceptionExpressionInfo> );
+    static_assert( std::same_as<ExpressionAlternate<ExpressionType::Expectation>, ExpectationExpressionInfo> );
 
 } // namespace CatchKit::Detail
 
-std::format_context::iterator std::formatter<CatchKit::Detail::ExpressionInfo>::format(const CatchKit::Detail::ExpressionInfo& expr, std::format_context& ctx) const {
-    using namespace CatchKit::Detail;
+std::format_context::iterator std::formatter<CatchKit::ExpressionInfo>::format(const CatchKit::ExpressionInfo& expr, std::format_context& ctx) const {
+    using namespace CatchKit;
 
     return std::visit(
         [&]<typename T>(T const& expr) -> std::format_context::iterator {
