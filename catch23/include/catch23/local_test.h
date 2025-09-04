@@ -15,6 +15,9 @@ namespace CatchKit {
     struct FullAssertionInfo {
         AssertionContext context;
         AssertionInfo info;
+
+        auto passed() const { return info.passed(); }
+        auto failed() const { return info.failed(); }
     };
 
     class MetaTestReporter : public Reporter {
@@ -44,6 +47,22 @@ namespace CatchKit {
         std::vector<FullAssertionInfo> results;
     };
 
+    struct MetaTestResults {
+        std::vector<FullAssertionInfo> all_results;
+
+        auto size() const { return all_results.size(); }
+        auto& operator[](std::size_t index) const { return all_results.at(index); }
+        auto failed() const {
+            return !all_results.empty() && all_results.back().failed();
+        }
+        auto passed() const {
+            return !all_results.empty() && all_results.back().passed();
+        }
+        auto message() const {
+            return !all_results.empty() ? all_results.back().info.message : std::string();
+        }
+    };
+
     class MetaTestRunner {
         MetaTestReporter reporter;
         TestResultHandler handler;
@@ -53,7 +72,7 @@ namespace CatchKit {
 
     public:
         explicit MetaTestRunner(std::string name = "local test", std::source_location location = std::source_location::current());
-        auto run( Detail::Test const& test ) && -> std::vector<FullAssertionInfo>;
+        auto run( Detail::Test const& test ) && -> MetaTestResults;
         auto operator << ( std::invocable<Checker&, Checker&> auto const& test_fun ) && {
             return std::move(*this).run(Detail::Test{test_fun, {location, std::move(name)}});
         }

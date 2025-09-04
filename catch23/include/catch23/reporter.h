@@ -22,6 +22,7 @@ namespace CatchKit {
         std::string message;
 
         [[nodiscard]] auto passed() const { return result == ResultType::Pass; }
+        [[nodiscard]] auto failed() const { return result != ResultType::Pass; }
     };
 
     struct Counters {

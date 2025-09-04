@@ -24,7 +24,6 @@ namespace CatchKit::Detail {
                 test.test_fun(check, require);
             }
             catch( TestCancelled ) {
-                // std::println("  *** aborted"); // !TBD
             }
             catch( ... ) {
                 // We need a new context because the old one had string_views to outdated data

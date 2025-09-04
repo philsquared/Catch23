@@ -12,9 +12,9 @@ namespace CatchKit {
         location(location)
     {}
 
-    auto MetaTestRunner::run( Detail::Test const& test ) && -> std::vector<FullAssertionInfo> {
+    auto MetaTestRunner::run( Detail::Test const& test ) && -> MetaTestResults {
         run_test(test, handler);
-        return std::move(reporter.results);
+        return MetaTestResults{ std::move(reporter.results) };
     }
 
 } // namespace CatchKit
