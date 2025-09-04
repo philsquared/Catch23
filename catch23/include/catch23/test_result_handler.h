@@ -25,7 +25,7 @@ namespace CatchKit::Detail
         std::vector<VariableCapture*> variable_captures;
         Counters assertions;
         ShrinkingMode shrinking_mode = ShrinkingMode::Normal;
-        int shrink_count;
+        int shrink_count = 0;
 
     public:
         explicit TestResultHandler(Reporter& reporter);

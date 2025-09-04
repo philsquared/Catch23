@@ -80,9 +80,9 @@ namespace CatchKit {
             else
                 println( ColourIntent::OriginalExpression, "  for {}", context.macro_name );
         }
-        auto const& expr_info = assertion_info.expression_info;
 
-        if( !std::holds_alternative<std::monostate>( expr_info ) ) {
+        if( auto const& expr_info = assertion_info.expression_info;
+                !std::holds_alternative<std::monostate>( expr_info ) ) {
             if( auto except_expr = std::get_if<ExceptionExpressionInfo>( &expr_info ) ) {
                 switch( except_expr->type ) {
                 case ExceptionExpressionInfo::Type::Unexpected:
