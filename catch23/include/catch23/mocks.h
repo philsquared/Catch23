@@ -86,7 +86,7 @@ namespace CatchKit::Mocks {
 
         virtual void set(ExpectationsBase* root) = 0;
         virtual void reset() = 0;
-        virtual void find_expectations_for_method( MockBase* obj_addr, MethodBase* method_addr, std::vector<IExpectation*>& matching ) = 0;
+        virtual void find_expectations_for_method( MockBase const* obj_addr, MethodBase const* method_addr, std::vector<IExpectation*>& matching ) = 0;
         virtual void verify() const = 0;
     };
 
@@ -99,7 +99,7 @@ namespace CatchKit::Mocks {
         bool is_wildcard;
         std::source_location location;
 
-        auto get_root_expectation() -> ExpectationsBase*;
+        auto get_root_expectation() const -> ExpectationsBase*;
         [[noreturn]] void fail(std::string const& message) const;
         auto get_qualified_name() const -> std::string;
 
@@ -128,7 +128,7 @@ namespace CatchKit::Mocks {
 
         void set(ExpectationsBase* root) final;
         void reset() final;
-        void find_expectations_for_method( MockBase* obj_addr, MethodBase* method_addr, std::vector<IExpectation*>& matching ) final;
+        void find_expectations_for_method( MockBase const* obj_addr, MethodBase const* method_addr, std::vector<IExpectation*>& matching ) final;
         void verify() const final;
     };
 
@@ -226,7 +226,7 @@ namespace CatchKit::Mocks {
                 exp->reset();
         }
 
-        void find_expectations_for_method( MockBase* obj_addr, MethodBase* method_addr, std::vector<IExpectation*>& matching ) final {
+        void find_expectations_for_method( MockBase const* obj_addr, MethodBase const* method_addr, std::vector<IExpectation*>& matching ) final {
             if constexpr ( Sequenced == sequenced::independently ) {
                 for(auto const& exp : std::ranges::reverse_view(expectations) ) {
                     exp->find_expectations_for_method( obj_addr, method_addr, matching );
@@ -319,7 +319,7 @@ namespace CatchKit::Mocks {
         }
 
         template<typename ... InvocationArgs>
-        auto invoke(InvocationArgs&&... args) -> Ret {
+        auto invoke(InvocationArgs&&... args) const -> Ret {
             if( auto root = get_root_expectation() ) {
                 std::vector<IExpectation*> expectations;
                 root->find_expectations_for_method(mock_base, this, expectations);
@@ -396,7 +396,7 @@ namespace CatchKit::Mocks {
         MethodInfo() : name( #name, this ) {} \
     }; \
     return_type MethodImpl<counter-start_counter>::name ( ADD_ARG_NAMES(__VA_ARGS__) ) qualifiers { \
-        return dynamic_cast<MethodInfo<counter-start_counter>*>(const_cast<MethodImpl<counter-start_counter>*>(this))->name.invoke(FORWARD_ARGS(__VA_ARGS__)); \
+        return static_cast<MethodInfo<counter-start_counter> const*>(this)->name.invoke(FORWARD_ARGS(__VA_ARGS__)); \
     }
 
 #define MOCK_METHOD(qualifiers, return_type, name, ...) MOCK_METHOD_IMPL(__COUNTER__, qualifiers, return_type, name, __VA_ARGS__)

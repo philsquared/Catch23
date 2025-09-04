@@ -29,7 +29,7 @@ namespace CatchKit::Mocks {
         std::unreachable();
     }
 
-    auto MethodBase::get_root_expectation() -> ExpectationsBase* {
+    auto MethodBase::get_root_expectation() const -> ExpectationsBase* {
         return mock_base->expectation;
     }
     auto MethodBase::get_qualified_name() const -> std::string {
@@ -54,7 +54,7 @@ namespace CatchKit::Mocks {
         method->mock_base->expectation = nullptr;
     }
 
-    void ExpectationImplBase::find_expectations_for_method( MockBase* obj_addr, MethodBase* method_addr, std::vector<IExpectation*>& matching ) {
+    void ExpectationImplBase::find_expectations_for_method( MockBase const* obj_addr, MethodBase const* method_addr, std::vector<IExpectation*>& matching ) {
         if( method == method_addr || (is_wildcard && obj_addr == method->mock_base) ) {
             matching.push_back( this );
         }
