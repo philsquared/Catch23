@@ -13,32 +13,24 @@
 #include <cassert>
 #include <source_location>
 
-// Macros for taking a set of types and adding names, just getting names, or just getting the types
+// Macros for taking a set of types and adding names or forwarding them
 #define ARG_NAME_0()
 #define ARG_NAME_1(a) a arg1
 #define ARG_NAME_2(a, b) a arg1, b arg2
 #define ARG_NAME_3(a, b, c) a arg1, b arg2, c arg3
+#define ARG_NAME_4(a, b, c, d) a arg1, b arg2, c arg3 d arg4
+#define ARG_NAME_5(a, b, c, d, e) a arg1, b arg2, c arg3 d arg4 e arg5
 // !TBD more
-
-#define ARG_0()
-#define ARG_1() arg1
-#define ARG_2() arg1, arg2
-#define ARG_3() arg1, arg2, arg3
-
-#define ARG_TYPE_0()
-#define ARG_TYPE_1(a) a
-#define ARG_TYPE_2(a, b) a, b
-#define ARG_TYPE_3(a, b, c) a, b, c
 
 #define FWD_ARG_0()
 #define FWD_ARG_1(a) std::forward<a>(arg1)
 #define FWD_ARG_2(a, b) std::forward<a>(arg1), std::forward<b>(arg2)
 #define FWD_ARG_3(a, b, c) std::forward<a>(arg1), std::forward<b>(arg2), std::forward<c>(arg3)
-
+#define FWD_ARG_4(a, b, c, d) std::forward<a>(arg1), std::forward<b>(arg2), std::forward<c>(arg3), std::forward<d>(arg4)
+#define FWD_ARG_5(a, b, c, d, e) std::forward<a>(arg1), std::forward<b>(arg2), std::forward<c>(arg3), std::forward<d>(arg4), std::forward<e>(arg5)
 
 #define GET_ARG_MACRO(_0,_1,_2,_3,_4,_5,NAME,...) NAME
 #define ADD_ARG_NAMES(...) GET_ARG_MACRO(dummy, ##__VA_ARGS__, ARG_NAME_5, ARG_NAME_4, ARG_NAME_3, ARG_NAME_2, ARG_NAME_1, ARG_NAME_0)(__VA_ARGS__)
-#define ADD_ARGS(...) GET_ARG_MACRO(dummy, ##__VA_ARGS__, ARG_5, ARG_4, ARG_3, ARG_2, ARG_1, ARG_0)()
 #define FORWARD_ARGS(...) GET_ARG_MACRO(dummy, ##__VA_ARGS__, FWD_ARG_5, FWD_ARG_4, FWD_ARG_3, FWD_ARG_2, FWD_ARG_1, FWD_ARG_0)(__VA_ARGS__)
 
 namespace CatchKit::Mocks {
