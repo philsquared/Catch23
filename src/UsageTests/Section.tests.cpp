@@ -4,6 +4,7 @@
 
 #include "catch23/test.h"
 #include "catch23/catch2_compat.h"
+#include "catch23/meta_test.h"
 
 
 TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {
@@ -14,29 +15,40 @@ TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {
         REQUIRE( a != b );
         REQUIRE( b != a );
     }
+    SECTION( "does equal" ) { // These should fail
+        CHECK( a == b );
+        CHECK( b == a );
+    }
 
     SECTION( "not equal" ) {
         REQUIRE( a != b);
     }
+    SECTION( "equal" ) { // This should fail
+        REQUIRE( a == b);
+    }
+}
+TEST("Meta: random SECTION tests", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME("random SECTION tests").failures() == 3 );
 }
 
 TEST_CASE( "nested SECTION tests", "[.][sections][failing]" ) {
     int a = 1;
     int b = 2;
 
-    SECTION( "doesn't equal" ) {
-        REQUIRE( a != b );
-        REQUIRE( b != a );
+    SECTION( "both equal" ) {
+        CHECK( a == b );
+        CHECK( b == a );
 
-        SECTION( "not equal" ) {
-            REQUIRE( a != b);
+        SECTION( "equal" ) {
+            REQUIRE( a == b);
         }
     }
 }
+TEST("Meta: nested SECTION tests", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME("nested SECTION tests").failures() == 5 );
+}
 
 TEST_CASE( "more nested SECTION tests", "[sections][failing][.]" ) {
-    // check.result_handler.report_on = CatchKit::ReportOn::AllResults;
-
     int a = 1;
     int b = 2;
 
@@ -52,6 +64,9 @@ TEST_CASE( "more nested SECTION tests", "[sections][failing][.]" ) {
             REQUIRE( a < b );
         }
     }
+}
+TEST("Meta: more nested SECTION tests", "[meta]") {
+    CHECK( RUN_TEST_BY_NAME("more nested SECTION tests").failures() == 1 );
 }
 
 TEST_CASE( "even more nested SECTION tests", "[sections]" ) {
@@ -79,6 +94,9 @@ TEST_CASE( "looped SECTION tests", "[.][failing][sections]" ) {
         }
     }
 }
+TEST( "Meta: looped SECTION tests", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME( "looped SECTION tests" ).failures() == 1 );
+}
 
 TEST_CASE( "looped tests", "[.][failing]" ) {
     static const int fib[]  = { 1, 1, 2, 3, 5, 8, 13, 21 };
@@ -87,6 +105,9 @@ TEST_CASE( "looped tests", "[.][failing]" ) {
         CHECK( ( fib[i] % 2 ) == 0,
             std::format("Testing if fib[{}] ({}) is even", i, fib[i] ) );
     }
+}
+TEST( "Meta: looped tests", "[meta]" ) {
+    CHECK( RUN_TEST_BY_NAME( "looped tests" ).failures() == 6 );
 }
 
 TEST_CASE( "vectors can be sized and resized", "[vector]" ) {
