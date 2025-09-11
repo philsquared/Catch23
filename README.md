@@ -1,5 +1,7 @@
-# Catch23
-A new test framework, in the spirit of Catch/ Catch2, but rewritten from the ground up for C++23 and on
+![Catch23 logo](artwork/catch23 logo wide.svg)
+
+# What is Catch23?
+Catch23 is a new test framework, in the spirit of [Catch/ Catch2](https://github.com/catchorg/Catch2), but rewritten from the ground up for C++23 and on
 
 This is an early work-in-progress and is not intended for general use.
 
