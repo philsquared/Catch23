@@ -1,4 +1,4 @@
-![Catch23 logo](artwork/catch23 logo wide.svg)
+![Catch23 logo](artwork/catch23-logo-wide.svg)
 
 # What is Catch23?
 Catch23 is a new test framework, in the spirit of [Catch/ Catch2](https://github.com/catchorg/Catch2), but rewritten from the ground up for C++23 and on
