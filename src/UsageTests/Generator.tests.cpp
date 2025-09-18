@@ -6,13 +6,13 @@
 #include "catch23/generators.h"
 #include "catch23/meta_test.h"
 
-TEST("Generators", "[.]") {
+TEST("Generators", [manual]) {
     auto i = GENERATE(values_of<int>()); // Defaults to 100 values
 
     CHECK( i < 50 ); // Half of these should fail
 }
 
-TEST("Two generators", "[.]") {
+TEST("Two generators", [manual]) {
     auto i = GENERATE(10, values_of<int>{ .up_to=16 });
     auto j = GENERATE(10, values_of<int>{ .up_to=32 });
 
@@ -43,7 +43,7 @@ TEST("string generators") {
 // }
 
 
-TEST("section within a generator", "[.]") {
+TEST("section within a generator", [manual]) {
     GENERATE(100, values_of<int>{} ); // Just repeat 100x, !TBD: add a REPEAT macro to do this?
 
     auto results = LOCAL_TEST() {

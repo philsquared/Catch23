@@ -19,7 +19,6 @@ namespace CatchKit::Detail {
         }
     }
 
-
     std::vector<Test> const& get_all_tests() { return get_all_tests_impl(); }
 
     void register_test(Test&& test) {

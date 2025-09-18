@@ -117,7 +117,8 @@ namespace CatchKit::Detail
             asserter->accept_expr(*this);
     }
 
-    CATCHKIT_WARNINGS_SUPPRESS_START CATCHKIT_WARNINGS_SUPPRESS_SIGN_MISMATCH
+    CATCHKIT_WARNINGS_SUPPRESS_START
+    CATCHKIT_WARNINGS_SUPPRESS_SIGN_MISMATCH
     template<typename LhsT, typename RhsT, Operators Op>
     auto eval_expr(BinaryExprRef<LhsT, RhsT, Op>& expr) {
         using enum Operators;

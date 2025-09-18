@@ -22,10 +22,15 @@ namespace CatchKit::Detail {
 
         for( auto&& test : tests) {
             // !TBD: this skips hidden tests until we do proper tag parsing
-            if( test.test_info.tags.find("[.") != std::string::npos )
-                continue;
-
-            run_test(test, test_handler);
+            bool skip = false;
+            for( auto&& tag : test.test_info.tags) {
+                if( tag.name.find("[.") != std::string::npos ) {
+                    skip = true;
+                    break;
+                }
+            }
+            if( !skip )
+                run_test(test, test_handler);
         }
     }
 

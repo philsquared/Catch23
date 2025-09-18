@@ -7,13 +7,20 @@
 
 #include <source_location>
 #include <string>
+#include <vector>
 
 namespace CatchKit {
+
+    struct Tag {
+        std::string name;
+        constexpr Tag() = default;
+        explicit constexpr Tag(std::string name) : name(std::move(name)) {}
+    };
 
     struct TestInfo {
         std::source_location location;
         std::string name = {};
-        std::string tags = {};
+        std::vector<Tag> tags = {};
     };
 
 } // namespace CatchKit

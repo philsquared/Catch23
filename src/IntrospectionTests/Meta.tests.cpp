@@ -39,7 +39,7 @@ TEST("A test that can run tests") {
     CHECK( expr2->op == "==" );
 }
 
-TEST("Variables can be captured", "[.]") {
+TEST("Variables can be captured", [manual]) {
     // !TBD: When we have richer reporting in the local test interface use that to check this
     int x = 7, y = 42;
     std::string s = "hello world";

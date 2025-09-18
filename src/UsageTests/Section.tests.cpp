@@ -2,10 +2,14 @@
 // Created by Phil Nash on 23/07/2025.
 //
 
+#include <iostream>
+#include <ostream>
+
 #include "catch23/test.h"
 #include "catch23/catch2_compat.h"
 #include "catch23/meta_test.h"
 
+#include "catch23/internal_test.h"
 
 TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {
     int a = 1;
@@ -27,7 +31,7 @@ TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {
         REQUIRE( a == b);
     }
 }
-TEST("Meta: random SECTION tests", "[meta]") {
+TEST("Meta: random SECTION tests", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME("random SECTION tests").failures() == 3 );
 }
 
@@ -44,7 +48,7 @@ TEST_CASE( "nested SECTION tests", "[.][sections][failing]" ) {
         }
     }
 }
-TEST("Meta: nested SECTION tests", "[meta]") {
+TEST("Meta: nested SECTION tests", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME("nested SECTION tests").failures() == 5 );
 }
 
@@ -65,7 +69,7 @@ TEST_CASE( "more nested SECTION tests", "[sections][failing][.]" ) {
         }
     }
 }
-TEST("Meta: more nested SECTION tests", "[meta]") {
+TEST("Meta: more nested SECTION tests", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME("more nested SECTION tests").failures() == 1 );
 }
 
@@ -94,7 +98,7 @@ TEST_CASE( "looped SECTION tests", "[.][failing][sections]" ) {
         }
     }
 }
-TEST( "Meta: looped SECTION tests", "[meta]" ) {
+TEST( "Meta: looped SECTION tests", ["meta"] ) {
     CHECK( RUN_TEST_BY_NAME( "looped SECTION tests" ).failures() == 1 );
 }
 
@@ -106,7 +110,7 @@ TEST_CASE( "looped tests", "[.][failing]" ) {
             std::format("Testing if fib[{}] ({}) is even", i, fib[i] ) );
     }
 }
-TEST( "Meta: looped tests", "[meta]" ) {
+TEST( "Meta: looped tests", ["meta"] ) {
     CHECK( RUN_TEST_BY_NAME( "looped tests" ).failures() == 6 );
 }
 

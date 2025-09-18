@@ -18,7 +18,7 @@ void throwing_function(std::string const& message = {}) {
     throw std::domain_error( message );
 }
 
-TEST("Bound matchers", "[.]") {
+TEST("Bound matchers", [manual]) {
 
     // These tests are for the matcher binding mechanism.
     // For exception matching in general see the subsequent tests
@@ -43,7 +43,7 @@ TEST("Bound matchers", "[.]") {
     // CHECK_THAT( "err", equals("err") >>= contains("stack") );
 }
 
-TEST("Meta: Bound matchers", "[meta]") {
+TEST("Meta: Bound matchers", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Bound matchers" ).failures() == 2 );
 }
 
@@ -70,11 +70,11 @@ TEST("throws matcher") {
 TEST("!throws matcher succeeds when call doesn't throw") {
     CHECK_THAT( non_throwing_function(), !throws() );
 }
-TEST("!throws matcher fails when call does throw", "[.]") {
+TEST("!throws matcher fails when call does throw", [manual]) {
     CHECK_THAT( throwing_function(), !throws() );
 }
 
-TEST("Meta: !throws matcher fails when call does throw", "[meta]") {
+TEST("Meta: !throws matcher fails when call does throw", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "!throws matcher fails when call does throw" ).failures() == 1 );
 }
 
@@ -182,14 +182,14 @@ TEST_CASE( "Contains string matcher", "[.][failing][matchers]" ) {
                 contains<CaseInsensitive>( "not there" ) );
     CHECK_THAT( testStringForMatching(), contains( "STRING" ) );
 }
-TEST("Meta: Contains string matcher", "[meta]") {
+TEST("Meta: Contains string matcher", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Contains string matcher" ).failures() == 2 );
 }
 TEST_CASE( "StartsWith string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), starts_with( "This String" ) );
     CHECK_THAT( testStringForMatching(), starts_with<CaseInsensitive>( "string" ) );
 }
-TEST("Meta: StartsWith string matcher", "[meta]") {
+TEST("Meta: StartsWith string matcher", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "StartsWith string matcher" ).failures() == 2 );
 }
 
@@ -197,7 +197,7 @@ TEST_CASE( "EndsWith string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), ends_with( "Substring" ) );
     CHECK_THAT( testStringForMatching(), ends_with<CaseInsensitive>( "this" ) );
 }
-TEST("Meta: EndsWith string matcher", "[meta]") {
+TEST("Meta: EndsWith string matcher", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "EndsWith string matcher" ).failures() == 2 );
 }
 
@@ -205,7 +205,7 @@ TEST_CASE( "Equals string matcher", "[.][failing][matchers]" ) {
     CHECK_THAT( testStringForMatching(), equals( "this string contains 'ABC' as a substring" ) );
     CHECK_THAT( testStringForMatching(), equals<CaseInsensitive>( "something else" ) );
 }
-TEST("Meta: Equals string matcher", "[meta]") {
+TEST("Meta: Equals string matcher", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Equals string matcher" ).failures() == 2 );
 }
 
@@ -270,7 +270,7 @@ TEST_CASE( "Matchers can be composed with both && and || - failing",
     CHECK_THAT( testStringForMatching(),
                 ( contains( "string" ) || contains( "different" ) ) && contains( "random" ) );
 }
-TEST("Meta: Matchers can be composed with both && and || - failing", "[meta]") {
+TEST("Meta: Matchers can be composed with both && and || - failing", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Matchers can be composed with both && and || - failing" ).failures() == 1 );
 }
 
@@ -283,7 +283,7 @@ TEST_CASE( "Matchers can be negated (Not) with the ! operator - failing",
            "[matchers][operators][not][.failing]" ) {
     CHECK_THAT( testStringForMatching(), !contains( "substring" ) );
 }
-TEST("Meta: Matchers can be negated (Not) with the ! operator - failing", "[meta]") {
+TEST("Meta: Matchers can be negated (Not) with the ! operator - failing", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Matchers can be negated (Not) with the ! operator - failing" ).failures() == 1 );
 }
 
@@ -506,7 +506,7 @@ TEST_CASE( "Exception matchers that fail",
         REQUIRE_THAT( throwsSpecialException( 4 ), throws<SpecialException>() >>= ExceptionMatcher{ 1 } );
     }
 }
-TEST("Meta: Exception matchers that fail", "[meta]") {
+TEST("Meta: Exception matchers that fail", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Exception matchers that fail" ).failures() == 6 );
 }
 
