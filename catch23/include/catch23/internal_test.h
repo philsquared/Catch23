@@ -16,9 +16,7 @@ namespace CatchKit::Detail {
     template<typename T>
     concept TagConvertible = std::constructible_from<Tag, T>;
 
-    inline auto make_test_info(std::source_location location, std::string name = {}, std::string tag_spec = {} ) {
-        return TestInfo{ location, std::move(name), {Tag(std::move(tag_spec))} };
-    }
+    auto make_test_info(std::source_location location, std::string name = {}, std::string_view tag_spec = {} ) -> TestInfo;
 
     struct Test {
         std::function<void(Checker&, Checker&)> test_fun;
@@ -29,6 +27,8 @@ namespace CatchKit::Detail {
             test_info.tags = std::vector{Tag{std::forward<T>(tags)}...};
             return std::move(*this);
         }
+
+        auto is_manual() const -> bool;
     };
     std::vector<Test> const& get_all_tests();
     auto find_test_by_name(std::string const& name) -> Test const*;
@@ -40,7 +40,9 @@ namespace CatchKit::Detail {
 } // CatchKit::Detail
 
 namespace CatchKit::Tags {
-    inline constexpr Tag manual("[.]");
+    inline constexpr Tag manual{".", Tag::Type::manual };
+    inline constexpr Tag mayfail{"!mayfail", Tag::Type::mayfail };
+    inline constexpr Tag shouldfail{"!shouldfail", Tag::Type::shouldfail };
 }
 
 #endif // CATCH23_INTERNAL_TEST_H

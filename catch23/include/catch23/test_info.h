@@ -12,9 +12,14 @@
 namespace CatchKit {
 
     struct Tag {
+        enum class Type {
+            normal,
+            manual, // test doesn't run by default, but can be run explicitly
+            mayfail, // If test fails, don't count it as a failed run overall
+            shouldfail, // If test fails count it as a pass. If it passes count as a failure.
+        };
         std::string name;
-        constexpr Tag() = default;
-        explicit constexpr Tag(std::string name) : name(std::move(name)) {}
+        Type type = Type::normal;
     };
 
     struct TestInfo {

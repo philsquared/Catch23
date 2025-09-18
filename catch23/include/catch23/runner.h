@@ -21,15 +21,7 @@ namespace CatchKit::Detail {
         TestResultHandler test_handler( reporter );
 
         for( auto&& test : tests) {
-            // !TBD: this skips hidden tests until we do proper tag parsing
-            bool skip = false;
-            for( auto&& tag : test.test_info.tags) {
-                if( tag.name.find("[.") != std::string::npos ) {
-                    skip = true;
-                    break;
-                }
-            }
-            if( !skip )
+            if( !test.is_manual() )
                 run_test(test, test_handler);
         }
     }
