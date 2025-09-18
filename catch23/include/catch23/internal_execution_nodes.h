@@ -70,9 +70,7 @@ namespace CatchKit::Detail {
         virtual void move_first() {}
         virtual auto move_next() -> bool; // `true` means we finished
     public:
-        explicit ExecutionNode( NodeId&& id )
-        :   id(std::move(id))
-        {}
+        explicit ExecutionNode( NodeId const& id ) : id(id) {}
         virtual ~ExecutionNode() = default;
 
         auto find_child(NodeId const& id) -> ExecutionNode*;

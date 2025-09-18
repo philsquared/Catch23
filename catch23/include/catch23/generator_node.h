@@ -126,8 +126,8 @@ namespace CatchKit::Detail {
         std::optional<Shrinker<GeneratorType, GeneratedType>> shrinker;
         std::set<GeneratedType> cache;
     public:
-        explicit GeneratorNode( NodeId&& id, GeneratorType&& gen )
-        :   ExecutionNode(std::move(id)),
+        explicit GeneratorNode( NodeId const& id, GeneratorType&& gen )
+        :   ExecutionNode(id),
             generator(std::move(gen)),
             size(size_of(generator, default_repetitions)),
             current_generated_value( generate_value() )
@@ -202,7 +202,7 @@ namespace CatchKit::Detail {
 
         template<typename T>
         void make_generator(T&& gen) {
-            generator_node = &execution_nodes.add_node( std::make_unique<GeneratorNode<T>>(std::move(id), std::forward<T>(gen)) );
+            generator_node = &execution_nodes.add_node( std::make_unique<GeneratorNode<T>>(id, std::forward<T>(gen)) );
         }
         template<typename T>
         auto derived_node() {
