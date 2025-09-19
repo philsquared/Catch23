@@ -44,7 +44,7 @@ namespace CatchKit::Detail {
     }
 
     auto Test::is_manual() const -> bool {
-        return std::ranges::any_of(test_info.tags, [](auto const& tag) { return tag.type == Tag::Type::manual; });
+        return std::ranges::any_of(test_info.tags, [](auto const& tag) { return tag.ignored != (tag.type == Tag::Type::manual); });
     }
 
 

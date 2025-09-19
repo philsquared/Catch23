@@ -20,6 +20,11 @@ namespace CatchKit {
         };
         std::string name;
         Type type = Type::normal;
+        bool ignored = false; // This means "pretend this tag doesn't exist" and is set by !
+
+        auto operator!() const -> Tag {
+            return Tag{name, type, !ignored};
+        }
     };
 
     struct TestInfo {

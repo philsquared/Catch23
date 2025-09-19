@@ -79,9 +79,7 @@ std::string left_pad(std::string const& input_string, int min_len) {
     return input_string;
 }
 
-TEST_CASE("left pad properties", "[/.]") {
-    // check.result_handler.report_on = CatchKit::ReportOn::AllResults;
-
+TEST("left pad properties", [manual]) {
     auto min_len = GENERATE(values_of<std::size_t>{0, 65});
     auto input_string = GENERATE(values_of<std::string>{.min_len=0, .max_len=65});
     auto output_string = left_pad(input_string, min_len);
