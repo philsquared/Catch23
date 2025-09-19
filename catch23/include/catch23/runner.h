@@ -21,7 +21,7 @@ namespace CatchKit::Detail {
         TestResultHandler test_handler( reporter );
 
         for( auto&& test : tests) {
-            if( !test.is_manual() )
+            if( !test.test_info.is_manual() )
                 run_test(test, test_handler);
         }
     }

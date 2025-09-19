@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <vector>
 #include <unordered_map>
-#include <algorithm>
 
 namespace CatchKit::Detail {
     namespace {
@@ -34,6 +33,8 @@ namespace CatchKit::Detail {
             std::string tag_name(tag_spec.substr( start+1, end-start-1 ));
             if( tag_name == "!mayfail" )
                 tags.emplace_back(Tags::mayfail);
+            if( tag_name == "!shouldfail" )
+                tags.emplace_back(Tags::shouldfail);
             else if( tag_name.starts_with( "." ) )
                 tags.emplace_back(tag_name, Tag::Type::manual);
             else
@@ -42,11 +43,6 @@ namespace CatchKit::Detail {
         }
         return { location, std::move(name), std::move(tags) };
     }
-
-    auto Test::is_manual() const -> bool {
-        return std::ranges::any_of(test_info.tags, [](auto const& tag) { return tag.ignored != (tag.type == Tag::Type::manual); });
-    }
-
 
     std::vector<Test> const& get_all_tests() { return get_all_tests_impl(); }
 

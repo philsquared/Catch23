@@ -35,37 +35,53 @@ namespace CatchKit {
     }
 
     void ConsoleReporter::lazy_print_test_header() {
-        if( lazy_test_info ) {
+        if( !printed_header && current_test_info ) {
             std::println("-------------------------------------------------------------------------------");
-            println(ColourIntent::Headers, "TEST: {}", lazy_test_info->name);
+            println(ColourIntent::Headers, "TEST: {}", current_test_info->name);
             std::println("{}:{}",
-                    lazy_test_info->location.file_name(),
-                    lazy_test_info->location.line());
+                    current_test_info->location.file_name(),
+                    current_test_info->location.line());
             std::println("...............................................................................\n");
-            lazy_test_info.reset();
+            printed_header = false;
         }
     }
     void ConsoleReporter::on_test_start( TestInfo const& test_info ) {
-        lazy_test_info = test_info;
+        current_test_info = &test_info;
+        printed_header = false;
     }
     void ConsoleReporter::on_test_end( TestInfo const&, Counters const& assertions ) {
+        // !TBD: should probably move this bit to on_assertion_end and use +=
         if( assertions.failed == 0 )
             test_totals.passed_explicitly++;
         else
             test_totals.failed++;
         assertion_totals += assertions;
+        current_test_info = nullptr;
     }
 
     void ConsoleReporter::on_assertion_start( AssertionContext const& ) {}
 
     void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) {
+        assert(current_test_info);
         lazy_print_test_header();
-        println( assertion_info.passed() ? ColourIntent::Success : ColourIntent::Error,
-                "{}:{}:{}: {}",
+        std::print( "{}:{}:{}: ",
                 context.location.file_name(),
                 context.location.line(),
-                context.location.column(),
-                assertion_info.passed() ? "👍 PASSED" : "❌ FAILED");
+                context.location.column());
+        if( assertion_info.passed() ) {
+            if( current_test_info->should_fail() )
+                println( ColourIntent::Success, "👍 PASSED" );
+            else
+                println( ColourIntent::Error, "🤦 PASSED - but expected failure" );
+        }
+        else {
+            if( current_test_info->should_fail() )
+                println( ColourIntent::Success, "👍 FAILED as expected" );
+            else if( current_test_info->may_fail() )
+                println( ColourIntent::Warning, "🫡 FAILED, but ok" );
+            else
+                println( ColourIntent::Error, "❌ FAILED" );
+        }
 
         if( !context.original_expression.empty() )
             std::println( "for expression:" );

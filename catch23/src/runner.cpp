@@ -32,7 +32,7 @@ namespace CatchKit::Detail {
                     .macro_name = "",
                     .original_expression = "* unknown line after the reported location *",
                     .message = {},
-                    .location = test_handler.get_current_context().location };
+                    .location = test_handler.get_last_known_location() };
                 test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
                 test_handler.on_assertion_result(
                     ResultType::Failed,
@@ -95,7 +95,7 @@ namespace CatchKit::Detail {
         test_handler.set_execution_nodes(&execution_nodes);
 
         do {
-            test_handler.on_test_start(test);
+            test_handler.on_test_start(test.test_info);
 
             root_node.enter();
             assert(root_node.get_state() != ExecutionNode::States::Completed);
@@ -108,7 +108,7 @@ namespace CatchKit::Detail {
 
             root_node.exit();
 
-            test_handler.on_test_end(test);
+            test_handler.on_test_end(test.test_info);
         }
         while(root_node.get_state() != ExecutionNode::States::Completed);
 

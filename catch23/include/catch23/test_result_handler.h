@@ -18,7 +18,8 @@ namespace CatchKit::Detail
 
     class TestResultHandler : public ResultHandler {
         Reporter& reporter;
-        AssertionContext current_context;
+        std::optional<AssertionContext> current_context;
+        TestInfo const* current_test_info = nullptr;
         ResultType last_result = ResultType::Unknown;
         ResultDisposition result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
@@ -33,8 +34,8 @@ namespace CatchKit::Detail
 
         auto operator=(TestResultHandler&&) = delete; // non-copyable, non-moveable
 
-        void on_test_start( Test const& test );
-        void on_test_end( Test const& test );
+        void on_test_start( TestInfo const& test_info );
+        void on_test_end( TestInfo const& test_info );
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) override;
@@ -48,10 +49,11 @@ namespace CatchKit::Detail
         void remove_variable_capture( VariableCapture* capture ) override;
 
         [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
-        [[nodiscard]] auto get_current_context() const -> AssertionContext const& { return current_context; }
         [[nodiscard]] auto passed() const { return last_result == ResultType::Passed; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }
+
+        [[nodiscard]] auto get_last_known_location() const -> std::source_location;
 
         void set_execution_nodes( ExecutionNodes* nodes ) { execution_nodes = nodes; }
     };

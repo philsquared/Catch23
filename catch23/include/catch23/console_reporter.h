@@ -10,7 +10,8 @@
 namespace CatchKit {
 
     class ConsoleReporter : public Reporter {
-        std::optional<TestInfo> lazy_test_info;
+        TestInfo const* current_test_info = nullptr;
+        bool printed_header = false;
         ReportOn what_to_report_on;
         void lazy_print_test_header();
 

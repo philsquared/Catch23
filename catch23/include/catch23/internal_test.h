@@ -27,8 +27,6 @@ namespace CatchKit::Detail {
             test_info.tags = std::vector{Tag{std::forward<T>(tags)}...};
             return std::move(*this);
         }
-
-        auto is_manual() const -> bool;
     };
     std::vector<Test> const& get_all_tests();
     auto find_test_by_name(std::string const& name) -> Test const*;

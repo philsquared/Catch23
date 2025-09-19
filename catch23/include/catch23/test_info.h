@@ -31,6 +31,11 @@ namespace CatchKit {
         std::source_location location;
         std::string name = {};
         std::vector<Tag> tags = {};
+
+        auto is_manual() const -> bool;
+        auto should_fail() const -> bool;
+        auto may_fail() const -> bool;
+
     };
 
 } // namespace CatchKit

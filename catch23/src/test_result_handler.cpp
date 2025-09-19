@@ -16,12 +16,14 @@ namespace CatchKit::Detail {
         reporter(reporter)
     {}
 
-    void TestResultHandler::on_test_start( Test const& test ) {
-        reporter.on_test_start(test.test_info);
+    void TestResultHandler::on_test_start( TestInfo const& test_info ) {
+        current_test_info = &test_info;
+        reporter.on_test_start(test_info);
     }
-    void TestResultHandler::on_test_end( Test const& test ) {
-        reporter.on_test_end(test.test_info, assertions);
+    void TestResultHandler::on_test_end( TestInfo const& test_info ) {
+        reporter.on_test_end(test_info, assertions);
         assertions = Counters();
+        current_test_info = nullptr;
     }
 
     void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
@@ -50,6 +52,8 @@ namespace CatchKit::Detail {
     }
 
     void TestResultHandler::on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) {
+        assert(current_test_info);
+
         last_result = result;
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
@@ -59,11 +63,24 @@ namespace CatchKit::Detail {
         if( shrinking_mode == ShrinkingMode::NotShrunk )
             return;
 
+        // If we completed a shrink then we get called one more time so we report the details.
+        // In that case we don't want to contribute to the assertion stats as will have already done so
+        // before we started shrinking
         if( shrinking_mode != ShrinkingMode::Shrunk ) {
-            if( result == ResultType::Passed )
-                assertions.passed_explicitly++;
-            else
-                assertions.failed++;
+            if( !current_test_info->should_fail() ) {
+                if( result == ResultType::Passed )
+                    assertions.passed_explicitly++;
+                else if( current_test_info->may_fail() )
+                    assertions.failed_expectedly++;
+                else
+                    assertions.failed++;
+            }
+            else {
+                if( result == ResultType::Failed )
+                    assertions.passed_explicitly++;
+                else
+                    assertions.failed++;
+            }
         }
 
         // !TBD: We should need to check this again
@@ -74,9 +91,10 @@ namespace CatchKit::Detail {
                 // Attempt to strip out an inline message
                 // note: this is quite brittle, so if it seems to have stopped working
                 // check that this logic still matches usage
-                if( auto pos = current_context.original_expression.rfind(message); pos != std::string::npos ) {
-                    assert( pos > 3 && current_context.original_expression[pos-3] == ',' );
-                    current_context.original_expression = current_context.original_expression.substr( 0, pos-3 );
+                std::string_view& expr = current_context->original_expression;
+                if( auto pos = expr.rfind(message); pos != std::string::npos ) {
+                    assert( pos > 3 && expr[pos-3] == ',' );
+                    expr = expr.substr( 0, pos-3 );
                 }
             }
 
@@ -92,11 +110,12 @@ namespace CatchKit::Detail {
                     full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
                 }
             }
-            reporter.on_assertion_end(current_context, AssertionInfo{ result, expression_info, full_message } );
+            reporter.on_assertion_end(*current_context, AssertionInfo{ result, expression_info, full_message } );
         }
     }
 
     void TestResultHandler::on_assertion_end() {
+        current_context.reset();
         if( last_result != ResultType::Passed && result_disposition == ResultDisposition::Abort ) {
             throw TestCancelled();
         }
@@ -107,6 +126,13 @@ namespace CatchKit::Detail {
     }
     void TestResultHandler::remove_variable_capture( VariableCapture* capture ) {
         std::erase(variable_captures, capture);
+    }
+
+    auto TestResultHandler::get_last_known_location() const -> std::source_location {
+        assert( current_test_info );
+        if( current_context )
+            return current_context->location;
+        return current_test_info->location;
     }
 
     auto get_execution_nodes_from_result_handler(ResultHandler& handler) -> ExecutionNodes& {
