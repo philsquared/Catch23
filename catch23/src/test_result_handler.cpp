@@ -16,6 +16,14 @@ namespace CatchKit::Detail {
         reporter(reporter)
     {}
 
+    void TestResultHandler::on_test_start( Test const& test ) {
+        reporter.on_test_start(test.test_info);
+    }
+    void TestResultHandler::on_test_end( Test const& test ) {
+        reporter.on_test_end(test.test_info, assertions);
+        assertions = Counters();
+    }
+
     void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
         current_context = std::move(context);
         this->result_disposition = result_disposition;
@@ -63,7 +71,7 @@ namespace CatchKit::Detail {
         // the other takes the full, expanded, data (probably no need for optional)
         if( report_on == ReportOn::AllResults || !result ) {
             if( !message.empty() ) {
-                // Attempt to string out an inline message
+                // Attempt to strip out an inline message
                 // note: this is quite brittle, so if it seems to have stopped working
                 // check that this logic still matches usage
                 if( auto pos = current_context.original_expression.rfind(message); pos != std::string::npos ) {

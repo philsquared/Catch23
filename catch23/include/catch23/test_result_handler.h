@@ -6,6 +6,7 @@
 #define CATCHKIT_TEST_ASSERTION_HANDLER_H
 
 #include "internal_execution_nodes.h"
+#include "internal_test.h"
 #include "reporter.h"
 #include "catchkit/result_handler.h"
 
@@ -32,6 +33,9 @@ namespace CatchKit::Detail
 
         auto operator=(TestResultHandler&&) = delete; // non-copyable, non-moveable
 
+        void on_test_start( Test const& test );
+        void on_test_end( Test const& test );
+
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
         void on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
@@ -49,7 +53,6 @@ namespace CatchKit::Detail
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }
 
-        void reset_assertion_counts() { assertions = Counters(); }
         void set_execution_nodes( ExecutionNodes* nodes ) { execution_nodes = nodes; }
     };
 

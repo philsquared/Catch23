@@ -90,14 +90,12 @@ namespace CatchKit::Detail {
     }
 
     void run_test( Test const& test, TestResultHandler& test_handler ) {
-        Reporter& reporter = test_handler.get_reporter();
-
         ExecutionNodes execution_nodes({test.test_info.name, test.test_info.location});
         auto& root_node = execution_nodes.get_root();
         test_handler.set_execution_nodes(&execution_nodes);
 
         do {
-            reporter.on_test_start(test.test_info);
+            test_handler.on_test_start(test);
 
             root_node.enter();
             assert(root_node.get_state() != ExecutionNode::States::Completed);
@@ -110,10 +108,7 @@ namespace CatchKit::Detail {
 
             root_node.exit();
 
-
-            reporter.on_test_end(test.test_info, test_handler.get_assertion_counts() );
-            test_handler.reset_assertion_counts();
-
+            test_handler.on_test_end(test);
         }
         while(root_node.get_state() != ExecutionNode::States::Completed);
 
