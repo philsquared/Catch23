@@ -27,7 +27,7 @@ namespace CatchKit::Detail {
         current_test_info = nullptr;
     }
 
-    void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
+    void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
         current_context = std::move(context);
         this->result_disposition = result_disposition;
         reporter.on_assertion_start( context );

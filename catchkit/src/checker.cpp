@@ -7,7 +7,6 @@
 
 namespace {
     CatchKit::Detail::AssertResultHandler default_assertion_handler;
-    constinit CatchKit::Detail::ResultHandler* current_assertion_handler = &default_assertion_handler;
 }
 
 constinit CatchKit::Checker check( &default_assertion_handler, CatchKit::ResultDisposition::Continue );
@@ -15,19 +14,29 @@ constinit CatchKit::Checker require( &default_assertion_handler, CatchKit::Resul
 
 namespace CatchKit::Detail {
 
-    // !TBD Do we need to return the old one so it can be set back later?
-    // This would probably change to being a pointer
-    void set_current_assertion_handler( AssertResultHandler& handler ) {
-        current_assertion_handler = &handler;
-    }
-
     auto Checker::operator()(std::string_view message, std::source_location assertion_location) -> Asserter {
         return operator()(AssertionContext{{}, {}, message, assertion_location});
     }
 
-    auto Checker::operator()(AssertionContext&& context) -> Asserter {
-        result_handler->on_assertion_start(result_disposition, std::move(context));
+    auto Checker::operator()(AssertionContext const& context) -> Asserter {
+        result_handler->on_assertion_start(result_disposition, context);
         return Asserter{*this};
     }
+
+    Asserter::~Asserter() noexcept(false) {
+        checker.result_handler->on_assertion_end(); // This may throw to cancel the test
+    }
+
+    void Asserter::report_current_exception() const {
+        if( checker.result_handler->on_assertion_result(ResultType::Failed) == ResultDetailNeeded::Yes ) {
+            checker.result_handler->on_assertion_result_detail(
+                ExceptionExpressionInfo{
+                    get_exception_message(
+                        std::current_exception()),
+                        ExceptionExpressionInfo::Type::Unexpected },
+                    {} );
+        }
+    }
+
 
 } // namespace CatchKit::Detail

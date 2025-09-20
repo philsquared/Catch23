@@ -11,7 +11,7 @@
 
 namespace CatchKit::Detail {
 
-    void AssertResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) {
+    void AssertResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
         current_context = std::move(context);
         this->result_disposition = result_disposition;
     }

@@ -39,7 +39,7 @@ namespace CatchKit::Detail
         void on_test_start( TestInfo const& test_info );
         void on_test_end( TestInfo const& test_info );
 
-        void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
+        void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) override;
         [[nodiscard]] auto on_assertion_result( ResultType result ) -> ResultDetailNeeded override;
         void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;

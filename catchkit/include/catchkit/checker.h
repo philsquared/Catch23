@@ -26,41 +26,32 @@ namespace CatchKit::Detail
         bool should_decompose = true;
 
         auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
-        auto operator()(AssertionContext&& context) -> Asserter;
+        auto operator()(AssertionContext const& context) -> Asserter;
     };
 
     struct Asserter {
         Checker& checker;
 
-        ~Asserter() noexcept(false) {
-            checker.result_handler->on_assertion_end(); // This may throw to cancel the test
-        }
+        ~Asserter() noexcept(false);
+
         void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
                 expr_call(*this);
             }
             catch(...) {
-                if( checker.result_handler->on_assertion_result(ResultType::Failed) == ResultDetailNeeded::Yes ) {
-                    checker.result_handler->on_assertion_result_detail(
-                        ExceptionExpressionInfo{
-                            get_exception_message(
-                                std::current_exception()),
-                                ExceptionExpressionInfo::Type::Unexpected },
-                            {} );
-                }
+                report_current_exception();
             }
         }
 
         template<typename T>
-        void simple_assert(auto const&, T&&) noexcept {
+        void simple_assert(auto const&, T&&) const noexcept {
             static_assert(std::is_convertible_v<T, std::string_view>, "Only matchers or strings can follow the comma operator");
         }
-        void simple_assert(std::nullptr_t, std::string_view message = {}) noexcept {
+        void simple_assert(std::nullptr_t, std::string_view message = {}) const noexcept {
             simple_assert(false, message);
         }
-        void simple_assert(auto const& result, std::string_view message = {}) noexcept {
-            bool is_failure = !result;
-            if( checker.result_handler->on_assertion_result(is_failure ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes )
+        void simple_assert(auto const& result, std::string_view message = {}) const noexcept {
+            if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes )
                 checker.result_handler->on_assertion_result_detail(std::monostate(), message);
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
@@ -78,6 +69,8 @@ namespace CatchKit::Detail
         [[maybe_unused]] friend constexpr auto operator << ( Asserter&& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
+    private:
+        void report_current_exception() const;
     };
 
     // --------------
@@ -176,7 +169,8 @@ namespace CatchKit
 } //namespace CatchKit
 
 // These global instances are used if not using the ones passed in to a function locally
-extern constinit CatchKit::Checker check, require;
+extern constinit CatchKit::Checker check; // NOLINT
+extern constinit CatchKit::Checker require; // NOLINT
 
 
 #define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \
@@ -191,9 +185,9 @@ extern constinit CatchKit::Checker check, require;
 
 
 #define CATCHKIT_ASSERT_THAT_INTERNAL(macro_name, checker, arg, match_expr) \
-do { using namespace CatchKit::Matchers; \
-    checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)).that( [&]{ return arg; }, match_expr ); \
-} while( false )
+    do { using namespace CatchKit::Matchers; \
+        checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)).that( [&]{ return arg; }, match_expr ); \
+    } while( false )
 
 
 #define CHECK(...) CATCHKIT_ASSERT_INTERNAL( "CHECK", check, __VA_ARGS__ )

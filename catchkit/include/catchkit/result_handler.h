@@ -26,7 +26,7 @@ namespace CatchKit::Detail
         explicit ResultHandler(ReportOn report_on) : report_on(report_on) {}
         virtual ~ResultHandler();
 
-        virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) = 0;
+        virtual void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) = 0;
         [[nodiscard]] virtual auto on_assertion_result( ResultType result ) -> ResultDetailNeeded = 0;
         virtual void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) = 0;
         virtual void on_assertion_end() = 0;

@@ -18,13 +18,11 @@ namespace CatchKit::Detail {
 
         AssertResultHandler() : ResultHandler(ReportOn::FailuresOnly) {}
 
-        void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
+        void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) override;
         [[nodiscard]] auto on_assertion_result( ResultType result ) -> ResultDetailNeeded override;
         void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
     };
-
-    void set_current_assertion_handler( AssertResultHandler& handler ); // impl in catchkit_checker.cpp
 
 } // namespace CatchKit::Detail
 

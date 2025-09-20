@@ -186,7 +186,6 @@ namespace CatchKit {
             return;
         }
 
-        // !TBD: allow for shouldfail/ mayfail
         if ( assertion_totals.total() > 0 && test_totals.all_passed() ) {
             println( ColourIntent::ResultSuccess, "All tests passed ({} assertion(s) in {} tests)",
                 assertion_totals.total(), test_totals.total() );
