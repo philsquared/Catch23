@@ -68,7 +68,7 @@ TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
 }
 
 TEST_CASE( "Meta: Equality checks that should fail", "[meta]" ) {
-    CHECK( RUN_TEST_BY_NAME("Equality checks that should fail").failures() == 13 );
+    CHECK( RUN_TEST_BY_NAME("Equality checks that should fail").expected_failures() == 13 );
 }
 
 // !TBD: [!mayfail], SECTION
@@ -104,7 +104,7 @@ TEST_CASE( "Inequality checks that should succeed" )
     REQUIRE( data.str_hello.size() != 6 );
 }
 
-TEST_CASE( "Inequality checks that should fail", "[.][failing][!shouldfail]" )
+TEST_CASE( "Inequality checks that should fail", "[.][failing][!mayfail]" )
 {
     TestData data;
 
@@ -116,7 +116,7 @@ TEST_CASE( "Inequality checks that should fail", "[.][failing][!shouldfail]" )
 }
 
 TEST_CASE( "Meta: Inequality checks that should fail", "[meta]" ) {
-    CHECK( RUN_TEST_BY_NAME("Inequality checks that should fail").failures() == 5 );
+    CHECK( RUN_TEST_BY_NAME("Inequality checks that should fail").expected_failures() == 5 );
 }
 
 // Ordering comparison tests

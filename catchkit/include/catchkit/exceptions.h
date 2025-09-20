@@ -12,8 +12,9 @@ namespace CatchKit::Detail {
 
     extern std::string unknown_exception_message;
 
-    [[nodiscard]] auto get_exception_message( std::exception_ptr const& ex ) -> std::string;
+    [[nodiscard]] auto get_current_exception_message() -> std::string;
 
+    [[nodiscard]] auto get_exception_message( std::exception_ptr const& ex ) -> std::string;
     [[nodiscard]] auto get_exception_message( std::exception const& ex ) -> std::string;
     [[nodiscard]] auto get_exception_message( std::string const& str ) -> std::string;
 

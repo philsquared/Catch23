@@ -8,6 +8,7 @@
 #include "catchkit/variable_capture.h"
 
 #include <cassert>
+#include <utility>
 
 namespace CatchKit::Detail {
 
@@ -50,73 +51,80 @@ namespace CatchKit::Detail {
     void TestResultHandler::on_shrink_end() {
         shrinking_mode = ShrinkingMode::Normal;
     }
-
-    void TestResultHandler::on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) {
-        assert(current_test_info);
-
-        last_result = result;
+    auto TestResultHandler::on_assertion_result( ResultType result ) -> ResultDetailNeeded {
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
             reporter.on_shrink_result(result, shrink_count);
-            return;
+            return ResultDetailNeeded::No;
         }
         if( shrinking_mode == ShrinkingMode::NotShrunk )
-            return;
+            return ResultDetailNeeded::No;
+
+
+        if( current_test_info->should_fail() )
+            last_result = (result == ResultType::Passed) ? AdjustedResult::Failed : AdjustedResult::Passed;
+        else if( current_test_info->may_fail() && result == ResultType::Failed )
+            last_result = AdjustedResult::FailedExpectly;
+        else
+            last_result = (result == ResultType::Passed) ? AdjustedResult::Passed : AdjustedResult::Failed;
 
         // If we completed a shrink then we get called one more time so we report the details.
         // In that case we don't want to contribute to the assertion stats as will have already done so
         // before we started shrinking
         if( shrinking_mode != ShrinkingMode::Shrunk ) {
-            if( !current_test_info->should_fail() ) {
-                if( result == ResultType::Passed )
-                    assertions.passed_explicitly++;
-                else if( current_test_info->may_fail() )
-                    assertions.failed_expectedly++;
-                else
-                    assertions.failed++;
-            }
-            else {
-                if( result == ResultType::Failed )
-                    assertions.passed_explicitly++;
-                else
-                    assertions.failed++;
+            switch(last_result) {
+            case AdjustedResult::Passed:
+                assertions.passed_explicitly++;
+                break;
+            case AdjustedResult::Failed:
+                assertions.failed++;
+                break;
+            case AdjustedResult::FailedExpectly:
+                assertions.failed_expectedly++;
+                break;
+            default:
+                std::unreachable();
             }
         }
 
-        // !TBD: We should need to check this again
-        // - go back to having two on_assertion_result methods - one that takes just a result,
-        // the other takes the full, expanded, data (probably no need for optional)
-        if( report_on == ReportOn::AllResults || !result ) {
-            if( !message.empty() ) {
-                // Attempt to strip out an inline message
-                // note: this is quite brittle, so if it seems to have stopped working
-                // check that this logic still matches usage
-                std::string_view& expr = current_context->original_expression;
-                if( auto pos = expr.rfind(message); pos != std::string::npos ) {
-                    assert( pos > 3 && expr[pos-3] == ',' );
-                    expr = expr.substr( 0, pos-3 );
-                }
-            }
+        if( report_on != ReportOn::AllResults && last_result != AdjustedResult::Failed )
+            return ResultDetailNeeded::No;
 
-            std::string full_message(message);
+        return ResultDetailNeeded::Yes;
+    }
 
-            // Add in any captured variables
-            // !TBD: improve formatting - or should we pass this through in a more fine-grained way to the reporter?
-            if( !variable_captures.empty() ) {
-                if( !full_message.empty() )
-                    full_message += "\nwith";
-                full_message += "captured variables:";
-                for( auto var : variable_captures ) {
-                    full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
-                }
+    void TestResultHandler::on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) {
+        assert(current_test_info);
+
+        if( !message.empty() ) {
+            // Attempt to strip out an inline message
+            // note: this is quite brittle, so if it seems to have stopped working
+            // check that this logic still matches usage
+            std::string_view& expr = current_context->original_expression;
+            if( auto pos = expr.rfind(message); pos != std::string::npos ) {
+                assert( pos > 3 && expr[pos-3] == ',' );
+                expr = expr.substr( 0, pos-3 );
             }
-            reporter.on_assertion_end(*current_context, AssertionInfo{ result, expression_info, full_message } );
         }
+
+        std::string full_message(message);
+
+        // Add in any captured variables
+        // !TBD: improve formatting - or should we pass this through in a more fine-grained way to the reporter?
+        if( !variable_captures.empty() ) {
+            if( !full_message.empty() )
+                full_message += "\nwith";
+            full_message += "captured variables:";
+            for( auto var : variable_captures ) {
+                full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
+            }
+        }
+        reporter.on_assertion_end(*current_context, AssertionInfo{ last_result, expression_info, full_message } );
     }
 
     void TestResultHandler::on_assertion_end() {
         current_context.reset();
-        if( last_result != ResultType::Passed && result_disposition == ResultDisposition::Abort ) {
+        if( !passed() && result_disposition == ResultDisposition::Abort ) {
             throw TestCancelled();
         }
     }

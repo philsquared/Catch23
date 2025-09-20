@@ -13,6 +13,9 @@ namespace CatchKit {
     auto MetaTestResults::failures() const -> int {
         return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc += result.failed(); });
     }
+    auto MetaTestResults::expected_failures() const -> int {
+        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc += result.failed_expectedly(); });
+    }
 
     MetaTestRunner::MetaTestRunner( std::string name, std::source_location location )
     :   handler( reporter ),

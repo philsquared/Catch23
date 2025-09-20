@@ -6,24 +6,23 @@
 #define CATCH23_REPORTER_H
 
 #include "test_info.h"
+#include "adjusted_result.h"
 
 #include "catchkit/expression_info.h"
 #include "catchkit/result_type.h"
 #include "catchkit/assertion_context.h"
 #include "catchkit/report_on.h"
 
-#include <optional>
-
 namespace CatchKit {
 
     struct AssertionInfo {
-        ResultType result;
+        AdjustedResult result;
         ExpressionInfo expression_info;
         std::string message;
         // !TBD: include variable captures, here?
 
-        [[nodiscard]] auto passed() const { return result == ResultType::Passed; }
-        [[nodiscard]] auto failed() const { return result != ResultType::Passed; }
+        [[nodiscard]] auto failed() const { return result == AdjustedResult::Failed; }
+        [[nodiscard]] auto passed() const { return !failed(); }
     };
 
     struct Counters {
@@ -32,10 +31,8 @@ namespace CatchKit {
         int failed = 0;
 
         [[nodiscard]] auto passed() const { return passed_explicitly + failed_expectedly; }
-
         [[nodiscard]] auto total() const { return passed() + failed; }
-
-        [[nodiscard]] auto all_passed() const { return failed == 0; }
+        [[nodiscard]] auto all_passed() const { return failed == 0 && failed_expectedly == 0; }
 
         auto& operator += ( Counters const& other ) {
             passed_explicitly += other.passed_explicitly;

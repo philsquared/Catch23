@@ -8,6 +8,8 @@
 #include "internal_execution_nodes.h"
 #include "internal_test.h"
 #include "reporter.h"
+#include "adjusted_result.h"
+
 #include "catchkit/result_handler.h"
 
 namespace CatchKit::Detail
@@ -20,7 +22,7 @@ namespace CatchKit::Detail
         Reporter& reporter;
         std::optional<AssertionContext> current_context;
         TestInfo const* current_test_info = nullptr;
-        ResultType last_result = ResultType::Unknown;
+        AdjustedResult last_result = AdjustedResult::Unknown;
         ResultDisposition result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
 
@@ -38,7 +40,8 @@ namespace CatchKit::Detail
         void on_test_end( TestInfo const& test_info );
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
-        void on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) override;
+        [[nodiscard]] auto on_assertion_result( ResultType result ) -> ResultDetailNeeded override;
+        void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
 
         void on_shrink_start();
@@ -49,7 +52,7 @@ namespace CatchKit::Detail
         void remove_variable_capture( VariableCapture* capture ) override;
 
         [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
-        [[nodiscard]] auto passed() const { return last_result == ResultType::Passed; }
+        [[nodiscard]] auto passed() const { return last_result != AdjustedResult::Failed; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }
 

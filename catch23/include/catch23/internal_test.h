@@ -38,9 +38,14 @@ namespace CatchKit::Detail {
 } // CatchKit::Detail
 
 namespace CatchKit::Tags {
-    inline constexpr Tag manual{".", Tag::Type::manual };
-    inline constexpr Tag mayfail{"!mayfail", Tag::Type::mayfail };
-    inline constexpr Tag shouldfail{"!shouldfail", Tag::Type::shouldfail };
+    // Manual tests are not run by default, but can be run by name or tag
+    inline constexpr Tag manual{"@manual", Tag::Type::manual };
+
+    // Tests that mayfail will be counted as a pass for the overall run even if they fail
+    inline constexpr Tag mayfail{"@mayfail", Tag::Type::mayfail };
+
+    // Tests that shouldfail are counted as a pass for the overall run if they fail, and a fail if they pass
+    inline constexpr Tag shouldfail{"@shouldfail", Tag::Type::shouldfail };
 }
 
 #endif // CATCH23_INTERNAL_TEST_H

@@ -8,13 +8,13 @@
 
 namespace CatchKit {
     auto TestInfo::is_manual() const -> bool {
-        return std::ranges::any_of(tags, [](auto const& tag) { return tag.ignored != (tag.type == Tag::Type::manual); });
+        return std::ranges::any_of(tags, [](auto const& tag) { return tag.type == Tag::Type::manual && !tag.ignored; });
     }
     auto TestInfo::should_fail() const -> bool {
-        return std::ranges::any_of(tags, [](auto const& tag) { return tag.ignored != (tag.type == Tag::Type::shouldfail); });
+        return std::ranges::any_of(tags, [](auto const& tag) { return tag.type == Tag::Type::shouldfail && !tag.ignored; });
     }
     auto TestInfo::may_fail() const -> bool {
-        return std::ranges::any_of(tags, [](auto const& tag) { return tag.ignored != (tag.type == Tag::Type::mayfail); });
+        return std::ranges::any_of(tags, [](auto const& tag) { return tag.type == Tag::Type::mayfail && !tag.ignored; });
     }
 
 }

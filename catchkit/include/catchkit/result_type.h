@@ -8,7 +8,6 @@
 namespace CatchKit {
 
     enum class ResultType {
-        Unknown,
         Passed,
         Failed
     };

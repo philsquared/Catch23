@@ -7,7 +7,7 @@
 #include "catch23/meta_test.h"
 
 TEST("Generators", [manual]) {
-    auto i = GENERATE(values_of<int>()); // Defaults to 100 values
+    auto i = GENERATE(values_of<int>{.up_to=100}); // Defaults to 100 values
 
     CHECK( i < 50 ); // Half of these should fail
 }
@@ -155,7 +155,7 @@ namespace {
 }
 
 TEST_CASE( "#2615 - Throwing in constructor generator fails test case but does not abort",
-           "[!shouldfail][regression][generators][.]" ) {
+           "[!shouldfail][regression][generators][/.]" ) {
     // this should fail the test case, but not abort the application
     auto sample = GENERATE( throwing_generator() );
     // this assertion shouldn't trigger

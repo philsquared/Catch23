@@ -13,13 +13,14 @@ namespace CatchKit::Detail {
 
     struct AssertResultHandler : ResultHandler {
         AssertionContext current_context;
-        ResultType last_result = ResultType::Unknown;
+        ResultType last_result = ResultType::Passed;
         ResultDisposition result_disposition = ResultDisposition::Abort;
 
         AssertResultHandler() : ResultHandler(ReportOn::FailuresOnly) {}
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext&& context ) override;
-        void on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) override;
+        [[nodiscard]] auto on_assertion_result( ResultType result ) -> ResultDetailNeeded override;
+        void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) override;
         void on_assertion_end() override;
     };
 

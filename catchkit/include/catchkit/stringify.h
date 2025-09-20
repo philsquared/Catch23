@@ -128,6 +128,8 @@ namespace CatchKit {
             return std::to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
             return "nullptr";
+        else if constexpr( std::is_convertible_v<T, char const*> && std::is_pointer_v<T> )
+            return value ? std::string(value) : std::string("nullptr");
         else if constexpr( std::is_convertible_v<T, std::string> )
             return std::format("\"{}\"", value);
         else

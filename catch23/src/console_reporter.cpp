@@ -50,9 +50,12 @@ namespace CatchKit {
         printed_header = false;
     }
     void ConsoleReporter::on_test_end( TestInfo const&, Counters const& assertions ) {
-        // !TBD: should probably move this bit to on_assertion_end and use +=
-        if( assertions.failed == 0 )
-            test_totals.passed_explicitly++;
+        if( assertions.failed == 0 ) {
+            if( assertions.failed_expectedly == 0 )
+                test_totals.passed_explicitly++;
+            else
+                test_totals.failed_expectedly++;
+        }
         else
             test_totals.failed++;
         assertion_totals += assertions;
@@ -69,16 +72,16 @@ namespace CatchKit {
                 context.location.line(),
                 context.location.column());
         if( assertion_info.passed() ) {
-            if( current_test_info->should_fail() )
-                println( ColourIntent::Success, "👍 PASSED" );
+            if( assertion_info.result == AdjustedResult::FailedExpectly )
+                println( ColourIntent::Warning, "🫡 FAILED, but ok" );
+            else if( current_test_info->should_fail() )
+                println( ColourIntent::Success, "👍 FAILED as expected" );
             else
-                println( ColourIntent::Error, "🤦 PASSED - but expected failure" );
+                println( ColourIntent::Success, "👍 PASSED" );
         }
         else {
             if( current_test_info->should_fail() )
-                println( ColourIntent::Success, "👍 FAILED as expected" );
-            else if( current_test_info->may_fail() )
-                println( ColourIntent::Warning, "🫡 FAILED, but ok" );
+                println( ColourIntent::Error, "🤦 PASSED - but expected failure" );
             else
                 println( ColourIntent::Error, "❌ FAILED" );
         }
@@ -183,6 +186,7 @@ namespace CatchKit {
             return;
         }
 
+        // !TBD: allow for shouldfail/ mayfail
         if ( assertion_totals.total() > 0 && test_totals.all_passed() ) {
             println( ColourIntent::ResultSuccess, "All tests passed ({} assertion(s) in {} tests)",
                 assertion_totals.total(), test_totals.total() );
@@ -190,15 +194,17 @@ namespace CatchKit {
         }
 
         auto print_summary = [](Counters const& counts, std::string const& label) {
-
             std::print("{}: {}", label, counts.total() );
-            print( Colours::BoldGrey, " | " );
             if( counts.passed() > 0) {
+                print( Colours::BoldGrey, " | " );
                 print( ColourIntent::ResultSuccess, "{} passed", counts.passed() );
-                if( counts.failed > 0 )
-                    print( Colours::BoldGrey, " | " );
+            }
+            if( counts.failed_expectedly > 0) {
+                print( Colours::BoldGrey, " | " );
+                print( ColourIntent::Warning, "{} failed expectly", counts.failed_expectedly );
             }
             if( counts.failed > 0) {
+                print( Colours::BoldGrey, " | " );
                 print( ColourIntent::ResultError, "{} failed", counts.failed );
             }
             std::println();

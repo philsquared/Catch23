@@ -16,8 +16,9 @@ namespace CatchKit {
         AssertionContext context;
         AssertionInfo info;
 
-        auto passed() const { return info.result == ResultType::Passed; }
-        auto failed() const { return info.result == ResultType::Failed; }
+        auto passed() const { return info.passed(); }
+        auto failed() const { return info.failed(); }
+        auto failed_expectedly() const { return info.result == AdjustedResult::FailedExpectly; }
     };
 
     class MetaTestReporter : public Reporter {
@@ -62,6 +63,7 @@ namespace CatchKit {
             return !all_results.empty() ? all_results.back().info.message : std::string();
         }
         auto failures() const -> int;
+        auto expected_failures() const -> int;
     };
 
     class MetaTestRunner {

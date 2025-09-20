@@ -16,13 +16,15 @@ namespace CatchKit::Detail {
         this->result_disposition = result_disposition;
     }
 
-    void AssertResultHandler::on_assertion_result( ResultType result, ExpressionInfo const& expression_info, std::string_view message ) {;
+    auto AssertResultHandler::on_assertion_result( ResultType result ) -> ResultDetailNeeded {
         last_result = result;
-
+        if( last_result == ResultType::Passed )
+            return ResultDetailNeeded::No;
+        return ResultDetailNeeded::Yes;
+    }
+    void AssertResultHandler::on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) {;
         // !TBD When we can use stacktrace do something like this:
         // https://godbolt.org/z/jM4TnaMEW
-        if( last_result == ResultType::Passed )
-            return;
 
         // Redundant?
         auto os = stdout;
@@ -39,13 +41,13 @@ namespace CatchKit::Detail {
             macro_name = "assertion";
         if ( !current_context.original_expression.empty() )
             std::println(os, "{} {} for expression:\n\t{}",
-                macro_name, (result == ResultType::Passed) ? "passed" : "failed",
+                macro_name, (last_result == ResultType::Passed) ? "passed" : "failed",
                 current_context.original_expression);
         else
             std::println(os, "{} {}",
-                macro_name, (result == ResultType::Passed) ? "passed" : "failed");
+                macro_name, (last_result == ResultType::Passed) ? "passed" : "failed");
 
-        if( result == ResultType::Failed ) {
+        if( last_result == ResultType::Failed ) {
             if( auto except_expr = std::get_if<ExceptionExpressionInfo>( &expression_info ) ) {
                 switch( except_expr->type ) {
                     case ExceptionExpressionInfo::Type::Missing:

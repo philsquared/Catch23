@@ -31,5 +31,9 @@ namespace CatchKit::Detail {
             return unknown_exception_message;
         }
     }
+    [[nodiscard]] auto get_current_exception_message() -> std::string {
+        return get_exception_message(std::current_exception());
+    }
+
 
 } // namespace CatchKit::Detail
