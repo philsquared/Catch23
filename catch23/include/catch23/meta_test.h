@@ -46,6 +46,7 @@ namespace CatchKit {
         void on_shrink_found( std::vector<std::string> const&, int ) override {}
         void on_no_shrink_found( int ) override {}
         void on_shrink_result( ResultType, int ) override {}
+        void on_shrink_end() override {}
 
         std::vector<FullAssertionInfo> results;
     };

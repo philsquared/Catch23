@@ -50,8 +50,16 @@ namespace CatchKit::Detail {
 
     void TestResultHandler::on_shrink_end() {
         shrinking_mode = ShrinkingMode::Normal;
+        reporter.on_shrink_end();
     }
     auto TestResultHandler::on_assertion_result( ResultType result ) -> ResultDetailNeeded {
+        if( current_test_info->should_fail() )
+            last_result = (result == ResultType::Passed) ? AdjustedResult::Failed : AdjustedResult::Passed;
+        else if( current_test_info->may_fail() && result == ResultType::Failed )
+            last_result = AdjustedResult::FailedExpectly;
+        else
+            last_result = (result == ResultType::Passed) ? AdjustedResult::Passed : AdjustedResult::Failed;
+
         if( shrinking_mode == ShrinkingMode::Shrinking ) {
             shrink_count++;
             reporter.on_shrink_result(result, shrink_count);
@@ -59,14 +67,6 @@ namespace CatchKit::Detail {
         }
         if( shrinking_mode == ShrinkingMode::NotShrunk )
             return ResultDetailNeeded::No;
-
-
-        if( current_test_info->should_fail() )
-            last_result = (result == ResultType::Passed) ? AdjustedResult::Failed : AdjustedResult::Passed;
-        else if( current_test_info->may_fail() && result == ResultType::Failed )
-            last_result = AdjustedResult::FailedExpectly;
-        else
-            last_result = (result == ResultType::Passed) ? AdjustedResult::Passed : AdjustedResult::Failed;
 
         // If we completed a shrink then we get called one more time so we report the details.
         // In that case we don't want to contribute to the assertion stats as will have already done so

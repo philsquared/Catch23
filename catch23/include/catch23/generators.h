@@ -82,7 +82,7 @@ namespace CatchKit {
                     strategy = Strategies::BinaryDescent;
             }
             auto shrink( values_of<T>& generator, T value ) -> std::generator<T> {
-                if( value > 0 ) {
+                if( value >= 0 ) {
                     switch( strategy ) {
                     case Strategies::SimpleValues:
                         co_yield 0;

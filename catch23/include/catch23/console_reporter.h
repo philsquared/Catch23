@@ -13,10 +13,12 @@ namespace CatchKit {
         TestInfo const* current_test_info = nullptr;
         bool printed_header = false;
         ReportOn what_to_report_on;
-        void lazy_print_test_header();
+        bool shrinking = false;
 
         Counters test_totals;
         Counters assertion_totals;
+
+        void lazy_print_test_header();
 
     public:
         explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailuresOnly )
@@ -37,6 +39,7 @@ namespace CatchKit {
         void on_shrink_found( std::vector<std::string> const& values, int shrinks ) override;
         void on_no_shrink_found( int shrinks ) override;
         void on_shrink_result( ResultType result, int shrinks_so_far ) override;
+        void on_shrink_end() override;
 
         void on_test_run_start() override;
         void on_test_run_end() override;

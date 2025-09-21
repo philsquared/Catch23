@@ -36,12 +36,15 @@ namespace CatchKit {
 
     void ConsoleReporter::lazy_print_test_header() {
         if( !printed_header && current_test_info ) {
-            std::println("-------------------------------------------------------------------------------");
-            println(ColourIntent::Headers, "TEST: {}", current_test_info->name);
-            std::println("{}:{}",
-                    current_test_info->location.file_name(),
-                    current_test_info->location.line());
-            std::println("...............................................................................\n");
+            if( !shrinking ) {
+                std::println("-------------------------------------------------------------------------------");
+                println(ColourIntent::Headers, "TEST: {}", current_test_info->name);
+                std::println("{}:{}",
+                        current_test_info->location.file_name(),
+                        current_test_info->location.line());
+                std::println("...............................................................................");
+            }
+            std::println();
             printed_header = false;
         }
     }
@@ -148,6 +151,7 @@ namespace CatchKit {
 
     void ConsoleReporter::on_shrink_start() {
         std::println("Attempting to find a simpler counterexample by \"shrinking\"...");
+        shrinking = true;
     }
     void ConsoleReporter::on_no_shrink_found( int shrinks ) {
         std::println("\nNo simpler counterexample found after {} shrinks", shrinks);
@@ -176,6 +180,9 @@ namespace CatchKit {
             std::println("  value: {}", values[0]);
             std::println("Final run with this value:");
         }
+    }
+    void ConsoleReporter::on_shrink_end() {
+        shrinking = false;
     }
 
     void ConsoleReporter::on_test_run_start() { /* Do nothing, for now */ }

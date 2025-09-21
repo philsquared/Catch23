@@ -67,6 +67,7 @@ namespace CatchKit {
         virtual void on_shrink_found( std::vector<std::string> const& values, int shrinks ) = 0;
         virtual void on_no_shrink_found( int shrinks ) = 0;
         virtual void on_shrink_result( ResultType result, int shrinks_so_far ) = 0;
+        virtual void on_shrink_end() = 0;
     };
 
 } // namespace CatchKit
