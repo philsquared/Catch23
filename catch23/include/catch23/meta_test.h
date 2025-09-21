@@ -16,9 +16,9 @@ namespace CatchKit {
         AssertionContext context;
         AssertionInfo info;
 
-        auto passed() const { return info.passed(); }
-        auto failed() const { return info.failed(); }
-        auto failed_expectedly() const { return info.result == AdjustedResult::FailedExpectly; }
+        [[nodiscard]] auto passed() const { return info.passed(); }
+        [[nodiscard]] auto failed() const { return info.failed(); }
+        [[nodiscard]] auto failed_expectedly() const { return info.result == AdjustedResult::FailedExpectly; }
     };
 
     class MetaTestReporter : public Reporter {
@@ -29,9 +29,11 @@ namespace CatchKit {
         : what_to_report_on( what_to_report_on )
         {}
 
-        auto report_on_what() const -> ReportOn override {
+        [[nodiscard]] auto report_on_what() const -> ReportOn override {
             return what_to_report_on;
         }
+        void on_test_run_start() override {}
+        void on_test_run_end() override {}
 
         void on_test_start( TestInfo const& ) override {}
         void on_test_end( TestInfo const&, Counters const& ) override {}
@@ -51,24 +53,23 @@ namespace CatchKit {
     struct MetaTestResults {
         std::vector<FullAssertionInfo> all_results;
 
-        auto size() const { return all_results.size(); }
-        auto& operator[](std::size_t index) const { return all_results.at(index); }
-        auto failed() const {
+        [[nodiscard]] auto size() const { return all_results.size(); }
+        [[nodiscard]] auto& operator[](std::size_t index) const { return all_results.at(index); }
+        [[nodiscard]] auto failed() const {
             return !all_results.empty() && all_results.back().failed();
         }
-        auto passed() const {
+        [[nodiscard]] auto passed() const {
             return !all_results.empty() && all_results.back().passed();
         }
-        auto message() const {
+        [[nodiscard]] auto message() const {
             return !all_results.empty() ? all_results.back().info.message : std::string();
         }
-        auto failures() const -> int;
-        auto expected_failures() const -> int;
+        [[nodiscard]] auto failures() const -> int;
+        [[nodiscard]] auto expected_failures() const -> int;
     };
 
     class MetaTestRunner {
         MetaTestReporter reporter;
-        TestResultHandler handler;
 
         std::string name;
         std::source_location location;

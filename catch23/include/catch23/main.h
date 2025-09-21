@@ -9,10 +9,9 @@
 // Pass ReportOn::AllResults if you want to see passing tests broken down, too
 #define CATCH23_MIN_MAIN(...) \
     int main() { \
-        using namespace CatchKit; \
-        auto reporter = ConsoleReporter(__VA_ARGS__); \
-        run_tests(Detail::get_all_tests(), reporter); \
-        reporter.on_test_run_end(); \
+        auto reporter = CatchKit::ConsoleReporter(__VA_ARGS__); \
+        CatchKit::TestRunner runner(reporter); \
+        runner.run_tests(CatchKit::Detail::get_all_tests()); \
     }
 
 #ifdef CATCH23_IMPL_MIN_MAIN

@@ -38,7 +38,8 @@ namespace CatchKit {
         void on_no_shrink_found( int shrinks ) override;
         void on_shrink_result( ResultType result, int shrinks_so_far ) override;
 
-        void on_test_run_end();
+        void on_test_run_start() override;
+        void on_test_run_end() override;
     };
 
 } // namespace CatchKit

@@ -18,13 +18,13 @@ namespace CatchKit {
     }
 
     MetaTestRunner::MetaTestRunner( std::string name, std::source_location location )
-    :   handler( reporter ),
-        name(std::move(name)),
+    :   name(std::move(name)),
         location(location)
     {}
 
     auto MetaTestRunner::run( Detail::Test const& test ) && -> MetaTestResults {
-        run_test(test, handler);
+        TestRunner runner( reporter );
+        runner.run_test( test );
         return MetaTestResults{ std::move(reporter.results) };
     }
 

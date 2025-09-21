@@ -54,6 +54,9 @@ namespace CatchKit {
 
         virtual auto report_on_what() const -> ReportOn = 0;
 
+        virtual void on_test_run_start() = 0;
+        virtual void on_test_run_end() = 0;
+
         virtual void on_test_start( TestInfo const& test_info ) = 0;
         virtual void on_test_end( TestInfo const& test_info, Counters const& assertions ) = 0;
 
@@ -64,7 +67,6 @@ namespace CatchKit {
         virtual void on_shrink_found( std::vector<std::string> const& values, int shrinks ) = 0;
         virtual void on_no_shrink_found( int shrinks ) = 0;
         virtual void on_shrink_result( ResultType result, int shrinks_so_far ) = 0;
-
     };
 
 } // namespace CatchKit

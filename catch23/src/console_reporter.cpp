@@ -178,6 +178,8 @@ namespace CatchKit {
         }
     }
 
+    void ConsoleReporter::on_test_run_start() { /* Do nothing, for now */ }
+
     void ConsoleReporter::on_test_run_end() {
         print_totals_divider(test_totals);
 

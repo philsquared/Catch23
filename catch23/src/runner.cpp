@@ -90,30 +90,30 @@ namespace CatchKit::Detail {
 
     }
 
-    void run_test( Test const& test, TestResultHandler& test_handler ) {
+    void TestRunner::run_test( Test const& test ) {
         ExecutionNodes execution_nodes({test.test_info.name, test.test_info.location});
         auto& root_node = execution_nodes.get_root();
-        test_handler.set_execution_nodes(&execution_nodes);
+        result_handler.set_execution_nodes(&execution_nodes);
 
         do {
-            test_handler.on_test_start(test.test_info);
+            result_handler.on_test_start(test.test_info);
 
             root_node.enter();
             assert(root_node.get_state() != ExecutionNode::States::Completed);
 
-            invoke_test(test, test_handler);
+            invoke_test(test, result_handler);
 
             auto current_execution_node = execution_nodes.get_current_node();
-            if( !test_handler.passed() )
-                try_shrink(test, test_handler, current_execution_node);
+            if( !result_handler.passed() )
+                try_shrink(test, result_handler, current_execution_node);
 
             root_node.exit();
 
-            test_handler.on_test_end(test.test_info);
+            result_handler.on_test_end(test.test_info);
         }
         while(root_node.get_state() != ExecutionNode::States::Completed);
 
-        test_handler.set_execution_nodes(nullptr);
+        result_handler.set_execution_nodes(nullptr);
     }
 
 } // namespace CatchKit::Detail
