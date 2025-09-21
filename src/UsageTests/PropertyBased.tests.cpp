@@ -6,14 +6,14 @@
 #include "catch23/generators.h"
 #include "catch23/meta_test.h"
 
-TEST("Single int generator", [manual]) {
+TEST("Single int generator", [mute]) {
      auto i = GENERATE(values_of<int>{ .up_to=16 });
 
     CAPTURE( i );
     CHECK( (i == 3 || i > 11 ) );
 }
 
-TEST("Two PBT generators", [manual, "tag"]) {
+TEST("Two PBT generators", [mute, "tag"]) {
     auto i = GENERATE(10, values_of<int>{ .up_to=16 });
     auto j = GENERATE(10, values_of<int>{ .up_to=32 });
 
@@ -31,7 +31,7 @@ std::pair<int, int> sd(int N) {
 }
 
 // This is based on an actual Codility exercise
-TEST("sparse decomposition", [manual]) {
+TEST("sparse decomposition", [mute]) {
     int N = GENERATE(values_of<int>());
     auto&& [a, b] = sd(N);
 

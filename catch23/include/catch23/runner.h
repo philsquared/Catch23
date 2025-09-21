@@ -25,10 +25,22 @@ namespace CatchKit::Detail {
         void run_tests( range_of<Test> auto const& tests ) {
             result_handler.get_reporter().on_test_run_start();
 
-            // !TBD Apply filters
+            std::vector<Test> soloed;
             for( auto&& test : tests) {
-                if( !test.test_info.is_manual() ) // for now, until we pre-filter
+                if( test.test_info.is_soloed() ) // for now, until we pre-filter
+                    soloed.push_back( test );
+            }
+            if( soloed.empty() ) {
+                // !TBD Apply filters
+                for( auto&& test : tests) {
+                    if( !test.test_info.is_muted() ) // for now, until we pre-filter
+                        run_test( test );
+                }
+            }
+            else {
+                for( auto&& test : soloed) {
                     run_test( test );
+                }
             }
 
             result_handler.get_reporter().on_test_run_end();

@@ -18,7 +18,7 @@ void throwing_function(std::string const& message = {}) {
     throw std::domain_error( message );
 }
 
-TEST("Bound matchers", [manual]) {
+TEST("Bound matchers", [mute]) {
 
     // These tests are for the matcher binding mechanism.
     // For exception matching in general see the subsequent tests
@@ -70,7 +70,7 @@ TEST("throws matcher") {
 TEST("!throws matcher succeeds when call doesn't throw") {
     CHECK_THAT( non_throwing_function(), !throws() );
 }
-TEST("!throws matcher fails when call does throw", [manual]) {
+TEST("!throws matcher fails when call does throw", [mute]) {
     CHECK_THAT( throwing_function(), !throws() );
 }
 

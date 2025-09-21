@@ -6,13 +6,13 @@
 #include "catch23/generators.h"
 #include "catch23/meta_test.h"
 
-TEST("Generators", [manual]) {
+TEST("Generators", [mute]) {
     auto i = GENERATE(values_of<int>{.up_to=100}); // Defaults to 100 values
 
     CHECK( i < 50 ); // Half of these should fail
 }
 
-TEST("Two generators", [manual]) {
+TEST("Two generators", [mute]) {
     auto i = GENERATE(10, values_of<int>{ .up_to=16 });
     auto j = GENERATE(10, values_of<int>{ .up_to=32 });
 
@@ -43,7 +43,7 @@ TEST("string generators") {
 // }
 
 
-TEST("section within a generator", [manual]) {
+TEST("section within a generator", [mute]) {
     GENERATE(100, values_of<int>{} ); // Just repeat 100x, !TBD: add a REPEAT macro to do this?
 
     auto results = LOCAL_TEST() {
@@ -79,7 +79,7 @@ std::string left_pad(std::string const& input_string, int min_len) {
     return input_string;
 }
 
-TEST("left pad properties", [manual]) {
+TEST("left pad properties", [mute]) {
     auto min_len = GENERATE(values_of<std::size_t>{0, 65});
     auto input_string = GENERATE(values_of<std::string>{.min_len=0, .max_len=65});
     auto output_string = left_pad(input_string, min_len);

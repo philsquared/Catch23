@@ -36,7 +36,7 @@ namespace CatchKit::Detail {
             if( tag_name == "!shouldfail" )
                 tags.emplace_back(Tags::shouldfail);
             else if( tag_name.starts_with( "." ) )
-                tags.emplace_back(tag_name, Tag::Type::manual);
+                tags.emplace_back(tag_name, Tag::Type::mute);
             else
                 tags.emplace_back(std::move(tag_name));
             tag_spec = tag_spec.substr(end);
