@@ -5,6 +5,7 @@
 #ifndef CATCH23_RUNNER_H
 #define CATCH23_RUNNER_H
 
+#include "print.h"
 #include "test.h"
 #include "reporter.h"
 #include "test_result_handler.h"
@@ -38,6 +39,7 @@ namespace CatchKit::Detail {
                 }
             }
             else {
+                println( ColourIntent::Warning, "\nWarning: Running soloed test(s) (tests with the [solo] tag) only.\n");
                 for( auto&& test : soloed) {
                     run_test( test );
                 }
