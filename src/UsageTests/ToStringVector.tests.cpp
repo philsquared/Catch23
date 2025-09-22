@@ -76,13 +76,13 @@ TEST_CASE( "vector<bool> -> toString", "[toString][containers][vector]" ) {
     bools.push_back(false);
     REQUIRE( ::CatchKit::stringify(bools) == "[true, false]");
 }
-/*
+
 TEST_CASE( "array<int, N> -> toString", "[toString][containers][array]" ) {
     std::array<int, 0> empty;
     REQUIRE( CatchKit::stringify( empty ) == "[]" );
     std::array<int, 1> oneValue = {{ 42 }};
     REQUIRE( CatchKit::stringify( oneValue ) == "[42]" );
-    std::array<int, 2> twoValues = {{ 42, 250 }};
-    REQUIRE( CatchKit::stringify( twoValues ) == "[42, 250]" );
+    std::array<int, 2> twoValues = {{ 42, 25 }};
+    REQUIRE( CatchKit::stringify( twoValues ) == "[42, 25]" );
 }
-*/
+}
