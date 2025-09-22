@@ -8,22 +8,18 @@
 #include <string>
 #include <string_view>
 #include <source_location>
+#include <format>
 
-#define CATCHKIT_FALLBACK_TO_FORMAT_STRING_CONVERSIONS
 // #define CATCHKIT_FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
 
-#ifdef CATCHKIT_FALLBACK_TO_FORMAT_STRING_CONVERSIONS
-#include <format>
-#endif
 #ifdef CATCHKIT_FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
 #include <sstream>
 #endif
 
 namespace CatchKit {
-
     namespace Detail {
         auto pointer_to_string(void const* p) -> std::string;
-        void ignore( auto&& ) noexcept {}
+        void ignore( auto&& ) noexcept { /* this function doesn't do anything */ }
 
         auto parse_templated_name( std::string const& templated_name, std::string_view function_name ) -> std::string_view;
         auto parse_templated_name( std::string const& templated_name, std::source_location location = std::source_location::current() ) -> std::string_view;
@@ -50,72 +46,38 @@ namespace CatchKit {
                 return std::string(val);
             return unknown_enum_to_string(static_cast<size_t>(e));
         }
-
     }
 
-    #ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
+    // Specialise this with a stringify member function for your own conversions
+    template<typename T>
+    struct Stringifier;
+
+    template<typename T>
+    concept Stringifiable = requires { Stringifier<T>::stringify; };
+
+    template<typename T>
+    [[nodiscard]] auto constexpr stringify(T const& value );
+}
+
+// This allows any type for which there is a Stringifier specialisation to be usable by std::format.
+// This is necessary so that ranges/ containers of custom types will work.
+// Note that if you provide both a std::formatter _and_ a Stringifier for your types,
+// then stringified _containers_ (or ranges) of them will prefer the std::formatter specialisations.
+template<CatchKit::Stringifiable T>
+struct std::formatter<T> {
+    constexpr auto parse( std::format_parse_context& ctx ) { return ctx.begin(); }
+    auto format(T const& val, auto& ctx) const {
+        return std::format_to( ctx.out(), "{}", CatchKit::Stringifier<T>::stringify(val) );
+    }
+};
+
+namespace CatchKit {
+#ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
     template <typename T>
     concept Streamable = requires( std::ostream os, T value ) {
         { os << value };
     };
-    #endif
-
-    template<typename T>
-    [[nodiscard]] auto constexpr stringify(T const& value );
-
-    template<typename T>
-    struct Stringifier {
-        [[nodiscard]] static auto stringify( T const& value ) -> std::string {
-
-            #ifdef FALLBACK_TO_FORMAT_STRING_CONVERSIONS
-            if constexpr( std::formattable<T, char> ) {
-                return std::format("{}", value);
-            }
-            #endif
-
-            #ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
-            if constexpr ( Streamable<T> ) {
-                std::ostringstream oss; // !TBD: use an ostringstream pool?
-                oss << value;
-                return oss.str();
-            }
-            #endif
-
-            #if !defined(FALLBACK_TO_OSTREAM_STRING_CONVERSIONS) && !defined(FALLBACK_TO_FORMAT_STRING_CONVERSIONS)
-            Detail::ignore( value );
-            #endif
-
-            return "{?}";
-        }
-    };
-
-    template<typename T>
-    requires requires{ !std::same_as<std::decay_t<T>, char>; }
-    struct Stringifier<T*> {
-        [[nodiscard]] static constexpr auto stringify( T* value ) -> std::string {
-            return value ? Detail::pointer_to_string( value ) : std::string("nullptr");
-        }
-    };
-
-    template<typename T, typename A>
-    struct Stringifier<std::vector<T, A>> {
-        [[nodiscard]] static constexpr auto stringify( std::vector<T, A> const& values ) -> std::string {
-            std::string s = "[";
-            bool first = true;
-            for(auto&& val : values) {
-                if( !first )
-                    s += ", ";
-                else
-                    first = false;
-                s += CatchKit::stringify( val );
-            }
-            s += "]";
-            return s;
-        }
-    };
-
-    // !TBD: more conversions of built-ins, including containers
-    // - also wait for std::format for ranges to match with that
+#endif
 
     // Don't specialise this
     template<typename T>
@@ -124,16 +86,23 @@ namespace CatchKit {
             return value ? "true" : "false";
         else if constexpr( std::is_enum_v<T> )
             return Detail::enum_to_string( value );
-        else if constexpr( std::floating_point<T> || std::integral<T> )
-            return std::to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
             return "nullptr";
         else if constexpr( std::is_convertible_v<T, char const*> && std::is_pointer_v<T> )
             return value ? std::string(value) : std::string("nullptr");
         else if constexpr( std::is_convertible_v<T, std::string> )
             return std::format("\"{}\"", value);
+        else if constexpr( std::formattable<T, char> )
+            return std::format("{}", value);
+#ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
+        else if constexpr ( Streamable<T> ) {
+            std::ostringstream oss; // !TBD: use an ostringstream pool?
+            oss << value;
+            return oss.str();
+        }
+#endif
         else
-            return Stringifier<T>::stringify( value );
+            return "{?}";
     }
 
 } // namespace CatchKit

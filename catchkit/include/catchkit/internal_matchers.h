@@ -20,6 +20,10 @@ namespace CatchKit {
 
     namespace Detail {
 
+        struct Matcher {
+            // This is just a marker interface
+        };
+
         struct CouldBeAnything {
             template <typename T> explicit(false) operator T() const;
         };
@@ -29,6 +33,8 @@ namespace CatchKit {
             auto lazy_match(auto&&) const -> MatchResult  { return true; }
         };
 
+        // !TBD: refactor this all in terms of marker interfaces, or something
+        // * currently we don't handle overloads or constrained-template match functions properly
         template<typename M, typename T=CouldBeAnything>
         concept IsEagerMatcher = requires(M m, T something) {
             { m.match(something) } -> std::same_as<MatchResult>;

@@ -198,7 +198,7 @@ namespace CatchKit {
 
             [[nodiscard]] auto match(double value) const -> MatchResult {
                 // !TBD: use better approach
-                return std::fabs(value-target) < 10*std::numeric_limits<double>::epsilon();
+                return std::fabs(value-target) < 100*std::numeric_limits<float>::epsilon();
             }
             [[nodiscard]] auto describe() const {
                 return std::format("is_close_to({})", target);
@@ -217,7 +217,7 @@ namespace CatchKit {
                 return std::equal(match_vec.begin(), match_vec.end(), vec.begin());
             }
             [[nodiscard]] auto describe() const {
-                return std::format("equals(vec)"); // !TBD
+                return std::format("equals({})", stringify(match_vec));
             }
         };
     }

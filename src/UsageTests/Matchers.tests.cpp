@@ -475,6 +475,15 @@ namespace {
     };
 } // end anonymous namespace
 
+// This is commented out to show that it can work without a Stringifier.
+// but uncomment if you want to SomeType in the output.
+// Note that, without a Stringifier for SomeType, even vector<SomeType> gets printed as just, "{?}"
+
+// template<>
+// struct CatchKit::Stringifier<SomeType> {
+//     static auto stringify(SomeType v) { return std::format("SomeType({})", v.i); }
+// };
+
 TEST_CASE( "Vector matcher with elements without !=", "[matchers][vector][approvals]" ) {
     std::vector<SomeType> lhs, rhs;
     lhs.push_back( { 1 } );
