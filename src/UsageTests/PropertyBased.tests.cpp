@@ -31,9 +31,10 @@ std::pair<int, int> sd(int N) {
 }
 
 // This is based on an actual Codility exercise
+// https://app.codility.com/programmers/trainings/9/sparse_binary_decomposition/
 TEST("sparse decomposition", [mute]) {
     int N = GENERATE(values_of<int>());
-    auto&& [a, b] = sd(N);
+    auto [a, b] = sd(N);
 
     CHECK( a+b == N);
 }
