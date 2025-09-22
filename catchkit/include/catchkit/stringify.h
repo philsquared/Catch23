@@ -79,17 +79,15 @@ namespace CatchKit {
     };
 #endif
 
-    // Don't specialise this
+    // Don't specialise this, specialise Stringifier instead
     template<typename T>
     [[nodiscard]] auto constexpr stringify(T const& value ) {
-        if constexpr( std::same_as<T, bool> )
-            return value ? "true" : "false";
-        else if constexpr( std::is_enum_v<T> )
+        if constexpr( std::is_enum_v<T> )
             return Detail::enum_to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
             return "nullptr";
         else if constexpr( std::is_convertible_v<T, char const*> && std::is_pointer_v<T> )
-            return value ? std::string(value) : std::string("nullptr");
+            return value ? std::format("\"{}\"", value) : std::string("nullptr");
         else if constexpr( std::is_convertible_v<T, std::string> )
             return std::format("\"{}\"", value);
         else if constexpr( std::formattable<T, char> )
