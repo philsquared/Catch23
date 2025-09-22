@@ -85,4 +85,4 @@ TEST_CASE( "array<int, N> -> toString", "[toString][containers][array]" ) {
     std::array<int, 2> twoValues = {{ 42, 25 }};
     REQUIRE( CatchKit::stringify( twoValues ) == "[42, 25]" );
 }
-}
+
