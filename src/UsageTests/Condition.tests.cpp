@@ -55,8 +55,8 @@ TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
     CHECK( data.int_seven == 0 );
     CHECK_THAT( data.float_nine_point_one, is_close_to( 9.11f ) );
     CHECK_THAT( data.float_nine_point_one, is_close_to( 9.0f ) );
-    CHECK_THAT( data.float_nine_point_one, is_close_to( 1 ) );
-    CHECK_THAT( data.float_nine_point_one, is_close_to( 0 ) );
+    CHECK_THAT( data.float_nine_point_one, is_close_to( 1.0f ) );
+    CHECK_THAT( data.float_nine_point_one, is_close_to( 0.0f ) );
     CHECK_THAT( data.double_pi, is_close_to( 3.1415 ) );
     CHECK( data.str_hello == "goodbye" );
     CHECK( data.str_hello == "hell" );
@@ -92,8 +92,8 @@ TEST_CASE( "Inequality checks that should succeed" )
     REQUIRE( data.int_seven != 8 );
     REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 9.11f ) );
     REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 9.0f ) );
-    REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 1 ) );
-    REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 0 ) );
+    REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 1.0 ) );
+    REQUIRE_THAT( data.float_nine_point_one, !is_close_to( 0.0 ) );
     REQUIRE_THAT( data.double_pi, !is_close_to( 3.1415 ) );
     REQUIRE( data.str_hello != "goodbye" );
     REQUIRE( data.str_hello != "hell" );

@@ -195,10 +195,10 @@ namespace CatchKit {
     namespace FloatMatchers {
         struct IsCloseTo {
             double target;
+            double epsilon = 100*std::numeric_limits<float>::epsilon();
 
             [[nodiscard]] auto match(double value) const -> MatchResult {
-                // !TBD: use better approach
-                return std::fabs(value-target) < 100*std::numeric_limits<float>::epsilon();
+                return std::fabs(value-target) < epsilon;
             }
             [[nodiscard]] auto describe() const {
                 return std::format("is_close_to({})", target);
@@ -244,7 +244,10 @@ namespace CatchKit {
         template<typename CasePolicy=CaseSensitive>
         auto equals(std::string_view str) { return StringMatchers::Equals<CasePolicy>{str}; }
 
+        inline auto is_close_to(float target) { return FloatMatchers::IsCloseTo{target}; }
         inline auto is_close_to(double target) { return FloatMatchers::IsCloseTo{target}; }
+        inline auto is_close_to(float target, float epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
+        inline auto is_close_to(double target, double epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
 
         inline auto is_true() { static bool true_value = true; return equals(true_value); }
         inline auto is_false() { static bool false_value = false; return equals(false_value); }
