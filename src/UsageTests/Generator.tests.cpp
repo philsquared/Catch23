@@ -21,27 +21,11 @@ TEST("Two generators", [mute]) {
 }
 
 TEST("string generators") {
-    auto words = GENERATE(10, values_of<std::string>{} );
-    auto symbols = GENERATE(10, values_of<std::string>{.charset=Charsets::symbols} );
+    auto words = GENERATE(10, values_of<std::string>{.min_len=1} );
+    auto symbols = GENERATE(10, values_of<std::string>{.min_len=1, .charset=Charsets::symbols} );
 
     CHECK( words != symbols );
 }
-
-// #include <print>
-//
-// TEST("sections within a generator", "[/.]") {
-//     auto i = GENERATE(inclusive_range_of<int>{.from=0, .to=10 } );
-//     SECTION("a") {
-//         std::println("a: {}, {}", section_info.node.get_current_index(), i);
-//     }
-//     SECTION("b") {
-//         std::println("b: {}, {}", section_info.node.get_current_index(), i);
-//     }
-//     SECTION("c") {
-//         std::println("c: {}, {}", section_info.node.get_current_index(), i);
-//     }
-// }
-
 
 TEST("section within a generator", [mute]) {
     GENERATE(100, values_of<int>{} ); // Just repeat 100x, !TBD: add a REPEAT macro to do this?
