@@ -413,59 +413,58 @@ TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
     // }
 }
 
-// TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
-//     std::vector<int> v;
-//     v.push_back( 1 );
-//     v.push_back( 2 );
-//     v.push_back( 3 );
-//
-//     std::vector<int> v2;
-//     v2.push_back( 1 );
-//     v2.push_back( 2 );
-//
-//     std::vector<double> v3;
-//     v3.push_back( 1 );
-//     v3.push_back( 2 );
-//     v3.push_back( 3 );
-//
-//     std::vector<double> v4;
-//     v4.push_back( 1.1 );
-//     v4.push_back( 2.1 );
-//     v4.push_back( 3.1 );
-//
-//     std::vector<int> empty;
-//
-//     SECTION( "Contains (element)" ) {
-//         CHECK_THAT( v, VectorContains( -1 ) );
-//         CHECK_THAT( empty, VectorContains( 1 ) );
-//     }
-//     SECTION( "Contains (vector)" ) {
-//         CHECK_THAT( empty, Contains( v ) );
-//         v2.push_back( 4 );
-//         CHECK_THAT( v, Contains( v2 ) );
-//     }
-//
-//     SECTION( "Equals" ) {
-//
-//         CHECK_THAT( v, Equals( v2 ) );
-//         CHECK_THAT( v2, Equals( v ) );
-//         CHECK_THAT( empty, Equals( v ) );
-//         CHECK_THAT( v, Equals( empty ) );
-//     }
-//     SECTION( "UnorderedEquals" ) {
-//         CHECK_THAT( v, UnorderedEquals( empty ) );
-//         CHECK_THAT( empty, UnorderedEquals( v ) );
-//
-//         auto permuted = v;
-//         std::next_permutation( begin( permuted ), end( permuted ) );
-//         permuted.pop_back();
-//         CHECK_THAT( permuted, UnorderedEquals( v ) );
-//
-//         std::reverse( begin( permuted ), end( permuted ) );
-//         CHECK_THAT( permuted, UnorderedEquals( v ) );
-//     }
-// }
-//
+TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
+    std::vector<int> v;
+    v.push_back( 1 );
+    v.push_back( 2 );
+    v.push_back( 3 );
+
+    std::vector<int> v2;
+    v2.push_back( 1 );
+    v2.push_back( 2 );
+
+    std::vector<double> v3;
+    v3.push_back( 1 );
+    v3.push_back( 2 );
+    v3.push_back( 3 );
+
+    std::vector<double> v4;
+    v4.push_back( 1.1 );
+    v4.push_back( 2.1 );
+    v4.push_back( 3.1 );
+
+    std::vector<int> empty;
+
+    // SECTION( "Contains (element)" ) {
+    //     CHECK_THAT( v, contains( -1 ) );
+    //     CHECK_THAT( empty, contains( 1 ) );
+    // }
+    // SECTION( "Contains (vector)" ) {
+    //     CHECK_THAT( empty, Contains( v ) );
+    //     v2.push_back( 4 );
+    //     CHECK_THAT( v, Contains( v2 ) );
+    // }
+
+    SECTION( "Equals" ) {
+        CHECK_THAT( v, equals( v2 ) );
+        CHECK_THAT( v2, equals( v ) );
+        CHECK_THAT( empty, equals( v ) );
+        CHECK_THAT( v, equals( empty ) );
+    }
+    // SECTION( "UnorderedEquals" ) {
+    //     CHECK_THAT( v, UnorderedEquals( empty ) );
+    //     CHECK_THAT( empty, UnorderedEquals( v ) );
+    //
+    //     auto permuted = v;
+    //     std::next_permutation( begin( permuted ), end( permuted ) );
+    //     permuted.pop_back();
+    //     CHECK_THAT( permuted, UnorderedEquals( v ) );
+    //
+    //     std::reverse( begin( permuted ), end( permuted ) );
+    //     CHECK_THAT( permuted, UnorderedEquals( v ) );
+    // }
+}
+
 namespace {
     struct SomeType {
         int i;
