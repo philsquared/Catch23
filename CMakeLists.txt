@@ -17,7 +17,9 @@ add_executable(Catch23Test src/main.cpp src/UsageTests/Condition.tests.cpp
         src/UsageTests/ToStringVector.tests.cpp
         src/UsageTests/Generator.tests.cpp
         src/IntrospectionTests/Meta.tests.cpp
-        src/UsageTests/PropertyBased.tests.cpp)
+        src/UsageTests/PropertyBased.tests.cpp
+        src/UsageTests/ToStringPair.tests.cpp
+        src/IntrospectionTests/Reflection.tests.cpp)
 
 target_link_libraries(Catch23Test PUBLIC Catch23)
 target_link_libraries(Catch23Test PUBLIC Catchkit)
