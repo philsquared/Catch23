@@ -32,9 +32,9 @@ namespace CatchKit::Detail {
                 throw std::invalid_argument("Invalid tag specification - missing an expected `]`");
             std::string tag_name(tag_spec.substr( start+1, end-start-1 ));
             if( tag_name == "!mayfail" )
-                tags.emplace_back(Tags::mayfail);
+                tags.emplace_back(Tags::may_fail);
             if( tag_name == "!shouldfail" )
-                tags.emplace_back(Tags::shouldfail);
+                tags.emplace_back(Tags::should_fail);
             else if( tag_name.starts_with( "." ) )
                 tags.emplace_back(tag_name, Tag::Type::mute);
             else

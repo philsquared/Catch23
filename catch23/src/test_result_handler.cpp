@@ -87,7 +87,9 @@ namespace CatchKit::Detail {
             }
         }
 
-        if( report_on != ReportOn::AllResults && last_result != AdjustedResult::Failed )
+        if( report_on != ReportOn::AllResults &&
+                last_result != AdjustedResult::Failed &&
+                !current_test_info->has_tag_type( Tag::Type::always_report ) )
             return ResultDetailNeeded::No;
 
         return ResultDetailNeeded::Yes;

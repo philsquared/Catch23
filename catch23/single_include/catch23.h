@@ -1318,7 +1318,7 @@ namespace CatchKit {
 // Packed from catch23/include/catch23/adjusted_result.h
 namespace CatchKit {
 
-    // After taking account of mayfail and shouldfail tags
+    // After taking account of mayfail and should_fail tags
     enum class AdjustedResult {
         Unknown,
         Passed,
@@ -1450,7 +1450,7 @@ namespace CatchKit {
             mute, // test doesn't run by default, but can be run explicitly
             solo, // Only soloed tests are run by default
             mayfail, // If test fails, don't count it as a failed run overall
-            shouldfail, // If test fails count it as a pass. If it passes count as a failure.
+            should_fail, // If test fails count it as a pass. If it passes count as a failure.
         };
         std::string name;
         Type type = Type::normal;
@@ -1515,8 +1515,8 @@ namespace CatchKit::Tags {
     // Tests that mayfail will be counted as a pass for the overall run even if they fail
     inline constexpr Tag mayfail{"@mayfail", Tag::Type::mayfail };
 
-    // Tests that shouldfail are counted as a pass for the overall run if they fail, and a fail if they pass
-    inline constexpr Tag shouldfail{"@shouldfail", Tag::Type::shouldfail };
+    // Tests that should_fail are counted as a pass for the overall run if they fail, and a fail if they pass
+    inline constexpr Tag shouldfail{"@should_fail", Tag::Type::should_fail };
 }
 
 
@@ -3139,7 +3139,7 @@ namespace CatchKit::Detail {
             std::string tag_name(tag_spec.substr( start+1, end-start-1 ));
             if( tag_name == "!mayfail" )
                 tags.emplace_back(Tags::mayfail);
-            if( tag_name == "!shouldfail" )
+            if( tag_name == "!should_fail" )
                 tags.emplace_back(Tags::shouldfail);
             else if( tag_name.starts_with( "." ) )
                 tags.emplace_back(tag_name, Tag::Type::mute);

@@ -2,8 +2,8 @@
 // Created by Phil Nash on 21/07/2025.
 //
 
-#ifndef CATCHKIT_TEST_ASSERTION_HANDLER_H
-#define CATCHKIT_TEST_ASSERTION_HANDLER_H
+#ifndef CATCHKIT_TEST_RESULT_HANDLER_H
+#define CATCHKIT_TEST_RESULT_HANDLER_H
 
 #include "internal_execution_nodes.h"
 #include "internal_test.h"
@@ -71,4 +71,4 @@ namespace CatchKit {
 
 } //namespace CatchKit
 
-#endif // CATCHKIT_TEST_ASSERTION_HANDLER_H
+#endif // CATCHKIT_TEST_RESULT_HANDLER_H

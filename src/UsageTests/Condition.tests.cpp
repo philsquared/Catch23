@@ -71,8 +71,8 @@ TEST_CASE( "Meta: Equality checks that should fail", "[meta]" ) {
     CHECK( RUN_TEST_BY_NAME("Equality checks that should fail").expected_failures() == 13 );
 }
 
-// Needed to test junit reporter's handling of mayfail test cases and sections
-TEST_CASE("Mayfail test case with nested sections", "[!mayfail]") {
+// Needed to test junit reporter's handling of may_fail test cases and sections
+TEST_CASE("mayfail test case with nested sections", "[!mayfail]") {
     SECTION("A") {
         SECTION("1") { FAIL(); }
         SECTION("2") { FAIL(); }

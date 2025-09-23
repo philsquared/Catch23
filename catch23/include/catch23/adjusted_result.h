@@ -7,11 +7,11 @@
 
 namespace CatchKit {
 
-    // After taking account of mayfail and shouldfail tags
+    // After taking account of may_fail and should_fail tags
     enum class AdjustedResult {
         Unknown,
         Passed,
-        FailedExpectly, // Failed, but mayfail was in operation
+        FailedExpectly, // Failed, but may_fail was in operation
         Failed
     };
 } // namespace CatchKit

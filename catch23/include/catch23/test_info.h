@@ -16,8 +16,9 @@ namespace CatchKit {
             normal,
             mute, // test doesn't run by default, but can be run explicitly
             solo, // Only soloed tests are run by default
-            mayfail, // If test fails, don't count it as a failed run overall
-            shouldfail, // If test fails count it as a pass. If it passes count as a failure.
+            may_fail, // If test fails, don't count it as a failed run overall
+            should_fail, // If test fails count it as a pass. If it passes count as a failure.
+            always_report, // Report all tests, even successful ones, regardless of flags
         };
         std::string name;
         Type type = Type::normal;
@@ -33,11 +34,9 @@ namespace CatchKit {
         std::string name = {};
         std::vector<Tag> tags = {};
 
-        auto is_muted() const -> bool;
-        auto is_soloed() const -> bool;
+        auto has_tag_type(Tag::Type tag_type) const -> bool;
         auto should_fail() const -> bool;
         auto may_fail() const -> bool;
-
     };
 
 } // namespace CatchKit

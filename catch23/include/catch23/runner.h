@@ -28,13 +28,13 @@ namespace CatchKit::Detail {
 
             std::vector<Test> soloed;
             for( auto&& test : tests) {
-                if( test.test_info.is_soloed() ) // for now, until we pre-filter
+                if( test.test_info.has_tag_type(Tag::Type::solo) ) // for now, until we pre-filter
                     soloed.push_back( test );
             }
             if( soloed.empty() ) {
                 // !TBD Apply filters
                 for( auto&& test : tests) {
-                    if( !test.test_info.is_muted() ) // for now, until we pre-filter
+                    if( !test.test_info.has_tag_type(Tag::Type::mute) ) // for now, until we pre-filter
                         run_test( test );
                 }
             }
