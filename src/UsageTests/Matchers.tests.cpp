@@ -72,7 +72,7 @@ TEST("throws matcher - macro free") {
     check().that( []{ throwing_function(); }, throws() );
 }
 // TBD This one should go somewhere else as it's not a matcher
-TEST("incidentally throwing assertion - macro free", [solo]) {
+TEST("incidentally throwing assertion - macro free", [should_fail]) {
     check().handle_unexpected_exceptions(
         [&]{ throw std::domain_error("hello"); } );
 }
