@@ -8,9 +8,24 @@
 namespace CatchKit {
 
     enum class ReportOn {
-        FailuresOnly,
-        AllResults
+        Nothing = 0,
+        PassingTests = 1,
+        FailingTests = 2,
+        AllResults = PassingTests | FailingTests,
     };
+
+    constexpr ReportOn operator&(ReportOn lhs, ReportOn rhs) {
+        return static_cast<ReportOn>(
+            static_cast<std::underlying_type_t<ReportOn>>(lhs) &
+            static_cast<std::underlying_type_t<ReportOn>>(rhs)
+        );
+    }
+    inline bool report_on_passing(ReportOn report_on) {
+        return (report_on & ReportOn::PassingTests) == ReportOn::PassingTests;
+    }
+    inline bool report_on_failing(ReportOn report_on) {
+        return (report_on & ReportOn::FailingTests) == ReportOn::FailingTests;
+    }
 
 } // namespace CatchKit
 

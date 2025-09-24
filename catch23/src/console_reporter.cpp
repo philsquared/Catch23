@@ -188,12 +188,21 @@ namespace CatchKit {
     void ConsoleReporter::on_test_run_start() { /* Do nothing, for now */ }
 
     void ConsoleReporter::on_test_run_end() {
-        print_totals_divider(test_totals);
+        bool should_print_summary =
+            always_print_summary
+            || ( report_on_passing( what_to_report_on ) && test_totals.passed() > 0 )
+            || ( report_on_failing( what_to_report_on ) && test_totals.failed > 0 )
+            || test_totals.total() == 0;
+
+        if( should_print_summary )
+            print_totals_divider(test_totals);
 
         if ( test_totals.total() == 0 ) {
             println( ColourIntent::Warning, "No tests ran" );
             return;
         }
+        if( !should_print_summary )
+            return;
 
         if ( assertion_totals.total() > 0 && test_totals.all_passed() ) {
             println( ColourIntent::ResultSuccess, "All tests passed ({} assertion(s) in {} tests)",

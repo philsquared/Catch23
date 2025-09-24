@@ -16,7 +16,7 @@ namespace CatchKit::Detail {
         ResultType last_result = ResultType::Passed;
         ResultDisposition result_disposition = ResultDisposition::Abort;
 
-        AssertResultHandler() : ResultHandler(ReportOn::FailuresOnly) {}
+        AssertResultHandler() : ResultHandler(ReportOn::FailingTests) {}
 
         void on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) override;
         [[nodiscard]] auto on_assertion_result( ResultType result ) -> ResultDetailNeeded override;

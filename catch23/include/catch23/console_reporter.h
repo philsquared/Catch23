@@ -13,6 +13,8 @@ namespace CatchKit {
         TestInfo const* current_test_info = nullptr;
         bool printed_header = false;
         ReportOn what_to_report_on;
+        bool always_print_summary;
+
         bool shrinking = false;
 
         Counters test_totals;
@@ -21,8 +23,9 @@ namespace CatchKit {
         void lazy_print_test_header();
 
     public:
-        explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailuresOnly )
-        : what_to_report_on( what_to_report_on )
+        explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailingTests, bool always_print_summary = true )
+        :   what_to_report_on( what_to_report_on ),
+            always_print_summary(always_print_summary)
         {}
 
         auto report_on_what() const -> ReportOn override {

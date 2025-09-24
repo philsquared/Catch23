@@ -4,3 +4,4 @@
 
 CATCH23_MIN_MAIN();
 // CATCH23_MIN_MAIN(CatchKit::ReportOn::AllResults);
+// CATCH23_MIN_MAIN(CatchKit::ReportOn::FailingTests, false);
