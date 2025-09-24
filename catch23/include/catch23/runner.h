@@ -26,23 +26,24 @@ namespace CatchKit::Detail {
         void run_tests( range_of<Test> auto const& tests ) {
             result_handler.get_reporter().on_test_run_start();
 
-            std::vector<Test> soloed;
+            std::vector<Test const*> tests_to_run;
+            bool soloing = false;
             for( auto&& test : tests) {
-                if( test.test_info.has_tag_type(Tag::Type::solo) ) // for now, until we pre-filter
-                    soloed.push_back( test );
-            }
-            if( soloed.empty() ) {
-                // !TBD Apply filters
-                for( auto&& test : tests) {
-                    if( !test.test_info.has_tag_type(Tag::Type::mute) ) // for now, until we pre-filter
-                        run_test( test );
+                if( test.test_info.has_tag_type(Tag::Type::solo) ) {
+                    if( !soloing ) {
+                        tests_to_run.clear();
+                        soloing = true;
+                    }
+                    tests_to_run.push_back( &test );
+                }
+                else if( !soloing && !test.test_info.has_tag_type(Tag::Type::mute) ) {
+                    tests_to_run.push_back( &test );
                 }
             }
-            else {
+            if( soloing )
                 println( ColourIntent::Warning, "\nWarning: Running soloed test(s) (tests with the [solo] tag) only.\n");
-                for( auto&& test : soloed) {
-                    run_test( test );
-                }
+            for( auto test : tests_to_run) {
+                run_test( *test );
             }
 
             result_handler.get_reporter().on_test_run_end();
