@@ -264,13 +264,14 @@ namespace CatchKit {
                 collect_subexpressions(matcher, sub_expressions, result);
             }
             std::string arg_as_string;
-            if constexpr (!std::is_void_v<decltype(arg())>) {
-                try {
+            try {
+                if constexpr ( !std::invocable<ArgT> )
+                    arg_as_string = stringify(arg);
+                else if constexpr (!std::is_void_v<decltype(arg())>)
                     arg_as_string = stringify(arg());
-                }
-                catch(...) {
-                    arg_as_string = std::format("exception thrown while evaluating matcher: {}", get_current_exception_message() );
-                }
+            }
+            catch(...) {
+                arg_as_string = std::format("exception thrown while evaluating matcher: {}", get_current_exception_message() );
             }
             return MatchExpressionInfo{ arg_as_string, matcher.describe(), std::move(sub_expressions) };
         }

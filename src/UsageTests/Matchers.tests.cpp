@@ -65,8 +65,18 @@ TEST("throws matcher") {
     SECTION("HasMessage() matches with 'unknown exception type' if an unknown exception type is applied directly") {
         CHECK_THAT( UnknownType(), CatchKit::ExceptionMatchers::HasMessage("<unknown exception type>") );
     }
-
 }
+
+TEST("throws matcher - macro free") {
+    using namespace CatchKit::Matchers;
+    check().that( []{ throwing_function(); }, throws() );
+}
+// TBD This one should go somewhere else as it's not a matcher
+TEST("incidentally throwing assertion - macro free", [solo]) {
+    check().handle_unexpected_exceptions(
+        [&]{ throw std::domain_error("hello"); } );
+}
+
 TEST("!throws matcher succeeds when call doesn't throw") {
     CHECK_THAT( non_throwing_function(), !throws() );
 }

@@ -46,6 +46,22 @@ TEST_CASE( "Equality checks that should succeed" )
     REQUIRE_THAT( x, is_close_to( 1.3 ) );
 }
 
+TEST_CASE( "Equality checks that should succeed - macro-free" )
+{
+    using namespace CatchKit::Matchers;
+    TestData data;
+
+    require() << data.int_seven == 7;
+    require().that( data.float_nine_point_one, is_close_to( 9.1f ) );
+    require().that( data.double_pi, is_close_to( 3.1415926535 ) );
+    require() << data.str_hello == "hello";
+    require() << "hello" == data.str_hello;
+    require() << data.str_hello.size() == 5;
+
+    double x = 1.1 + 0.1 + 0.1;
+    require().that( x, is_close_to( 1.3 ) );
+}
+
 TEST_CASE( "Equality checks that should fail", "[.][failing][!mayfail]" )
 {
     TestData data;
