@@ -28,8 +28,8 @@ namespace CatchKit::Detail {
     }
 
     void TestResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
-        current_context = std::move(context);
-        this->result_disposition = result_disposition;
+        current_context = context;
+        this->current_result_disposition = result_disposition;
         reporter.on_assertion_start( context );
     }
 
@@ -126,7 +126,7 @@ namespace CatchKit::Detail {
 
     void TestResultHandler::on_assertion_end() {
         current_context.reset();
-        if( !passed() && result_disposition == ResultDisposition::Abort ) {
+        if( !passed() && current_result_disposition == ResultDisposition::Abort ) {
             throw TestCancelled();
         }
     }

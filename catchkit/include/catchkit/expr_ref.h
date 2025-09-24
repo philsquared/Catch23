@@ -29,8 +29,8 @@ namespace CatchKit::Detail {
 
         ~BinaryExprRef();
 
-        [[maybe_unused]] auto&& operator, ( std::string_view message ) noexcept {
-            this->message = message;
+        [[maybe_unused]] auto&& operator, ( std::string_view new_message ) noexcept {
+            this->message = new_message;
             return *this;
         }
 
@@ -85,8 +85,8 @@ namespace CatchKit::Detail {
             return lhs.template make_binary_expr<Operators::GreaterThanOrEqual>( std::forward<RhsT>( rhs ) );
         }
 
-        [[maybe_unused]] auto&& operator, ( std::string_view message ) noexcept {
-            this->message = message;
+        [[maybe_unused]] auto&& operator, ( std::string_view new_message ) noexcept {
+            this->message = new_message;
             return *this;
         }
 

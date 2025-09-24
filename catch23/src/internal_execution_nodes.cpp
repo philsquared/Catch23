@@ -15,16 +15,16 @@ namespace CatchKit::Detail {
         return container->current_node = node;
     }
 
-    auto ExecutionNode::find_child(NodeId const& id) -> ExecutionNode* {
+    auto ExecutionNode::find_child(NodeId const& id_to_find) -> ExecutionNode* {
         for(auto const& child : children) {
-            if(child->id == id)
+            if(child->id == id_to_find)
                 return child.get();
         }
         return nullptr;
     }
 
-    auto ExecutionNode::add_child(NodeId&& id) -> ExecutionNode& {
-        return add_child( std::make_unique<ExecutionNode>(std::move(id)) );
+    auto ExecutionNode::add_child(NodeId const& id_to_add) -> ExecutionNode& {
+        return add_child( std::make_unique<ExecutionNode>(id_to_add) );
     }
 
     void ExecutionNode::reset() {
@@ -78,10 +78,8 @@ namespace CatchKit::Detail {
         if( state == States::HasIncompleteChildren )
             return state;
 
-        if( state == States::EnteredButDoneForThisLevel ) {
-            if( !all_children_are_complete )
-                return state;
-        }
+        if( state == States::EnteredButDoneForThisLevel && !all_children_are_complete )
+            return state;
 
         assert( state == States::Entered || state == States::EnteredButDoneForThisLevel );
 
@@ -102,9 +100,9 @@ namespace CatchKit::Detail {
         return current_node->add_child(std::move(child));
     }
 
-    auto ExecutionNodes::add_node(NodeId&& id) -> ExecutionNode& {
+    auto ExecutionNodes::add_node(NodeId const& id) -> ExecutionNode& {
         assert(find_node(id) == nullptr);
-        auto& new_node = current_node->add_child(std::move(id));
+        auto& new_node = current_node->add_child(id);
         new_node.container = this;
         return new_node;
     }

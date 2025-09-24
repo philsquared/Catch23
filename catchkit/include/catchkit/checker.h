@@ -32,7 +32,7 @@ namespace CatchKit::Detail
     struct Asserter {
         Checker& checker;
 
-        ~Asserter() noexcept(false);
+        ~Asserter() noexcept(false); // NOSONAR
 
         void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
@@ -105,7 +105,9 @@ namespace CatchKit::Detail
         else {
             // Have to do this at runtime because we can get here from the destructor of a UnaryExpr,
             // even if it doesn't happen at runtime because it's actually a binary expresion
-            throw std::logic_error("Attempt to use a value that cannot convert to bool in boolean context");
+            assert(false);
+            return ResultType::Failed;
+            // throw std::logic_error("Attempt to use a value that cannot convert to bool in boolean context");
         }
     }
     template<typename T>
@@ -183,12 +185,13 @@ extern constinit CatchKit::Checker require; // NOSONAR
 
 #define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \
     if( checker.should_decompose ) \
-        checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ).handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
-            CATCHKIT_WARNINGS_SUPPRESS_START \
-            CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
-            asserter << __VA_ARGS__; \
-            CATCHKIT_WARNINGS_SUPPRESS_END \
-        }); \
+        checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
+            .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
+                CATCHKIT_WARNINGS_SUPPRESS_START \
+                CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
+                asserter << __VA_ARGS__; \
+                CATCHKIT_WARNINGS_SUPPRESS_END \
+            }); \
     else checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).simple_assert(__VA_ARGS__)
 
 

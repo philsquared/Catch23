@@ -67,20 +67,20 @@ namespace CatchKit::Detail {
     protected:
         ShrinkableNode* shrinkable = nullptr; // May be set by derived class
         std::size_t current_index = 0;
-        virtual void move_first() {}
+        virtual void move_first() { /* may be implemented in derived class */ }
         virtual auto move_next() -> bool; // `true` means we finished
     public:
         explicit ExecutionNode( NodeId const& id ) : id(id) {}
         virtual ~ExecutionNode() = default;
 
-        auto find_child(NodeId const& id) -> ExecutionNode*;
+        auto find_child(NodeId const& id_to_find) -> ExecutionNode*;
 
         auto add_child(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {
             child->parent = this;
             children.emplace_back( std::move(child) );
             return *children.back();
         }
-        auto add_child(NodeId&& id) -> ExecutionNode&;
+        auto add_child(NodeId const& id_to_add) -> ExecutionNode&;
 
         [[nodiscard]] auto get_state() const { return state; }
         [[nodiscard]] auto get_parent() { return parent; }
@@ -103,15 +103,15 @@ namespace CatchKit::Detail {
         ExecutionNode* current_node;
         friend class ExecutionNode;
     public:
-        explicit ExecutionNodes(NodeId&& root_id)
-        :   root(std::move(root_id)),
+        explicit ExecutionNodes(NodeId const& root_id)
+        :   root(root_id),
             current_node(&root)
         {
             root.container = this;
         }
 
         auto add_node(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode&;
-        auto add_node(NodeId&& id) -> ExecutionNode&;
+        auto add_node(NodeId const& id) -> ExecutionNode&;
 
         [[nodiscard]] auto& get_root() { return root; }
         [[nodiscard]] auto get_current_node() const { return current_node; }

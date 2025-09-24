@@ -6,7 +6,7 @@
 
 namespace CatchKit::Detail {
 
-    std::string unknown_exception_message = "<unknown exception type>";
+    const std::string unknown_exception_message = "<unknown exception type>";
 
     [[nodiscard]] auto get_exception_message( std::exception const& ex ) -> std::string {
         return ex.what();
@@ -20,13 +20,13 @@ namespace CatchKit::Detail {
         try {
             std::rethrow_exception(ex);
         }
-        catch(std::exception& e) {
+        catch(std::exception& e) { // NOSONAR
             return get_exception_message(e);
         }
         catch (std::string& s) {
             return get_exception_message(s);
         }
-        catch(...) {
+        catch(...) { // NOSONAR
             // !TBD: registry for custom exception translations
             return unknown_exception_message;
         }
@@ -34,6 +34,5 @@ namespace CatchKit::Detail {
     [[nodiscard]] auto get_current_exception_message() -> std::string {
         return get_exception_message(std::current_exception());
     }
-
 
 } // namespace CatchKit::Detail

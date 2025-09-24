@@ -59,7 +59,8 @@ TEST("execution nodes with early returns") {
     auto& root = nodes.get_root();
     root.enter();
 
-    NodeId a_id( {"a"} ), b_id( {"b"} );
+    NodeId a_id( {"a"} );
+    NodeId b_id( {"b"} );
 
     auto& a_node = nodes.add_node(NodeId(a_id));
 
@@ -85,12 +86,10 @@ TEST("execution nodes with early returns") {
 
 }
 
-struct TickTockNode : public CatchKit::Detail::ExecutionNode {
-    explicit TickTockNode(CatchKit::Detail::NodeId&& id)
-    :   ExecutionNode(std::move(id))
-    {}
+struct TickTockNode : CatchKit::Detail::ExecutionNode {
+    using ExecutionNode::ExecutionNode;
 
-    int current_value() {
+    auto current_value() const {
         return current_index + 1;
     }
     auto move_next() -> bool override {
@@ -141,7 +140,8 @@ TEST( "TickTick Execution Nodes : two nodes" ) {
     auto& root = nodes.get_root();
     root.enter();
 
-    NodeId a_id({"a"}), b_id({"b"});
+    NodeId a_id({"a"});
+    NodeId b_id({"b"});
 
     nodes.add_node( std::make_unique<TickTockNode>(NodeId(a_id)) );
     auto node = nodes.find_node(a_id);
@@ -204,7 +204,8 @@ TEST( "One TickTock node, one regular node" ) {
     auto& root = nodes.get_root();
     root.enter();
 
-    NodeId a_id({"a"}), s_id({"b"});
+    NodeId a_id({"a"});
+    NodeId s_id({"b"});
 
     nodes.add_node( std::make_unique<TickTockNode>(NodeId(a_id)) );
     auto node = nodes.find_node(a_id);
@@ -249,7 +250,8 @@ TEST( "One regular node with a nested TickTock node" ) {
     auto& root = nodes.get_root();
     root.enter();
 
-    NodeId tt_id({"tt"}), s_id({"s"});
+    NodeId tt_id({"tt"});
+    NodeId s_id({"s"});
 
     // First go into the "section" node
     nodes.add_node(NodeId(s_id));

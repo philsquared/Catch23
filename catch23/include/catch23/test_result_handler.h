@@ -23,7 +23,7 @@ namespace CatchKit::Detail
         std::optional<AssertionContext> current_context;
         TestInfo const* current_test_info = nullptr;
         AdjustedResult last_result = AdjustedResult::Unknown;
-        ResultDisposition result_disposition = ResultDisposition::Abort;
+        ResultDisposition current_result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
 
         std::vector<VariableCapture*> variable_captures;
