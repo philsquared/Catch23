@@ -10,7 +10,7 @@
 
 #include "catchkit/checker.h"
 #include "catchkit/internal_warnings.h"
-#include "catchkit/unique_name.h"
+#include "catchkit/internal_macro_utils.h"
 
 #define CATCH23_VA_MACRO_HEAD(first, ...) first
 #define CATCH23_VA_MACRO_TAIL(first, ...) __VA_ARGS__
@@ -22,11 +22,9 @@
 
 #define CATCH23_TEST_INTERNAL3(fname, test_decl) \
     static void fname(CatchKit::Checker&, CatchKit::Checker&); \
-    CATCHKIT_WARNINGS_SUPPRESS_START \
     namespace{ namespace CATCHKIT_INTERNAL_UNIQUE_NAME(reg_ns) { using namespace CatchKit::Tags; CatchKit::Detail::AutoReg auto_registrar ( test_decl ); } } /* NOLINT */ \
-    CATCHKIT_WARNINGS_SUPPRESS_END \
-    CATCHKIT_WARNINGS_SUPPRESS_UNUSED_PARAMETER \
-    CATCHKIT_WARNINGS_SUPPRESS_SHADOW \
+    CATCHKIT_WARNINGS_UNSCOPED_SUPPRESS_UNUSED_PARAMETER \
+    CATCHKIT_WARNINGS_UNSCOPED_SUPPRESS_SHADOW \
     static void fname(CatchKit::Checker& check, CatchKit::Checker& require )
 
 #define CATCH23_TEST_INTERNAL2(fname, test_decl) static void CATCHKIT_INTERNAL_UNIQUE_NAME(test_)()

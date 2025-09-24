@@ -2,8 +2,8 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
-#ifndef CATCHKIT_PLATFORM_H
-#define CATCHKIT_PLATFORM_H
+#ifndef CATCHKIT_INTERNAL_PLATFORM_H
+#define CATCHKIT_INTERNAL_PLATFORM_H
 
 #if defined(WIN32) || defined(__WIN32__) || defined(_WIN32) || defined(_MSC_VER) || defined(__MINGW32__)
 #  define CATCHKIT_PLATFORM_WINDOWS
@@ -24,4 +24,4 @@
 #  endif
 #endif
 
-#endif // CATCHKIT_PLATFORM_H
+#endif // CATCHKIT_INTERNAL_PLATFORM_H

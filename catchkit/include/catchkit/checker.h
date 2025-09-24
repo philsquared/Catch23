@@ -177,8 +177,8 @@ namespace CatchKit
 } //namespace CatchKit
 
 // These global instances are used if not using the ones passed in to a function locally
-extern constinit CatchKit::Checker check; // NOLINT
-extern constinit CatchKit::Checker require; // NOLINT
+extern constinit CatchKit::Checker check; // NOSONAR
+extern constinit CatchKit::Checker require; // NOSONAR
 
 
 #define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \

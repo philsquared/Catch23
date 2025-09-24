@@ -11,7 +11,7 @@ add_library(Catchkit STATIC
         src/assertion_context.cpp
         include/catchkit/checker.h
         include/catchkit/internal_warnings.h
-        include/catchkit/unique_name.h
+        include/catchkit/internal_macro_utils.h
         include/catchkit/result_handler.h
         include/catchkit/result_type.h
         include/catchkit/operators.h
@@ -29,7 +29,7 @@ add_library(Catchkit STATIC
         include/catchkit/stringify.h
         src/matchers.cpp
         include/catchkit/matchers.h
-        include/catchkit/platform.h
+        include/catchkit/internal_platform.h
         include/catchkit/report_on.h
         src/internal_matchers.cpp
         include/catchkit/internal_matchers.h
@@ -37,6 +37,9 @@ add_library(Catchkit STATIC
         include/catchkit/variable_capture.h
         src/reflection.cpp
         include/catchkit/reflection.h
+        include/catchkit/internal_compilers.h
+        src/internal_compilers.cpp
+        src/internal_platform.cpp
 )
 
 target_include_directories(Catchkit PUBLIC include)
