@@ -9,11 +9,17 @@
 
 namespace CatchKit {
 
+    enum class PrintSummary {
+        Always, // The default
+        Never,
+        OnlyWhenTestsAreReported
+    };
+
     class ConsoleReporter : public Reporter {
         TestInfo const* current_test_info = nullptr;
         bool printed_header = false;
         ReportOn what_to_report_on;
-        bool always_print_summary;
+        PrintSummary print_summary;
 
         bool shrinking = false;
 
@@ -23,9 +29,9 @@ namespace CatchKit {
         void lazy_print_test_header();
 
     public:
-        explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailingTests, bool always_print_summary = true )
+        explicit ConsoleReporter( ReportOn what_to_report_on = ReportOn::FailingTests, PrintSummary print_summary = PrintSummary::Always )
         :   what_to_report_on( what_to_report_on ),
-            always_print_summary(always_print_summary)
+            print_summary(print_summary)
         {}
 
         auto report_on_what() const -> ReportOn override {

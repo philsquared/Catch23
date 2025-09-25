@@ -189,10 +189,11 @@ namespace CatchKit {
 
     void ConsoleReporter::on_test_run_end() {
         bool should_print_summary =
-            always_print_summary
-            || ( report_on_passing( what_to_report_on ) && test_totals.passed() > 0 )
-            || ( report_on_failing( what_to_report_on ) && test_totals.failed > 0 )
-            || test_totals.total() == 0;
+            print_summary == PrintSummary::Always
+            || ( print_summary == PrintSummary::OnlyWhenTestsAreReported &&
+                (  (report_on_passing( what_to_report_on ) && test_totals.passed() > 0 )
+                || ( report_on_failing( what_to_report_on ) && test_totals.failed > 0 )
+                || test_totals.total() == 0 ) );
 
         if( should_print_summary )
             print_totals_divider(test_totals);
