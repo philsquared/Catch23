@@ -11,10 +11,10 @@
 namespace CatchKit {
 
     auto MetaTestResults::failures() const -> int {
-        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc += result.failed(); });
+        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + result.failed(); });
     }
     auto MetaTestResults::expected_failures() const -> int {
-        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc += result.failed_expectedly(); });
+        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + result.failed_expectedly(); });
     }
 
     MetaTestRunner::MetaTestRunner( std::string name, std::source_location location )
@@ -28,10 +28,10 @@ namespace CatchKit {
         return MetaTestResults{ std::move(reporter.results) };
     }
 
-    auto MetaTestRunner::run_test_by_name( std::string const& name ) && -> MetaTestResults {
-        auto const* test = Detail::find_test_by_name( name );
+    auto MetaTestRunner::run_test_by_name( std::string const& name_to_find ) && -> MetaTestResults {
+        auto const* test = Detail::find_test_by_name( name_to_find );
         if( test == nullptr )
-            throw std::domain_error( "No such test: " + name );
+            throw std::domain_error( "No such test: " + name_to_find );
         return std::move(*this).run(*test);
     }
 

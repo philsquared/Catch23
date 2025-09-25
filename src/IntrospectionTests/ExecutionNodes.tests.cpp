@@ -90,10 +90,10 @@ struct TickTockNode : CatchKit::Detail::ExecutionNode {
     using ExecutionNode::ExecutionNode;
 
     auto current_value() const {
-        return current_index + 1;
+        return get_current_index() + 1;
     }
     auto move_next() -> bool override {
-        return ++current_index == 2;
+        return increment_current_index() == 2;
     }
 };
 

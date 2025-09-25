@@ -6,16 +6,16 @@
 
 namespace CatchKit::Detail {
 
-    auto ExecutionNode::get_current_node() -> ExecutionNode* {
+    auto ExecutionNode::get_current_node() const -> ExecutionNode* {
         assert(container);
         return container->current_node;
     }
-    auto ExecutionNode::set_current_node(ExecutionNode* node) {
+    auto ExecutionNode::set_current_node(ExecutionNode* node) { // NOLINT
         assert(container);
         return container->current_node = node;
     }
 
-    auto ExecutionNode::find_child(NodeId const& id_to_find) -> ExecutionNode* {
+    auto ExecutionNode::find_child( NodeId const& id_to_find ) const -> ExecutionNode* {
         for(auto const& child : children) {
             if(child->id == id_to_find)
                 return child.get();
@@ -35,7 +35,7 @@ namespace CatchKit::Detail {
             reset_children();
         }
     }
-    void ExecutionNode::reset_children() {
+    void ExecutionNode::reset_children() { // NOLINT
         for(auto const& child : children) {
             child->reset();
         }
@@ -52,47 +52,48 @@ namespace CatchKit::Detail {
     }
 
     auto ExecutionNode::exit(bool early) -> States {
-        assert(state == States::Entered || state == States::EnteredButDoneForThisLevel);
+        using enum States;
+        assert(state == Entered || state == EnteredButDoneForThisLevel);
 
         if(parent) {
-            assert(parent->state == States::Entered || parent->state == States::EnteredButDoneForThisLevel);
-            parent->state = States::EnteredButDoneForThisLevel;
+            assert(parent->state == Entered || parent->state == EnteredButDoneForThisLevel);
+            parent->state = EnteredButDoneForThisLevel;
         }
         bool all_children_are_complete = true;
         for(auto const& child : children) {
-            if( child->state == States::Entered || child->state == States::EnteredButDoneForThisLevel )
+            if( child->state == Entered || child->state == EnteredButDoneForThisLevel )
                 child->exit();
-            if( child->state != States::Completed && child->state != States::NotEntered ) {
-                state = States::HasIncompleteChildren;
+            if( child->state != Completed && child->state != NotEntered ) {
+                state = HasIncompleteChildren;
             }
-            if( child->state == States::ExitedEarly )
-                child->state = States::Completed;
+            if( child->state == ExitedEarly )
+                child->state = Completed;
 
-            if( child->state != States::Completed )
+            if( child->state != Completed )
                 all_children_are_complete = false;
         }
         if( get_current_node() == this ) {
             set_current_node(parent);
         }
 
-        if( state == States::HasIncompleteChildren )
+        if( state == HasIncompleteChildren )
             return state;
 
-        if( state == States::EnteredButDoneForThisLevel && !all_children_are_complete )
+        if( state == EnteredButDoneForThisLevel && !all_children_are_complete )
             return state;
 
-        assert( state == States::Entered || state == States::EnteredButDoneForThisLevel );
+        assert( state == Entered || state == EnteredButDoneForThisLevel );
 
         if( !move_next() ) {
             reset_children();
-            return state = States::Incomplete;
+            return state = Incomplete;
         }
 
         reset_children();
         if( early )
-            return state = States::ExitedEarly;
+            return state = ExitedEarly;
 
-        return state = States::Completed;
+        return state = Completed;
     }
 
     auto ExecutionNodes::add_node(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {

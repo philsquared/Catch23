@@ -81,7 +81,7 @@ namespace CatchKit {
                 // if( strategy == Strategies::SimpleValues )
                     strategy = Strategies::BinaryDescent;
             }
-            auto shrink( values_of<T>& generator, T value ) -> std::generator<T> {
+            auto shrink( values_of<T>& generator, T value ) -> std::generator<T> { // NOSONAR
                 if( value >= 0 ) {
                     switch( strategy ) {
                     case Strategies::SimpleValues:
@@ -124,7 +124,7 @@ namespace CatchKit {
                             co_yield -value;
 
                             // Explicitly yield a positive 0 for floating point, too
-                            if constexpr( std::is_floating_point_v<T> )
+                            if constexpr( std::is_floating_point_v<T> ) // NOSONAR
                                 co_yield 0;
                         }
                         // Mirror positive shrinks
@@ -140,7 +140,7 @@ namespace CatchKit {
             T from {};
             T to = std::numeric_limits<T>::max();
 
-            [[nodiscard]] auto generate_at( std::size_t index, RandomNumberGenerator& ) const { return from + static_cast<T>(index); }
+            [[nodiscard]] auto generate_at( std::size_t index, RandomNumberGenerator const& ) const { return from + static_cast<T>(index); }
             auto size() const { assert(to > from); return 1 + to - from; }
         };
 
@@ -173,7 +173,7 @@ namespace CatchKit {
         struct from_values {
             std::vector<T> values;
 
-            auto generate_at( std::size_t pos, RandomNumberGenerator& ) const { return values[pos]; }
+            auto generate_at( std::size_t pos, RandomNumberGenerator const& ) const { return values[pos]; }
             auto size() const { return values.size(); }
 
         };
@@ -199,7 +199,7 @@ namespace CatchKit {
 
     namespace Generators {
 
-        namespace Charsets { using namespace Detail::Charsets; }
+        namespace Charsets = Detail::Charsets;
 
         // Built in matchers
         using Detail::values_of;

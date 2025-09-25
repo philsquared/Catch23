@@ -28,12 +28,12 @@ namespace CatchKit {
     } // namespace Detail
 
     TextColour::~TextColour() {
-        set(Colours::Reset);
+        set(Colours::Reset); // NOSONAR
     }
 
-    void TextColour::set( Colours colour ) const {
+    void TextColour::set( Colours colour ) const { // NOLINT
         if ( Detail::is_colour_available() ) {
-            std::print("\o{33}[0;{}m", [colour]() {
+            std::print("\o{33}[0;{}m", [colour]() { // NOSONAR
                 switch( colour )
                 {
                     using enum Colours;
@@ -53,21 +53,20 @@ namespace CatchKit {
                     case BoldNormal:    return "1;39";
                     default:
                         assert(false);
-                        std::unreachable();
                 }
             }());
         }
     }
 
-    Colours ColourIntent::FileName = Colours::BoldGrey;
-    Colours ColourIntent::ResultError = Colours::BoldRed;
-    Colours ColourIntent::ResultSuccess = Colours::BoldGreen;
-    Colours ColourIntent::ResultExpectedFailure = Warning;
-
     Colours ColourIntent::Error = Colours::BoldRed;
     Colours ColourIntent::Success = Colours::Green;
     Colours ColourIntent::Warning = Colours::BoldYellow;
     Colours ColourIntent::Skip = Colours::BoldGrey;
+
+    Colours ColourIntent::FileName = Colours::BoldGrey;
+    Colours ColourIntent::ResultError = Colours::BoldRed;
+    Colours ColourIntent::ResultSuccess = Colours::BoldGreen;
+    Colours ColourIntent::ResultExpectedFailure = Warning;
 
     Colours ColourIntent::OriginalExpression = Colours::Cyan;
     Colours ColourIntent::ReconstructedExpression = Colours::BoldYellow;

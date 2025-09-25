@@ -35,7 +35,8 @@ namespace CatchKit {
     }
 
     void ConsoleReporter::lazy_print_test_header() {
-        if( !printed_header && current_test_info ) {
+        if( !printed_header ) {
+            assert(current_test_info);
             if( !shrinking ) {
                 std::println("-------------------------------------------------------------------------------");
                 println(ColourIntent::Headers, "TEST: {}", current_test_info->name);
@@ -45,7 +46,7 @@ namespace CatchKit {
                 std::println("...............................................................................");
             }
             std::println();
-            printed_header = false;
+            printed_header = true;
         }
     }
     void ConsoleReporter::on_test_start( TestInfo const& test_info ) {
@@ -65,9 +66,9 @@ namespace CatchKit {
         current_test_info = nullptr;
     }
 
-    void ConsoleReporter::on_assertion_start( AssertionContext const& ) {}
+    void ConsoleReporter::on_assertion_start( AssertionContext const& ) { /* Not implemented for now */ }
 
-    void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) {
+    void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) { // NOSONAR
         assert(current_test_info);
         lazy_print_test_header();
         std::print( "{}:{}:{}: ",
@@ -128,7 +129,7 @@ namespace CatchKit {
 
                 if( !match_expr->sub_expressions.empty() ) {
                     std::println( " because:");
-                    for(auto const& sub_expr : match_expr->sub_expressions) {
+                    for( auto const& sub_expr : match_expr->sub_expressions ) { // NOSONAR
                         if( sub_expr.result )
                             std::print("    ✅ ");
                         else
@@ -157,7 +158,7 @@ namespace CatchKit {
         std::println("\nNo simpler counterexample found after {} shrinks", shrinks);
     }
     void ConsoleReporter::on_shrink_result( ResultType result, int shrinks_so_far ) {
-        const int shrink_print_width = 37;
+        constexpr int shrink_print_width = 37;
         if( shrinks_so_far < shrink_print_width ) {
             if( result == ResultType::Passed )
                 std::print("✅");
@@ -172,7 +173,8 @@ namespace CatchKit {
         if( values.size() > 1 ) {
             int i = 0;
             for (auto const& value : values) {
-                std::println("  value {}: {}", ++i, value);
+                std::println("  value {}: {}", i, value);
+                ++i;
             }
             std::println("Final run with these values:");
         }
@@ -211,7 +213,7 @@ namespace CatchKit {
             return;
         }
 
-        auto print_summary = [](Counters const& counts, std::string const& label) {
+        auto print_summary_box = [](Counters const& counts, std::string const& label) { // NOSONAR
             std::print("{}: {}", label, counts.total() );
             if( counts.passed() > 0) {
                 print( Colours::BoldGrey, " | " );
@@ -227,8 +229,8 @@ namespace CatchKit {
             }
             std::println();
         };
-        print_summary(test_totals, "test cases");
-        print_summary(assertion_totals, "assertions");
+        print_summary_box(test_totals, "test cases");
+        print_summary_box(assertion_totals, "assertions");
     }
 
 } // namespace CatchKit

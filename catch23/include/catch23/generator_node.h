@@ -36,7 +36,7 @@ namespace CatchKit::Detail {
     auto size_of(G const& generator, std::size_t default_size = 100) {
         if constexpr( IsMultiValueGenerator<G> ) {
             static_assert( !IsGeneratorSized<G>, "Generator has generate_at() but not size()");
-            return generator.size();
+            return std::size(generator);
         }
         else
             return default_size;
@@ -68,8 +68,8 @@ namespace CatchKit::Detail {
     struct Shrinker {
         GeneratedType original_failing_value;
         explicit Shrinker(GeneratorType const&, GeneratedType const&, std::set<GeneratedType>&) {}
-        void rebase(){}
-        [[nodiscard]] auto shrink() const -> bool { return false; }
+        static void rebase() { /* no impl needed here */ }
+        [[nodiscard]] static auto shrink() -> bool { return false; }
     };
 
     template<IsGeneratorShrinkable GeneratorType, typename GeneratedType>
@@ -133,12 +133,12 @@ namespace CatchKit::Detail {
             current_generated_value( generate_value() )
         {
             if( IsGeneratorShrinkable<GeneratorType> ) {
-                shrinkable = this;
+                set_shrinkable(this);
             }
         }
 
         auto generate_value() {
-            return generate_at(generator, current_index, rng);
+            return generate_at(generator, get_current_index(), rng);
         }
         void move_first() override {
             assert( !shrinker );
@@ -147,7 +147,7 @@ namespace CatchKit::Detail {
         }
         auto move_next() -> bool override {
             assert( !shrinker );
-            if( ++current_index == size )
+            if( increment_current_index() == size )
                 return true;
             current_generated_value = generate_value();
             return false;
@@ -179,7 +179,7 @@ namespace CatchKit::Detail {
             bool shrunk = (pre_shrunk_value != current_generated_value);
             shrinker.reset();
             pre_shrunk_value.reset();
-            current_index = size-1;
+            set_current_index(size-1);
             return shrunk;
 
         }
@@ -194,7 +194,7 @@ namespace CatchKit::Detail {
         NodeId id;
         ExecutionNode* generator_node;
 
-        GeneratorAcquirer(Checker& checker, NodeId&& id)
+        GeneratorAcquirer(Checker const& checker, NodeId&& id)
         :   execution_nodes(get_execution_nodes_from_result_handler(*checker.result_handler)),
             id(std::move(id)),
             generator_node(execution_nodes.find_node(this->id))
@@ -207,7 +207,7 @@ namespace CatchKit::Detail {
         template<typename T>
         auto derived_node() {
             assert(generator_node != nullptr);
-            generator_node->enter();
+            generator_node->enter(); // NOLINT (we just checked it wasn't null!)
             return static_cast<GeneratorNode<T>*>(generator_node);
         }
     };

@@ -34,9 +34,9 @@ namespace CatchKit {
         std::string name = {};
         std::vector<Tag> tags = {};
 
-        auto has_tag_type(Tag::Type tag_type) const -> bool;
-        auto should_fail() const -> bool;
-        auto may_fail() const -> bool;
+        [[nodiscard]] auto has_tag_type(Tag::Type tag_type) const -> bool;
+        [[nodiscard]] auto should_fail() const -> bool;
+        [[nodiscard]] auto may_fail() const -> bool;
     };
 
 } // namespace CatchKit

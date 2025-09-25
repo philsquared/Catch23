@@ -87,7 +87,7 @@ namespace CatchKit::Detail {
             }
         }
 
-        if( !current_test_info->has_tag_type( Tag::Type::always_report ) ) {
+        if( !current_test_info->has_tag_type( Tag::Type::always_report ) ) { // NOSONAR
             if( last_result == AdjustedResult::Failed ) {
                 if( (report_on & ReportOn::FailingTests) != ReportOn::FailingTests )
                     return ResultDetailNeeded::No;
@@ -133,7 +133,7 @@ namespace CatchKit::Detail {
     void TestResultHandler::on_assertion_end() {
         current_context.reset();
         if( !passed() && current_result_disposition == ResultDisposition::Abort ) {
-            throw TestCancelled();
+            throw TestCancelled(); // NOLINT
         }
     }
 
@@ -153,7 +153,7 @@ namespace CatchKit::Detail {
 
     auto get_execution_nodes_from_result_handler(ResultHandler& handler) -> ExecutionNodes& {
         assert(dynamic_cast<TestResultHandler*>(&handler) != nullptr);
-        auto execution_nodes = static_cast<TestResultHandler&>(handler).get_execution_nodes();
+        auto execution_nodes = static_cast<TestResultHandler&>(handler).get_execution_nodes(); // NOLINT
         assert(execution_nodes);
         return *execution_nodes;
     }

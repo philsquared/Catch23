@@ -11,11 +11,11 @@
 namespace CatchKit::Detail {
     namespace {
         auto& get_all_tests_impl() {
-            static std::vector<Test> all_tests;
+            static std::vector<Test> all_tests; // NOSONAR
             return all_tests;
         }
         auto& get_tests_by_name_impl() {
-            static std::unordered_map<std::string, std::size_t> tests_by_name;
+            static std::unordered_map<std::string, std::size_t> tests_by_name; // NOSONAR
             return tests_by_name;
         }
     }
@@ -49,7 +49,7 @@ namespace CatchKit::Detail {
     void register_test(Test&& test) {
         auto& all_tests = get_all_tests_impl();
         all_tests.emplace_back(std::move(test));
-        get_tests_by_name_impl().emplace( all_tests.back().test_info.name, all_tests.size()-1 );
+        get_tests_by_name_impl().try_emplace( all_tests.back().test_info.name, all_tests.size()-1 );
     }
     auto find_test_by_name(std::string const& name) -> Test const* {
         if( auto it = get_tests_by_name_impl().find( name ); it != get_tests_by_name_impl().end() )

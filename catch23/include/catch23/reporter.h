@@ -52,7 +52,7 @@ namespace CatchKit {
     struct Reporter {
         virtual ~Reporter() = default;
 
-        virtual auto report_on_what() const -> ReportOn = 0;
+        [[nodiscard]] virtual auto report_on_what() const -> ReportOn = 0;
 
         virtual void on_test_run_start() = 0;
         virtual void on_test_run_end() = 0;

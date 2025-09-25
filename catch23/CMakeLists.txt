@@ -32,7 +32,7 @@ add_library(Catch23 STATIC
         include/catch23/meta_test.h
         src/generator_node.cpp
         include/catch23/generator_node.h
-        include/catch23/print.cpp
+        src/print.cpp
         include/catch23/print.h
         src/main.cpp
         include/catch23/main.h

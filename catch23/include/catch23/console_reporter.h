@@ -34,7 +34,7 @@ namespace CatchKit {
             print_summary(print_summary)
         {}
 
-        auto report_on_what() const -> ReportOn override {
+        [[nodiscard]] auto report_on_what() const -> ReportOn override {
             return what_to_report_on;
         }
 

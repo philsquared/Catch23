@@ -51,7 +51,7 @@ namespace CatchKit::Detail
         void add_variable_capture( VariableCapture* capture ) override;
         void remove_variable_capture( VariableCapture* capture ) override;
 
-        [[nodiscard]] auto get_reporter() -> Reporter& { return reporter; }
+        [[nodiscard]] auto get_reporter() const -> Reporter& { return reporter; }
         [[nodiscard]] auto passed() const { return last_result != AdjustedResult::Failed; }
         [[nodiscard]] auto get_execution_nodes() const { return execution_nodes; }
         [[nodiscard]] auto get_assertion_counts() const { return assertions; }

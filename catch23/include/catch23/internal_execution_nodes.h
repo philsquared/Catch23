@@ -36,6 +36,8 @@ namespace CatchKit::Detail {
         virtual auto stop_shrinking() -> bool = 0;
         virtual auto shrink() -> bool = 0;
         virtual auto current_value_as_string() -> std::string = 0;
+    protected:
+        ~ShrinkableNode() = default;
     };
 
     class ExecutionNode {
@@ -61,19 +63,22 @@ namespace CatchKit::Detail {
         std::vector<std::unique_ptr<ExecutionNode>> children;
         States state = States::None;
 
-        auto get_current_node() -> ExecutionNode*;
+        [[nodiscard]] auto get_current_node() const -> ExecutionNode*;
         auto set_current_node(ExecutionNode* node);
 
-    protected:
         ShrinkableNode* shrinkable = nullptr; // May be set by derived class
         std::size_t current_index = 0;
+    protected:
         virtual void move_first() { /* may be implemented in derived class */ }
         virtual auto move_next() -> bool; // `true` means we finished
+        void set_current_index(std::size_t index) { current_index = index; }
+        auto increment_current_index() { return ++current_index; }
+        void set_shrinkable(ShrinkableNode* node) { shrinkable = node; }
     public:
-        explicit ExecutionNode( NodeId const& id ) : id(id) {}
+        explicit ExecutionNode( NodeId id ) : id(std::move(id)) {}
         virtual ~ExecutionNode() = default;
 
-        auto find_child(NodeId const& id_to_find) -> ExecutionNode*;
+        [[nodiscard]] auto find_child(NodeId const& id_to_find) const -> ExecutionNode*;
 
         auto add_child(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {
             child->parent = this;
@@ -83,7 +88,7 @@ namespace CatchKit::Detail {
         auto add_child(NodeId const& id_to_add) -> ExecutionNode&;
 
         [[nodiscard]] auto get_state() const { return state; }
-        [[nodiscard]] auto get_parent() { return parent; }
+        [[nodiscard]] auto get_parent() const { return parent; }
         [[nodiscard]] auto get_parent_state() const { return parent ? parent->get_state() : States::None; }
         [[nodiscard]] auto get_current_index() const { return current_index; }
         [[nodiscard]] auto get_shrinkable() const { return shrinkable; }
@@ -103,8 +108,8 @@ namespace CatchKit::Detail {
         ExecutionNode* current_node;
         friend class ExecutionNode;
     public:
-        explicit ExecutionNodes(NodeId const& root_id)
-        :   root(root_id),
+        explicit ExecutionNodes(NodeId root_id)
+        :   root(std::move(root_id)),
             current_node(&root)
         {
             root.container = this;
@@ -115,7 +120,7 @@ namespace CatchKit::Detail {
 
         [[nodiscard]] auto& get_root() { return root; }
         [[nodiscard]] auto get_current_node() const { return current_node; }
-        [[nodiscard]] auto find_node(NodeId const& id) -> ExecutionNode* {
+        [[nodiscard]] auto find_node(NodeId const& id) const -> ExecutionNode* {
             return current_node->find_child(id);
         }
     };

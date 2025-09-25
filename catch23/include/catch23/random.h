@@ -4,8 +4,8 @@
 
 #ifndef CATCH23_RANDOM_H
 #define CATCH23_RANDOM_H
+
 #include <random>
-#include <type_traits>
 
 namespace CatchKit::Detail {
 
@@ -23,7 +23,7 @@ namespace CatchKit::Detail {
         RandomNumberGenerator()
         : RandomNumberGenerator(std::random_device()())
         {}
-        RandomNumberGenerator(unsigned int seed)
+        explicit RandomNumberGenerator(unsigned int seed)
         :   seed(seed),
             mt(seed)
         {}

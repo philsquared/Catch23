@@ -21,7 +21,7 @@ namespace CatchKit {
         [[nodiscard]] auto failed_expectedly() const { return info.result == AdjustedResult::FailedExpectly; }
     };
 
-    class MetaTestReporter : public Reporter {
+    class MetaTestReporter : public Reporter { // NOSONAR
         ReportOn what_to_report_on;
 
     public:
@@ -32,21 +32,21 @@ namespace CatchKit {
         [[nodiscard]] auto report_on_what() const -> ReportOn override {
             return what_to_report_on;
         }
-        void on_test_run_start() override {}
-        void on_test_run_end() override {}
+        void on_test_run_start() override { /* no impl */ }
+        void on_test_run_end() override { /* no impl */ }
 
-        void on_test_start( TestInfo const& ) override {}
-        void on_test_end( TestInfo const&, Counters const& ) override {}
+        void on_test_start( TestInfo const& ) override { /* no impl */ }
+        void on_test_end( TestInfo const&, Counters const& ) override { /* no impl */ }
 
-        void on_assertion_start( AssertionContext const& ) override {}
+        void on_assertion_start( AssertionContext const& ) override { /* no impl */ }
         void on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) override {
             results.emplace_back(context, assertion_info);
         }
-        void on_shrink_start() override {}
-        void on_shrink_found( std::vector<std::string> const&, int ) override {}
-        void on_no_shrink_found( int ) override {}
-        void on_shrink_result( ResultType, int ) override {}
-        void on_shrink_end() override {}
+        void on_shrink_start() override { /* no impl */ }
+        void on_shrink_found( std::vector<std::string> const&, int ) override { /* no impl */ }
+        void on_no_shrink_found( int ) override { /* no impl */ }
+        void on_shrink_result( ResultType, int ) override { /* no impl */ }
+        void on_shrink_end() override { /* no impl */ }
 
         std::vector<FullAssertionInfo> results;
     };
@@ -78,10 +78,10 @@ namespace CatchKit {
     public:
         explicit MetaTestRunner(std::string name = "local test", std::source_location location = std::source_location::current());
         auto run( Detail::Test const& test ) && -> MetaTestResults;
-        auto run_test_by_name( std::string const& name ) && -> MetaTestResults;
+        auto run_test_by_name( std::string const& name_to_find ) && -> MetaTestResults;
 
-        auto operator << ( std::invocable<Checker&, Checker&> auto const& test_fun ) && {
-            return std::move(*this).run(Detail::Test{test_fun, {location, std::move(name)}});
+        friend auto operator << ( MetaTestRunner&& runner, std::invocable<Checker&, Checker&> auto const& test_fun ) {
+            return std::move(runner).run(Detail::Test{test_fun, {runner.location, std::move(runner.name)}});
         }
     };
 

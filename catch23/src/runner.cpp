@@ -16,16 +16,16 @@ namespace CatchKit::Detail {
                 .result_handler=&test_handler,
                 .result_disposition=ResultDisposition::Abort };
 
-            Checker old_check = ::check, old_require = ::require;
+            Checker old_check = ::check;
+            Checker old_require = ::require;
             ::check = check;
             ::require = require;
 
             try {
                 test.test_fun(check, require);
             }
-            catch( TestCancelled ) {
-            }
-            catch( ... ) {
+            catch( TestCancelled ) { /* allow to pass through */ } // NOSONAR
+            catch( ... ) { // NOSONAR
                 // We need a new context because the old one had string_views to outdated data
                 // - we want to preserve the last known source location, though
                 AssertionContext context{
@@ -33,7 +33,7 @@ namespace CatchKit::Detail {
                     .original_expression = "* unknown line after the reported location *",
                     .message = {},
                     .location = test_handler.get_last_known_location() };
-                test_handler.on_assertion_start( ResultDisposition::Continue, std::move(context) );
+                test_handler.on_assertion_start( ResultDisposition::Continue, context );
                 if( test_handler.on_assertion_result(ResultType::Failed) == ResultDetailNeeded::Yes ) {
                     test_handler.on_assertion_result_detail(
                         ExceptionExpressionInfo{

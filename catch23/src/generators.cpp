@@ -4,7 +4,6 @@
 
 #include "catch23/generators.h"
 
-#include <map>
 #include <cassert>
 
 namespace CatchKit::Detail {
@@ -16,7 +15,7 @@ namespace CatchKit::Detail {
         std::string const numbers = "01234567890";
         std::string const alphanumeric = all_alpha + numbers;
         std::string const word_chars = alphanumeric + " ";
-        std::string const symbols = "!@£$%^&*()-=_+[]{};'\\\\:\\\"|,./<>?`~";
+        std::string const symbols = R"(!@£$%^&*()-=_+[]{};'\\:\"|,./<>?`~)";
         std::string const printable_ascii = word_chars + symbols;
     }
 
