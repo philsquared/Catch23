@@ -27,7 +27,7 @@ namespace CatchKit::Detail
     };
 
     template<typename T>
-    struct TypedVariableCapture : VariableCapture {
+    struct TypedVariableCapture final : VariableCapture {
         T const& value;
 
         [[nodiscard]] auto get_value() const -> std::string override { return stringify( value ); }

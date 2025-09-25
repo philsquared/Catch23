@@ -12,8 +12,8 @@
 namespace CatchKit::Detail {
 
     void AssertResultHandler::on_assertion_start( ResultDisposition result_disposition, AssertionContext const& context ) {
-        current_context = std::move(context);
-        this->result_disposition = result_disposition;
+        current_context = context;
+        current_result_disposition = result_disposition;
     }
 
     auto AssertResultHandler::on_assertion_result( ResultType result ) -> ResultDetailNeeded {
@@ -22,7 +22,7 @@ namespace CatchKit::Detail {
             return ResultDetailNeeded::No;
         return ResultDetailNeeded::Yes;
     }
-    void AssertResultHandler::on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) {;
+    void AssertResultHandler::on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) {
         // !TBD When we can use stacktrace do something like this:
         // https://godbolt.org/z/jM4TnaMEW
 
@@ -69,7 +69,7 @@ namespace CatchKit::Detail {
         }
     }
     void AssertResultHandler::on_assertion_end() {
-        if ( last_result != ResultType::Passed && result_disposition == ResultDisposition::Abort ) {
+        if ( last_result != ResultType::Passed && current_result_disposition == ResultDisposition::Abort ) {
             std::terminate();
         }
     }

@@ -28,9 +28,9 @@ namespace CatchKit {
             static constexpr auto find(E e) -> std::string_view {
                 if( e == candidate )
                     return parse_enum_name_from_function(std::source_location::current().function_name());
-                constexpr auto raw_value = static_cast<std::size_t>( candidate );
-                if constexpr(raw_value < max_probe ) {
-                    if constexpr( requires { std::integral_constant<E, static_cast<E>(raw_value+1)>{}; })
+                if constexpr(constexpr auto raw_value = static_cast<std::size_t>( candidate );
+                    raw_value < max_probe &&
+                    requires { std::integral_constant<E, static_cast<E>(raw_value+1)>{}; } ) {
                         return enum_value_string<E, static_cast<E>(raw_value + 1)>::find(e);
                 }
                 return {};

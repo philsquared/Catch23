@@ -25,12 +25,12 @@ namespace CatchKit {
         };
 
         struct CouldBeAnything {
-            template <typename T> explicit(false) operator T() const;
+            template <typename T> explicit(false) operator T() const; // NOLINT
         };
 
         struct AlwaysMatcher {
-            auto match(auto&&) const -> MatchResult { return true; }
-            auto lazy_match(auto&&) const -> MatchResult  { return true; }
+            static auto match(auto&&) -> MatchResult { return true; }
+            static auto lazy_match(auto&&) -> MatchResult  { return true; }
         };
 
         // !TBD: refactor this all in terms of marker interfaces, or something
@@ -42,7 +42,7 @@ namespace CatchKit {
 
         template<typename M>
         concept IsLazyMatcher = requires(M m) {
-            { m.lazy_match([]{}) } -> std::same_as<MatchResult>;
+            { m.lazy_match([]{/* any callable */}) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
@@ -52,7 +52,7 @@ namespace CatchKit {
 
         template<typename M>
         concept IsLazyBindableMatcher = requires(M m, AlwaysMatcher matcher) {
-            { m.lazy_bound_match([]{}, matcher) } -> std::same_as<MatchResult>;
+            { m.lazy_bound_match([]{/* any callable */}, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
@@ -72,8 +72,10 @@ namespace CatchKit {
                     return matcher.lazy_match( arg ).set_address( address );
                 else if constexpr( IsEagerMatcher<MatcherT> )
                     return matcher.match( arg ).set_address( address );
-                else
+                else {
                     static_assert( false, "Lazy matchers must be matched against lambdas" );
+                    std::unreachable();
+                }
             }
             else if constexpr( IsEagerMatcher<MatcherT> ) {
                 auto address = std::bit_cast<uintptr_t>( &matcher );
@@ -84,6 +86,7 @@ namespace CatchKit {
             }
             else {
                 static_assert( false, "RHS of match statement is not a matcher" );
+                std::unreachable();
             }
         }
 
@@ -153,18 +156,18 @@ namespace CatchKit {
         };
 
         template<typename M2>
-        auto operator && (IsMatcher auto&& m1, M2&& m2) {
+        auto operator && (IsMatcher auto&& m1, M2&& m2) { // NOSONAR
             static_assert(IsMatcher<M2>, "Operand to && is not a matcher");
             return AndMatcher(m1, m2);
         }
 
         template<typename M2>
-        auto operator || (IsMatcher auto&& m1, M2&& m2) {
+        auto operator || (IsMatcher auto&& m1, M2&& m2) { // NOSONAR
             static_assert(IsMatcher<M2>, "Operand to || is not a matcher");
             return OrMatcher( m1, m2 );
         }
 
-        auto operator ! (IsMatcher auto&& m) {
+        auto operator ! (IsMatcher auto&& m) { // NOSONAR
             return NotMatcher(m);
         }
 
@@ -248,12 +251,12 @@ namespace CatchKit {
         }
 
         template<typename ArgT, typename MatcherT>
-        auto MatchExprRef<ArgT, MatcherT>::evaluate() -> MatchResult {
+        auto MatchExprRef<ArgT, MatcherT>::evaluate() const -> MatchResult {
             return invoke_matcher( matcher, arg );
         }
 
         template<typename ArgT, typename MatcherT>
-        auto MatchExprRef<ArgT, MatcherT>::expand( MatchResult const& result ) -> ExpressionInfo {
+        auto MatchExprRef<ArgT, MatcherT>::expand( MatchResult const& result ) const -> ExpressionInfo {
             std::vector<SubExpressionInfo> sub_expressions;
             if constexpr ( IsCompositeMatcher<MatcherT>) {
                 collect_subexpressions(matcher, sub_expressions, result);

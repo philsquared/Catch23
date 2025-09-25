@@ -35,10 +35,10 @@ namespace CatchKit {
             explicit MatchesPredicate( PredicateT&& pred, std::string description )
             : pred( std::move(pred) ), description( std::move(description) ) {}
 
-            auto match( auto const& arg ) const -> MatchResult {
+            [[nodiscard]] auto match( auto const& arg ) const -> MatchResult {
                 return pred(arg);
             }
-            auto describe() const -> std::string {
+            [[nodiscard]] auto describe() const -> std::string {
                 return description;
             }
         };
@@ -143,7 +143,7 @@ namespace CatchKit {
             }
             auto constexpr with_message( std::string_view message_to_match ) {
                 using Detail::operator >>=;
-                return *this >>= HasMessage() >>= StringMatchers::Equals(message_to_match);
+                return *this >>= HasMessage() >>= StringMatchers::Equals{ message_to_match };
             }
 
             template<typename ArgT>
@@ -194,7 +194,7 @@ namespace CatchKit {
 
     namespace FloatMatchers {
         struct IsCloseTo {
-            double target;
+            double target = 0;
             double epsilon = 100*std::numeric_limits<float>::epsilon();
 
             [[nodiscard]] auto match(double value) const -> MatchResult {
@@ -211,10 +211,12 @@ namespace CatchKit {
         struct Equals {
             std::vector<T, AllocatorT> const& match_vec;
 
-            [[nodiscard]] auto match(auto const& vec) const -> MatchResult {
-                if (match_vec.size() != vec.size())
+            template<typename Range>
+            [[nodiscard]] auto match(Range const& vec) const -> MatchResult {
+                static_assert(std::ranges::sized_range<Range>);
+                if( match_vec.size() != std::size(vec) )
                     return false;
-                return std::equal(match_vec.begin(), match_vec.end(), vec.begin());
+                return std::equal( match_vec.begin(), match_vec.end(), std::begin(vec) );
             }
             [[nodiscard]] auto describe() const {
                 return std::format("equals({})", stringify(match_vec));

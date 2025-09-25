@@ -7,6 +7,7 @@
 
 #include "result_type.h"
 #include "expression_info.h"
+#include "operators.h"
 
 #include <vector>
 #include <cassert>
@@ -24,8 +25,8 @@ namespace CatchKit::Detail {
         Asserter* asserter = nullptr;
         std::string message = {};
 
-        auto evaluate() -> ResultType;
-        auto expand( ResultType result ) -> ExpressionInfo;
+        [[nodiscard]] auto evaluate() const -> ResultType;
+        [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
 
         ~BinaryExprRef();
 
@@ -41,16 +42,16 @@ namespace CatchKit::Detail {
     template<typename T>
     struct UnaryExprRef {
         T& value;
-        Asserter* asserter;
+        Asserter* asserter = nullptr;
         std::string message = {};
 
-        auto evaluate() -> ResultType;
-        auto expand( ResultType result ) -> ExpressionInfo;
+        [[nodiscard]] auto evaluate() const -> ResultType;
+        [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
 
         ~UnaryExprRef();
 
         template<Operators Op, typename RhsT>
-        auto make_binary_expr( RhsT&& rhs ) noexcept {
+        auto make_binary_expr( RhsT&& rhs ) noexcept { // NOSONAR (ref is used within its lifetime)
             return BinaryExprRef<T, std::remove_reference_t<RhsT>, Op>{ value, rhs, std::exchange(asserter, nullptr) };
         }
 
@@ -102,8 +103,8 @@ namespace CatchKit::Detail {
         Asserter* asserter = nullptr;
         std::string message = {};
 
-        auto evaluate() -> MatchResult;
-        auto expand( MatchResult const& result ) -> ExpressionInfo;
+        [[nodiscard]] auto evaluate() const -> MatchResult;
+        [[nodiscard]] auto expand( MatchResult const& result ) const -> ExpressionInfo;
 
         ~MatchExprRef();
     };

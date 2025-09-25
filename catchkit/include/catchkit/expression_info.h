@@ -5,8 +5,6 @@
 #ifndef CATCHKIT_EXPRESSION_INFO_H
 #define CATCHKIT_EXPRESSION_INFO_H
 
-#include "operators.h"
-
 #include <string_view>
 #include <vector>
 #include <string>
@@ -57,8 +55,8 @@ namespace CatchKit {
 
 template<>
 struct std::formatter<CatchKit::ExpressionInfo> {
-    constexpr auto parse(std::format_parse_context& ctx) { return ctx.begin(); }
-    std::format_context::iterator format(const CatchKit::ExpressionInfo& expr, std::format_context& ctx) const;
+    [[nodiscard]] constexpr static auto parse(std::format_parse_context const& ctx) { return ctx.begin(); }
+    static std::format_context::iterator format(CatchKit::ExpressionInfo const& expr, std::format_context& ctx);
 };
 
 #endif // CATCHKIT_EXPRESSION_INFO_H

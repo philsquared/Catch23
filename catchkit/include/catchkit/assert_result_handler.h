@@ -11,10 +11,10 @@
 
 namespace CatchKit::Detail {
 
-    struct AssertResultHandler : ResultHandler {
+    struct AssertResultHandler final : ResultHandler {
         AssertionContext current_context;
         ResultType last_result = ResultType::Passed;
-        ResultDisposition result_disposition = ResultDisposition::Abort;
+        ResultDisposition current_result_disposition = ResultDisposition::Abort;
 
         AssertResultHandler() : ResultHandler(ReportOn::FailingTests) {}
 

@@ -6,19 +6,19 @@
 
 #include <cassert>
 
-std::format_context::iterator std::formatter<CatchKit::ExpressionInfo>::format(const CatchKit::ExpressionInfo& expr, std::format_context& ctx) const {
+std::format_context::iterator std::formatter<CatchKit::ExpressionInfo>::format(CatchKit::ExpressionInfo const& expr, std::format_context& ctx) {
     using namespace CatchKit;
 
     return std::visit(
-        [&]<typename T>(T const& expr) -> std::format_context::iterator {
+        [&]<typename T>(T const& expr_inner) -> std::format_context::iterator {
             if constexpr(std::is_same_v<T, UnaryExpressionInfo>)
-                return std::format_to( ctx.out(), "{}", expr.value );
+                return std::format_to( ctx.out(), "{}", expr_inner.value );
             if constexpr(std::is_same_v<T, BinaryExpressionInfo>)
-                return std::format_to( ctx.out(), "{} {} {}", expr.lhs, expr.op, expr.rhs );
+                return std::format_to( ctx.out(), "{} {} {}", expr_inner.lhs, expr_inner.op, expr_inner.rhs );
             if constexpr(std::is_same_v<T, MatchExpressionInfo>)
-                return std::format_to( ctx.out(), "{} {}", expr.candidate_value, expr.matcher );
+                return std::format_to( ctx.out(), "{} {}", expr_inner.candidate_value, expr_inner.matcher );
             if constexpr(std::is_same_v<T, ExceptionExpressionInfo>)
-                return std::format_to( ctx.out(), "{}", expr.exception_message );
+                return std::format_to( ctx.out(), "{}", expr_inner.exception_message );
             assert(false);
     }, expr);
 }

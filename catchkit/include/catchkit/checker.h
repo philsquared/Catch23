@@ -21,8 +21,8 @@ namespace CatchKit::Detail
     struct Asserter;
 
     struct Checker {
-        ResultHandler* result_handler;
-        ResultDisposition result_disposition;
+        ResultHandler* result_handler = nullptr;
+        ResultDisposition result_disposition = ResultDisposition::Abort;
         bool should_decompose = true;
 
         auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
@@ -42,7 +42,7 @@ namespace CatchKit::Detail
                 report_current_exception();
             }
         }
-        void handle_unexpected_exceptions(std::invocable auto const& expr_call) {
+        void handle_unexpected_exceptions(std::invocable auto const& expr_call) const {
             try {
                 expr_call();
             }
@@ -64,9 +64,8 @@ namespace CatchKit::Detail
         }
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
-        template<typename ArgT, typename MatcherT> // !TBD Matcher concept
-        constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept {
-            // !TBD: Should we use only this path, or keep the decomp operator path, too?
+        template<typename ArgT, typename MatcherT>
+        constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime)
             return MatchExprRef{ arg, matcher, this };
         }
 
@@ -90,28 +89,28 @@ namespace CatchKit::Detail
     }
 
     template<typename T>
-    auto UnaryExprRef<T>::evaluate() -> ResultType {
+    auto UnaryExprRef<T>::evaluate() const -> ResultType {
+        using enum ResultType;
         if constexpr( requires (T v){ { !v } -> std::same_as<bool>; }) {
             CATCHKIT_WARNINGS_SUPPRESS_START
             CATCHKIT_WARNINGS_SUPPRESS_ADDRESS
             CATCHKIT_WARNINGS_SUPPRESS_NULL_CONVERSION
-            return !value ? ResultType::Failed : ResultType::Passed;
+            return !value ? Failed : Passed;
             CATCHKIT_WARNINGS_SUPPRESS_END
         }
         else if constexpr( std::is_null_pointer_v<T> ) {
             // Special case for GCC
-            return ResultType::Failed;
+            return Failed;
         }
         else {
             // Have to do this at runtime because we can get here from the destructor of a UnaryExpr,
-            // even if it doesn't happen at runtime because it's actually a binary expresion
+            // even if it doesn't happen at runtime because it's actually a binary expression
             assert(false);
-            return ResultType::Failed;
-            // throw std::logic_error("Attempt to use a value that cannot convert to bool in boolean context");
+            return Failed;
         }
     }
     template<typename T>
-    auto UnaryExprRef<T>::expand(ResultType) -> ExpressionInfo {
+    auto UnaryExprRef<T>::expand(ResultType) const -> ExpressionInfo {
         return UnaryExpressionInfo{ stringify(value) };
     }
 
@@ -124,7 +123,7 @@ namespace CatchKit::Detail
     CATCHKIT_WARNINGS_SUPPRESS_START
     CATCHKIT_WARNINGS_SUPPRESS_SIGN_MISMATCH
     template<typename LhsT, typename RhsT, Operators Op>
-    auto eval_expr(BinaryExprRef<LhsT, RhsT, Op>& expr) {
+    auto eval_expr(BinaryExprRef<LhsT, RhsT, Op> const& expr) {
         using enum Operators;
         if constexpr( Op == Equals )                    return expr.lhs == expr.rhs;
         else if constexpr( Op == NotEqualTo )           return expr.lhs != expr.rhs;
@@ -141,11 +140,11 @@ namespace CatchKit::Detail
     CATCHKIT_WARNINGS_SUPPRESS_END
 
     template<typename LhsT, typename RhsT, Operators Op>
-    auto BinaryExprRef<LhsT, RhsT, Op>::evaluate() -> ResultType {
+    auto BinaryExprRef<LhsT, RhsT, Op>::evaluate() const -> ResultType {
         return static_cast<bool>( eval_expr(*this) ) ? ResultType::Passed : ResultType::Failed;
     }
     template<typename LhsT, typename RhsT, Operators Op>
-    auto BinaryExprRef<LhsT, RhsT, Op>::expand(ResultType) -> ExpressionInfo {
+    auto BinaryExprRef<LhsT, RhsT, Op>::expand(ResultType) const -> ExpressionInfo {
         return BinaryExpressionInfo{
             std::string( stringify(lhs) ),
             std::string( stringify(rhs) ),

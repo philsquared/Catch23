@@ -34,8 +34,8 @@ namespace CatchKit {
 // Note that if you provide both a std::formatter _and_ a Stringifier for your types,
 // then stringified _containers_ (or ranges) of them will prefer the std::formatter specialisations.
 template<CatchKit::Stringifiable T>
-struct std::formatter<T> {
-    constexpr auto parse( std::format_parse_context& ctx ) { return ctx.begin(); }
+struct std::formatter<T> { // NOLINT
+    constexpr static auto parse( std::format_parse_context const& ctx ) { return ctx.begin(); }
     auto format(T const& val, auto& ctx) const {
         return std::format_to( ctx.out(), "{}", CatchKit::Stringifier<T>::stringify(val) );
     }
@@ -64,7 +64,7 @@ namespace CatchKit {
             return std::format("{}", value);
 #ifdef FALLBACK_TO_OSTREAM_STRING_CONVERSIONS
         else if constexpr ( Streamable<T> ) {
-            std::ostringstream oss; // !TBD: use an ostringstream pool?
+            std::ostringstream oss;
             oss << value;
             return oss.str();
         }

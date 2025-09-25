@@ -9,7 +9,6 @@
 #include "expression_info.h"
 #include "report_on.h"
 
-#include <optional>
 #include <string_view>
 
 namespace CatchKit::Detail
