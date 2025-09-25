@@ -66,19 +66,21 @@ namespace CatchKit {
         template<typename ArgT, typename MatcherT>
         auto invoke_matcher( MatcherT& matcher, ArgT&& arg ) -> MatchResult {
             if constexpr( IsLazyMatcher<MatcherT> ) {
+                auto address = std::bit_cast<uintptr_t>( &matcher );
                 if constexpr( std::invocable<ArgT> )
                 // static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
-                    return matcher.lazy_match( arg ).set_address(&matcher);
+                    return matcher.lazy_match( arg ).set_address( address );
                 else if constexpr( IsEagerMatcher<MatcherT> )
-                    return matcher.match( arg ).set_address( &matcher );
+                    return matcher.match( arg ).set_address( address );
                 else
                     static_assert( false, "Lazy matchers must be matched against lambdas" );
             }
             else if constexpr( IsEagerMatcher<MatcherT> ) {
+                auto address = std::bit_cast<uintptr_t>( &matcher );
                 if constexpr( std::invocable<ArgT> )
-                    return matcher.match( arg() ).set_address(&matcher);
+                    return matcher.match( arg() ).set_address( address );
                 else
-                    return matcher.match( arg ).set_address( &matcher );
+                    return matcher.match( arg ).set_address( address );
             }
             else {
                 static_assert( false, "RHS of match statement is not a matcher" );
@@ -178,7 +180,7 @@ namespace CatchKit {
                 if constexpr ( IsLazyBindableMatcher<M1> ) {
                     static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
                     return matcher1.lazy_bound_match(arg, matcher2)
-                        .set_address(&matcher1)
+                        .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
                 }
                 else
@@ -190,11 +192,11 @@ namespace CatchKit {
                 static_assert( IsEagerBindableMatcher<M1>, "The LHS of >>= must be a bindable matcher" );
                 if constexpr( std::invocable<ArgT> )
                     return matcher1.bound_match(arg(), matcher2)
-                        .set_address(&matcher1)
+                        .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
                 else
                     return matcher1.bound_match(arg, matcher2)
-                        .set_address(&matcher1)
+                        .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
             }
 
@@ -207,13 +209,6 @@ namespace CatchKit {
         auto operator >>= ( M1&& m1, M2&& m2 ) {
             static_assert(IsMatcher<M2>, "Operand to >>= is not a matcher");
             return BoundMatchers{std::forward<M1>(m1), std::forward<M2>(m2)};
-        }
-
-
-        template<typename ArgT, IsMatcher MatcherT>
-        [[maybe_unused]] constexpr auto operator, ( UnaryExprRef<ArgT>&& arg, MatcherT const& matcher ) noexcept {
-            static_assert( MatcherHasDescribeMethod<MatcherT>, "Matcher is missing describe method" );
-            return MatchExprRef{ arg.value, matcher, std::exchange(arg.asserter, nullptr) };
         }
 
         template<typename ArgT, typename MatcherT>
@@ -236,7 +231,7 @@ namespace CatchKit {
         template<typename M>
         concept IsCompositeMatcher = IsBinaryCompositeMatcher<M> || IsUnaryCompositeMatcher<M>;
 
-        void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results, void const* matcher_address, std::string const& description );
+        void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results, uintptr_t matcher_address, std::string const& description );
 
         template<typename M>
         auto collect_subexpressions(M const& matcher, std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results) {
@@ -248,7 +243,7 @@ namespace CatchKit {
                 collect_subexpressions(matcher.base_matcher, sub_expressions, results);
             }
             else {
-                add_subexpressions( sub_expressions, results, &matcher, matcher.describe() );
+                add_subexpressions( sub_expressions, results, std::bit_cast<uintptr_t>(&matcher), matcher.describe() );
             }
         }
 

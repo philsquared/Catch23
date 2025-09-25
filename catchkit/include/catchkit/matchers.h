@@ -122,7 +122,7 @@ namespace CatchKit {
                     return false;
 
                 return bound_matcher.match(message)
-                    .set_address(&bound_matcher)
+                    .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
                     .make_child_of(this);
             }
 
@@ -160,7 +160,7 @@ namespace CatchKit {
                     }
                     catch(...) {
                         return bound_matcher.match(std::current_exception())
-                            .set_address(&bound_matcher)
+                            .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
                             .make_child_of(this);
                     }
                 }
@@ -173,7 +173,7 @@ namespace CatchKit {
                     }
                     catch(E& ex) {
                         return bound_matcher.match(ex)
-                            .set_address(&bound_matcher)
+                            .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
                             .make_child_of(this);
                     }
                     catch(...) {

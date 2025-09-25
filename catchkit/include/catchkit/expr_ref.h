@@ -110,19 +110,19 @@ namespace CatchKit::Detail {
 
     struct SubExpression {
         bool result;
-        void const* matcher_address;
+        uintptr_t matcher_address;
     };
 
     // Holds the result of a match
     struct MatchResult {
         bool result;
-        void const* matcher_address = nullptr;
-        std::vector<SubExpression> child_results; // TBD: only include this in composite matcher results?
-        explicit(false) MatchResult(bool result, void const* matcher_address = nullptr) : result(result), matcher_address(matcher_address) {}
+        uintptr_t matcher_address = 0;
+        std::vector<SubExpression> child_results;
+        explicit(false) MatchResult(bool result, uintptr_t matcher_address = 0) : result(result), matcher_address(matcher_address) {}
         explicit operator bool() const { return result; }
 
-        auto set_address(void const* address) -> MatchResult& {
-            assert(matcher_address == nullptr || matcher_address == address);
+        auto set_address(uintptr_t address) -> MatchResult& {
+            assert(matcher_address == 0 || matcher_address == address);
             matcher_address = address;
             return *this;
         }
@@ -131,8 +131,8 @@ namespace CatchKit::Detail {
             std::ranges::copy( other.child_results, std::back_inserter( child_results ) );
             return *this;
         }
-        auto make_child_of(void const* new_matcher_address) -> MatchResult& {
-            child_results.emplace_back( result, std::exchange( matcher_address, new_matcher_address ) );
+        auto make_child_of(auto const& matcher) -> MatchResult& {
+            child_results.emplace_back( result, std::exchange( matcher_address, std::bit_cast<uintptr_t>( matcher ) ) );
             return *this;
         }
     };
