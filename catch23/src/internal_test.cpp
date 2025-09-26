@@ -11,11 +11,11 @@
 namespace CatchKit::Detail {
     namespace {
         auto& get_all_tests_impl() {
-            static std::vector<Test> all_tests; // NOSONAR
+            static std::vector<Test> all_tests; // NOSONAR NOLINT (misc-typo)
             return all_tests;
         }
         auto& get_tests_by_name_impl() {
-            static std::unordered_map<std::string, std::size_t> tests_by_name; // NOSONAR
+            static std::unordered_map<std::string, std::size_t> tests_by_name; // NOSONAR NOLINT (misc-typo)
             return tests_by_name;
         }
     }
@@ -31,9 +31,9 @@ namespace CatchKit::Detail {
             if( end == std::string::npos )
                 throw std::invalid_argument("Invalid tag specification - missing an expected `]`");
             std::string tag_name(tag_spec.substr( start+1, end-start-1 ));
-            if( tag_name == "!mayfail" )
+            if( tag_name == "!mayfail" ) // NOLINT (misc-typo)
                 tags.emplace_back(Tags::may_fail);
-            if( tag_name == "!shouldfail" )
+            if( tag_name == "!shouldfail" ) // NOLINT (misc-typo)
                 tags.emplace_back(Tags::should_fail);
             else if( tag_name.starts_with( "." ) )
                 tags.emplace_back(tag_name, Tag::Type::mute);

@@ -6,11 +6,11 @@
 #include "catchkit/assert_result_handler.h"
 
 namespace {
-    CatchKit::Detail::AssertResultHandler default_assertion_handler; // NOSONAR
+    CatchKit::Detail::AssertResultHandler default_assertion_handler; // NOSONAR NOLINT (misc-typo)
 }
 
-constinit CatchKit::Checker check{ &default_assertion_handler, CatchKit::ResultDisposition::Continue }; // NOSONAR
-constinit CatchKit::Checker require{ &default_assertion_handler, CatchKit::ResultDisposition::Abort }; // NOSONAR
+constinit CatchKit::Checker check{ &default_assertion_handler, CatchKit::ResultDisposition::Continue }; // NOSONAR NOLINT (misc-typo)
+constinit CatchKit::Checker require{ &default_assertion_handler, CatchKit::ResultDisposition::Abort }; // NOSONAR NOLINT (misc-typo)
 
 namespace CatchKit::Detail {
 

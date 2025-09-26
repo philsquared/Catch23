@@ -9,8 +9,8 @@
 namespace CatchKit::Detail {
 
     namespace Charsets {
-        std::string const lcase = "abcdefghijklmnopqrstuvwxyz";
-        std::string const ucase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        std::string const lcase = "abcdefghijklmnopqrstuvwxyz"; // NOLINT (misc-typo)
+        std::string const ucase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // NOLINT (misc-typo)
         std::string const all_alpha = lcase + ucase;
         std::string const numbers = "01234567890";
         std::string const alphanumeric = all_alpha + numbers;

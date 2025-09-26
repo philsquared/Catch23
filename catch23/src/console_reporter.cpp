@@ -68,7 +68,7 @@ namespace CatchKit {
 
     void ConsoleReporter::on_assertion_start( AssertionContext const& ) { /* Not implemented for now */ }
 
-    void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) { // NOSONAR
+    void ConsoleReporter::on_assertion_end( AssertionContext const& context, AssertionInfo const& assertion_info ) { // NOSONAR NOLINT (misc-typo)
         assert(current_test_info);
         lazy_print_test_header();
         std::print( "{}:{}:{}: ",
@@ -129,7 +129,7 @@ namespace CatchKit {
 
                 if( !match_expr->sub_expressions.empty() ) {
                     std::println( " because:");
-                    for( auto const& sub_expr : match_expr->sub_expressions ) { // NOSONAR
+                    for( auto const& sub_expr : match_expr->sub_expressions ) { // NOSONAR NOLINT (misc-typo)
                         if( sub_expr.result )
                             std::print("    ✅ ");
                         else
@@ -213,7 +213,7 @@ namespace CatchKit {
             return;
         }
 
-        auto print_summary_box = [](Counters const& counts, std::string const& label) { // NOSONAR
+        auto print_summary_box = [](Counters const& counts, std::string const& label) { // NOSONAR NOLINT (misc-typo)
             std::print("{}: {}", label, counts.total() );
             if( counts.passed() > 0) {
                 print( Colours::BoldGrey, " | " );

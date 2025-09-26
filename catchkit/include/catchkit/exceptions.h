@@ -18,7 +18,7 @@ namespace CatchKit::Detail {
     [[nodiscard]] auto get_exception_message( std::exception const& ex ) -> std::string;
     [[nodiscard]] auto get_exception_message( std::string const& str ) -> std::string;
 
-    [[nodiscard]] inline auto get_exception_message(...) -> std::string { // NOSONAR
+    [[nodiscard]] inline auto get_exception_message(...) -> std::string { // NOSONAR NOLINT (misc-typo)
         return unknown_exception_message;
     }
 

@@ -6,13 +6,13 @@
 #define CATCHKIT_CHECKER_H
 
 #include "result_handler.h"
-#include "assertion_context.h"
+#include "assertion_context.h" // NOLINT (misc-include-cleaner)
 #include "expr_ref.h"
 #include "internal_warnings.h"
 #include "operator_to_string.h"
 #include "exceptions.h"
 #include "stringify.h"
-#include "variable_capture.h"
+#include "variable_capture.h" // NOLINT (misc-include-cleaner)
 
 #include <utility>
 
@@ -32,7 +32,7 @@ namespace CatchKit::Detail
     struct Asserter {
         Checker& checker;
 
-        ~Asserter() noexcept(false); // NOSONAR
+        ~Asserter() noexcept(false); // NOSONAR NOLINT (misc-typo)
 
         void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
@@ -65,7 +65,7 @@ namespace CatchKit::Detail
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
         template<typename ArgT, typename MatcherT>
-        constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime)
+        constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
             return MatchExprRef{ arg, matcher, this };
         }
 
@@ -178,8 +178,8 @@ namespace CatchKit
 } //namespace CatchKit
 
 // These global instances are used if not using the ones passed in to a function locally
-extern constinit CatchKit::Checker check; // NOSONAR
-extern constinit CatchKit::Checker require; // NOSONAR
+extern constinit CatchKit::Checker check; // NOSONAR NOLINT (misc-typo)
+extern constinit CatchKit::Checker require; // NOSONAR NOLINT (misc-typo)
 
 
 #define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \

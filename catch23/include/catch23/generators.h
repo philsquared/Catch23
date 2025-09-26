@@ -81,7 +81,7 @@ namespace CatchKit {
                 // if( strategy == Strategies::SimpleValues )
                     strategy = Strategies::BinaryDescent;
             }
-            auto shrink( values_of<T>& generator, T value ) -> std::generator<T> { // NOSONAR
+            auto shrink( values_of<T>& generator, T value ) -> std::generator<T> { // NOSONAR NOLINT (misc-typo)
                 if( value >= 0 ) {
                     switch( strategy ) {
                     case Strategies::SimpleValues:
@@ -124,7 +124,7 @@ namespace CatchKit {
                             co_yield -value;
 
                             // Explicitly yield a positive 0 for floating point, too
-                            if constexpr( std::is_floating_point_v<T> ) // NOSONAR
+                            if constexpr( std::is_floating_point_v<T> ) // NOSONAR NOLINT (misc-typo)
                                 co_yield 0;
                         }
                         // Mirror positive shrinks
@@ -147,8 +147,8 @@ namespace CatchKit {
         // String generator:
 
         namespace Charsets {
-            extern std::string const lcase;
-            extern std::string const ucase;
+            extern std::string const lcase; // NOLINT (misc-typo)
+            extern std::string const ucase; // NOLINT (misc-typo)
             extern std::string const all_alpha;
             extern std::string const numbers;
             extern std::string const alphanumeric;

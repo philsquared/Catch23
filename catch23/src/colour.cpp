@@ -17,7 +17,7 @@ namespace CatchKit {
         bool is_colour_available() {
             static bool colour_available =
 #if !(defined(__DJGPP__) && defined(__STRICT_ANSI__))
-                isatty(STDOUT_FILENO)
+                isatty(STDOUT_FILENO) // NOLINT (misc-typo)
 #endif
 #if defined(CATCHKIT_PLATFORM_APPLE)
             && !isDebuggerActive()
@@ -28,12 +28,12 @@ namespace CatchKit {
     } // namespace Detail
 
     TextColour::~TextColour() {
-        set(Colours::Reset); // NOSONAR
+        set(Colours::Reset); // NOSONAR NOLINT (misc-typo)
     }
 
     void TextColour::set( Colours colour ) const { // NOLINT
         if ( Detail::is_colour_available() ) {
-            std::print("\o{33}[0;{}m", [colour]() { // NOSONAR
+            std::print("\o{33}[0;{}m", [colour]() { // NOSONAR NOLINT (misc-typo)
                 switch( colour )
                 {
                     using enum Colours;

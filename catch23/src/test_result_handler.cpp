@@ -87,7 +87,7 @@ namespace CatchKit::Detail {
             }
         }
 
-        if( !current_test_info->has_tag_type( Tag::Type::always_report ) ) { // NOSONAR
+        if( !current_test_info->has_tag_type( Tag::Type::always_report ) ) { // NOSONAR NOLINT (misc-typo)
             if( last_result == AdjustedResult::Failed ) {
                 if( (report_on & ReportOn::FailingTests) != ReportOn::FailingTests )
                     return ResultDetailNeeded::No;
@@ -121,7 +121,7 @@ namespace CatchKit::Detail {
         // !TBD: improve formatting - or should we pass this through in a more fine-grained way to the reporter?
         if( !variable_captures.empty() ) {
             if( !full_message.empty() )
-                full_message += "\nwith";
+                full_message += "\n" "with";
             full_message += "captured variables:";
             for( auto var : variable_captures ) {
                 full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );

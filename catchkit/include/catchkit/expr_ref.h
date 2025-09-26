@@ -51,7 +51,7 @@ namespace CatchKit::Detail {
         ~UnaryExprRef();
 
         template<Operators Op, typename RhsT>
-        auto make_binary_expr( RhsT&& rhs ) noexcept { // NOSONAR (ref is used within its lifetime)
+        auto make_binary_expr( RhsT&& rhs ) noexcept { // NOSONAR (ref is used within its lifetime) NOLINT (misc-typo)
             return BinaryExprRef<T, std::remove_reference_t<RhsT>, Op>{ value, rhs, std::exchange(asserter, nullptr) };
         }
 

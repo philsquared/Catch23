@@ -12,7 +12,7 @@
 
 #ifdef CATCHKIT_COMPILER_CLANG
 #  define CATCHKIT_CLANG_PRAGMA(w) _Pragma(w)
-#  define CATCHKIT_CLANG_PRAGMA_NOTOOLS(w) _Pragma(w) // used for push/ pop - not defined for other compilers
+#  define CATCHKIT_CLANG_PRAGMA_NO_TOOLS(w) _Pragma(w) // used for push/ pop - not defined for other compilers
 #  define CATCHKIT_GCC_PRAGMA(w)
 #  define CATCHKIT_MSVC_PRAGMA(w)
 
@@ -22,24 +22,24 @@
 #  else
 #    define CATCHKIT_CLANG_PRAGMA(w) _Pragma(w) // Invoked for clang tools, regardless of compiler
 #  endif
-#  define CATCHKIT_CLANG_PRAGMA_NOTOOLS(w)
+#  define CATCHKIT_CLANG_PRAGMA_NO_TOOLS(w)
 #  define CATCHKIT_GCC_PRAGMA(w) _Pragma(w)
 #  define CATCHKIT_MSVC_PRAGMA(w)
 
 #elifdef CATCHKIT_COMPILER_MSVC
 #  define CATCHKIT_CLANG_PRAGMA(w)
-#  define CATCHKIT_CLANG_PRAGMA_NOTOOLS(w)
+#  define CATCHKIT_CLANG_PRAGMA_NO_TOOLS(w)
 #  define CATCHKIT_GCC_PRAGMA(w)
 #  define CATCHKIT_MSVC_PRAGMA(w) __pragma(w)
 
 #else
 #  define CATCHKIT_CLANG_PRAGMA(w)
-#  define CATCHKIT_CLANG_PRAGMA_NOTOOLS(w)
+#  define CATCHKIT_CLANG_PRAGMA_NO_TOOLS(w)
 #  define CATCHKIT_GCC_PRAGMA(w)
 #  define CATCHKIT_MSVC_PRAGMA(w)
 #endif
 
-#define CATCHKIT_CLANG_WARNING_UNSCOPED_DISABLE(w) CATCHKIT_CLANG_PRAGMA_NOTOOLS( CATCHKIT_INTERNAL_STRINGIFY_ARGS(clang diagnostic ignored w) )
+#define CATCHKIT_CLANG_WARNING_UNSCOPED_DISABLE(w) CATCHKIT_CLANG_PRAGMA_NO_TOOLS( CATCHKIT_INTERNAL_STRINGIFY_ARGS(clang diagnostic ignored w) )
 #define CATCHKIT_CLANG_WARNING_DISABLE(w) CATCHKIT_CLANG_PRAGMA( CATCHKIT_INTERNAL_STRINGIFY_ARGS(clang diagnostic ignored w) )
 #define CATCHKIT_GCC_WARNING_DISABLE(w) CATCHKIT_GCC_PRAGMA( CATCHKIT_INTERNAL_STRINGIFY_ARGS(GCC diagnostic ignored w) )
 #define CATCHKIT_MSVC_WARNING_DISABLE(w) CATCHKIT_MSVC_PRAGMA( warning( disable:w ) )
@@ -48,12 +48,12 @@
 #define CATCHKIT_WARNINGS_SUPPRESS_START \
     CATCHKIT_GCC_PRAGMA( "GCC diagnostic push" ) \
     CATCHKIT_GCC_PRAGMA( "GCC diagnostic ignored \"-Wunknown-pragmas\"") \
-    CATCHKIT_CLANG_PRAGMA_NOTOOLS( "clang diagnostic push" ) \
+    CATCHKIT_CLANG_PRAGMA_NO_TOOLS( "clang diagnostic push" ) \
     CATCHKIT_MSVC_PRAGMA ( warning(push) )
 
 // End warning suppression block <<<
 #define CATCHKIT_WARNINGS_SUPPRESS_END \
-    CATCHKIT_CLANG_PRAGMA_NOTOOLS( "clang diagnostic pop" ) \
+    CATCHKIT_CLANG_PRAGMA_NO_TOOLS( "clang diagnostic pop" ) \
     CATCHKIT_GCC_PRAGMA( "GCC diagnostic pop" ) \
     CATCHKIT_MSVC_PRAGMA( warning(pop) )
 

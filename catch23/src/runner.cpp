@@ -24,8 +24,8 @@ namespace CatchKit::Detail {
             try {
                 test.test_fun(check, require);
             }
-            catch( TestCancelled ) { /* allow to pass through */ } // NOSONAR
-            catch( ... ) { // NOSONAR
+            catch( TestCancelled ) { /* allow to pass through */ } // NOSONAR NOLINT (misc-typo)
+            catch( ... ) { // NOSONAR NOLINT (misc-typo)
                 // We need a new context because the old one had string_views to outdated data
                 // - we want to preserve the last known source location, though
                 AssertionContext context{
@@ -48,7 +48,7 @@ namespace CatchKit::Detail {
     }
     auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {
 
-        std::vector<ShrinkableNode*> shrinkables;
+        std::vector<ShrinkableNode*> shrinkables; // NOLINT (misc-typo)
         auto node = leaf_node;
         for(; node->get_parent(); node = node->get_parent())
             if( auto shrinkable = node->get_shrinkable())

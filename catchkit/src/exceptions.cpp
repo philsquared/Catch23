@@ -20,13 +20,13 @@ namespace CatchKit::Detail {
         try {
             std::rethrow_exception(ex);
         }
-        catch(std::exception& e) { // NOSONAR
+        catch(std::exception& e) { // NOSONAR NOLINT (misc-typo)
             return get_exception_message(e);
         }
         catch (std::string& s) {
             return get_exception_message(s);
         }
-        catch(...) { // NOSONAR
+        catch(...) { // NOSONAR NOLINT (misc-typo)
             // !TBD: registry for custom exception translations
             return unknown_exception_message;
         }

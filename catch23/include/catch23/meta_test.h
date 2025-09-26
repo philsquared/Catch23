@@ -21,7 +21,7 @@ namespace CatchKit {
         [[nodiscard]] auto failed_expectedly() const { return info.result == AdjustedResult::FailedExpectly; }
     };
 
-    class MetaTestReporter : public Reporter { // NOSONAR
+    class MetaTestReporter : public Reporter { // NOSONAR NOLINT (misc-typo)
         ReportOn what_to_report_on;
 
     public:

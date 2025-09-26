@@ -156,18 +156,18 @@ namespace CatchKit {
         };
 
         template<typename M2>
-        auto operator && (IsMatcher auto&& m1, M2&& m2) { // NOSONAR
+        auto operator && (IsMatcher auto&& m1, M2&& m2) { // NOSONAR NOLINT (misc-typo)
             static_assert(IsMatcher<M2>, "Operand to && is not a matcher");
             return AndMatcher(m1, m2);
         }
 
         template<typename M2>
-        auto operator || (IsMatcher auto&& m1, M2&& m2) { // NOSONAR
+        auto operator || (IsMatcher auto&& m1, M2&& m2) { // NOSONAR NOLINT (misc-typo)
             static_assert(IsMatcher<M2>, "Operand to || is not a matcher");
             return OrMatcher( m1, m2 );
         }
 
-        auto operator ! (IsMatcher auto&& m) { // NOSONAR
+        auto operator ! (IsMatcher auto&& m) { // NOSONAR NOLINT (misc-typo)
             return NotMatcher(m);
         }
 
