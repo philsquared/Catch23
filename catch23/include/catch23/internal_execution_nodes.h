@@ -57,7 +57,7 @@ namespace CatchKit::Detail {
     private:
         friend class ExecutionNodes;
 
-        NodeId id;
+        NodeId id; // NOLINT
         ExecutionNodes* container = nullptr;
         ExecutionNode* parent = nullptr;
         std::vector<std::unique_ptr<ExecutionNode>> children;

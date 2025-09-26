@@ -35,7 +35,7 @@ namespace CatchKit::Detail {
             reset_children();
         }
     }
-    void ExecutionNode::reset_children() { // NOLINT
+    void ExecutionNode::reset_children() { // NOLINT NOSONAR
         for(auto const& child : children) {
             child->reset();
         }

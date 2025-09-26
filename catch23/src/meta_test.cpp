@@ -11,10 +11,10 @@
 namespace CatchKit {
 
     auto MetaTestResults::failures() const -> int {
-        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + result.failed(); });
+        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + (result.failed() ? 1 : 0); });
     }
     auto MetaTestResults::expected_failures() const -> int {
-        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + result.failed_expectedly(); });
+        return std::ranges::fold_left( all_results, 0, [](int acc, auto const& result){ return acc + (result.failed_expectedly() ? 1 : 0); });
     }
 
     MetaTestRunner::MetaTestRunner( std::string name, std::source_location location )

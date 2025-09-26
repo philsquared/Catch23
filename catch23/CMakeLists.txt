@@ -21,7 +21,7 @@ add_library(Catch23 STATIC
         include/catch23/console_reporter.h
         src/runner.cpp
         include/catch23/runner.h
-        src/catch2.cpp
+        src/catch2_compat.cpp
         include/catch23/catch2_compat.h
         src/internal_execution_nodes.cpp
         include/catch23/internal_execution_nodes.h
