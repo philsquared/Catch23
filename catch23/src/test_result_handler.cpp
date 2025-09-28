@@ -103,6 +103,7 @@ namespace CatchKit::Detail {
 
     void TestResultHandler::on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) {
         assert(current_test_info);
+        assert(current_context);
 
         if( !message.empty() ) {
             // Attempt to strip out an inline message

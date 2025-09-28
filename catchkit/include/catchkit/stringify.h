@@ -18,6 +18,9 @@
 #endif
 
 namespace CatchKit {
+
+    auto pointer_to_string(void const* p) -> std::string;
+
     // Specialise this with a stringify member function for your own conversions
     template<typename T>
     struct Stringifier;
@@ -56,8 +59,14 @@ namespace CatchKit {
             return enum_to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
             return "nullptr";
-        else if constexpr( std::is_convertible_v<T, char const*> && std::is_pointer_v<T> )
-            return value ? std::format("\"{}\"", value) : std::string("nullptr");
+        else if constexpr( std::is_pointer_v<T> ) {
+            if( !value )
+                return std::string("nullptr");
+            if constexpr( std::is_convertible_v<T, char const*> )
+                return std::format("\"{}\"", value);
+            else
+                return pointer_to_string( value );
+        }
         else if constexpr( std::is_convertible_v<T, std::string> )
             return std::format("\"{}\"", value);
         else if constexpr( std::formattable<T, char> )

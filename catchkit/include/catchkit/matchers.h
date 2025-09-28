@@ -27,6 +27,17 @@ namespace CatchKit {
             }
         };
 
+        struct HasSize {
+            std::size_t size;
+
+            [[nodiscard]] auto match(auto&& val) const -> MatchResult { // NOSONAR NOLINT(misc-type)
+                return std::size(val) == size;
+            }
+            [[nodiscard]] auto describe() const {
+                return std::format("has_size(\"{}\")", size);
+            }
+        };
+
         template<typename PredicateT>
         struct MatchesPredicate {
             PredicateT pred;
@@ -233,6 +244,8 @@ namespace CatchKit {
 
         template<NotStringViewable T>
         auto equals(T& value) { return GenericMatchers::Equals<T>{value}; }
+
+        inline auto has_size(std::size_t size) { return GenericMatchers::HasSize{size}; }
 
         template<typename CasePolicy=CaseSensitive>
         auto starts_with(std::string_view str) { return StringMatchers::StartsWith<CasePolicy>{str}; }
