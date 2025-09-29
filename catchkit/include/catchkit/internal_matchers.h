@@ -8,6 +8,7 @@
 #include "expr_ref.h"
 #include "exceptions.h"
 #include "stringify.h"
+#include "checker.h"
 
 #include <type_traits>
 #include <format>
@@ -246,6 +247,13 @@ namespace CatchKit {
             else {
                 add_subexpressions( sub_expressions, results, std::bit_cast<uintptr_t>(&matcher), matcher.describe() );
             }
+        }
+
+        template<typename ArgT, typename MatcherT>
+        constexpr auto Asserter::that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
+            static_assert(!IsCompositeMatcher<MatcherT> || !std::is_lvalue_reference_v<MatcherT>,
+                "Composite Matchers (&&, ||, !) cannot be stored in variables. Use them inline");
+            return MatchExprRef{ arg, matcher, this };
         }
 
         template<typename ArgT, typename MatcherT>

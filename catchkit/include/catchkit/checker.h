@@ -14,8 +14,6 @@
 #include "stringify.h"
 #include "variable_capture.h" // NOLINT (misc-include-cleaner)
 
-#include "internal_matchers.h" // !TBD Needed?
-
 #include <utility>
 
 namespace CatchKit::Detail
@@ -67,11 +65,7 @@ namespace CatchKit::Detail
         void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
         template<typename ArgT, typename MatcherT>
-        constexpr auto that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
-            static_assert(!IsCompositeMatcher<MatcherT> || !std::is_lvalue_reference_v<MatcherT>,
-                "Composite Matchers (&&, ||, !) cannot be stored in variables. Use them inline");
-            return MatchExprRef{ arg, matcher, this };
-        }
+        constexpr auto that( ArgT&& arg, MatcherT&& matcher ) noexcept;
 
         // To kick off an expression decomposition
         [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, auto&& lhs ) noexcept {
