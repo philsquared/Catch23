@@ -114,8 +114,6 @@ namespace CatchKit {
         // The result of a || expression
         template<typename M1, typename M2>
         struct OrMatcher {
-            using composite_matcher = void;
-
             M1& matcher1;
             M2& matcher2;
 

@@ -88,6 +88,17 @@ TEST("Meta: !throws matcher fails when call does throw", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "!throws matcher fails when call does throw" ).failures() == 1 );
 }
 
+TEST("Composed matchers cannot be stored") {
+    using namespace CatchKit::Matchers;
+    auto is_close_to_zero = is_close_to(0.0, 0.1);
+    auto is_zero = is_close_to(0.0, 0.0);
+    CHECK_THAT( 0.01, is_close_to_zero && !is_zero ); // ol
+
+    // The following should not compile if uncommented:
+    // auto is_close_to_but_not_zero = is_close_to(0.0, 0.1) && !is_close_to(0.0, 0.0);
+    // CHECK_THAT( 0.01, is_close_to_but_not_zero ); // dangling refs
+}
+
 // The following tests have been taken from the Catch2 test suite,
 // with modifications to allow for the new matcher syntax and semantics
 
