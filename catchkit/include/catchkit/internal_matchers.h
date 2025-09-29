@@ -64,6 +64,27 @@ namespace CatchKit {
             { m.describe() } -> std::convertible_to<std::string>;
         };
 
+        template<typename M>
+        concept IsBinaryCompositeMatcher = requires(M const m) {
+            { m.matcher1 } -> IsMatcher;
+            { m.matcher2 } -> IsMatcher;
+        };
+
+        template<typename M>
+        concept IsUnaryCompositeMatcher = requires(M const m) {
+            { m.base_matcher } -> IsMatcher;
+        };
+
+        template<typename M>
+        concept IsCompositeMatcher = IsBinaryCompositeMatcher<M> || IsUnaryCompositeMatcher<M>;
+
+        template<typename MatcherT>
+        constexpr void enforce_composite_matchers_are_rvalues() {
+            static_assert(!IsCompositeMatcher<MatcherT> || !std::is_lvalue_reference_v<MatcherT>,
+                "Composite Matchers (&&, ||, !) cannot be stored in variables. Use them inline");
+        }
+
+
         template<typename ArgT, typename MatcherT>
         auto invoke_matcher( MatcherT& matcher, ArgT&& arg ) -> MatchResult {
             if constexpr( IsLazyMatcher<MatcherT> ) {
@@ -154,19 +175,25 @@ namespace CatchKit {
             }
         };
 
-        template<typename M2>
-        auto operator && (IsMatcher auto&& m1, M2&& m2) { // NOSONAR NOLINT (misc-typo)
+        template<IsMatcher M1, typename M2>
+        auto operator && ( M1&& m1, M2&& m2 ) { // NOSONAR NOLINT (misc-typo)
+            enforce_composite_matchers_are_rvalues<M1>();
+            enforce_composite_matchers_are_rvalues<M2>();
             static_assert(IsMatcher<M2>, "Operand to && is not a matcher");
             return AndMatcher(m1, m2);
         }
 
-        template<typename M2>
-        auto operator || (IsMatcher auto&& m1, M2&& m2) { // NOSONAR NOLINT (misc-typo)
+        template<IsMatcher M1, typename M2>
+        auto operator || ( M1&& m1, M2&& m2 ) { // NOSONAR NOLINT (misc-typo)
+            enforce_composite_matchers_are_rvalues<M1>();
+            enforce_composite_matchers_are_rvalues<M2>();
             static_assert(IsMatcher<M2>, "Operand to || is not a matcher");
             return OrMatcher( m1, m2 );
         }
 
-        auto operator ! (IsMatcher auto&& m) { // NOSONAR NOLINT (misc-typo)
+        template<IsMatcher MatcherT>
+        auto operator ! (MatcherT&& m) { // NOSONAR NOLINT (misc-typo)
+            enforce_composite_matchers_are_rvalues<MatcherT>();
             return NotMatcher(m);
         }
 
@@ -219,20 +246,6 @@ namespace CatchKit {
             return matcher_ref;
         }
 
-        template<typename M>
-        concept IsBinaryCompositeMatcher = requires(M const m) {
-            { m.matcher1 } -> IsMatcher;
-            { m.matcher2 } -> IsMatcher;
-        };
-
-        template<typename M>
-        concept IsUnaryCompositeMatcher = requires(M const m) {
-            { m.base_matcher } -> IsMatcher;
-        };
-
-        template<typename M>
-        concept IsCompositeMatcher = IsBinaryCompositeMatcher<M> || IsUnaryCompositeMatcher<M>;
-
         void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results, uintptr_t matcher_address, std::string const& description );
 
         template<typename M>
@@ -251,8 +264,7 @@ namespace CatchKit {
 
         template<typename ArgT, typename MatcherT>
         constexpr auto Asserter::that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
-            static_assert(!IsCompositeMatcher<MatcherT> || !std::is_lvalue_reference_v<MatcherT>,
-                "Composite Matchers (&&, ||, !) cannot be stored in variables. Use them inline");
+            enforce_composite_matchers_are_rvalues<MatcherT>();
             return MatchExprRef{ arg, matcher, this };
         }
 
