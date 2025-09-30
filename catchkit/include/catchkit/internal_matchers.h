@@ -5,7 +5,6 @@
 #ifndef CATCHKIT_INTERNAL_MATCHERS_H
 #define CATCHKIT_INTERNAL_MATCHERS_H
 
-#include "expr_ref.h"
 #include "exceptions.h"
 #include "stringify.h"
 #include "checker.h"
@@ -28,24 +27,16 @@ namespace CatchKit {
         struct MatchResult {
             bool result;
             uintptr_t matcher_address = 0;
-            std::vector<Detail::SubExpression> child_results;
-            explicit(false) MatchResult(bool result, uintptr_t matcher_address = 0) : result(result), matcher_address(matcher_address) {}
+            std::vector<SubExpression> child_results;
+
+            explicit(false) MatchResult( bool result) : result(result) {}
+            MatchResult( bool result, uintptr_t matcher_address ) : result(result), matcher_address(matcher_address) {}
             explicit operator bool() const { return result; }
 
-            auto set_address(uintptr_t address) -> MatchResult& {
-                assert(matcher_address == 0 || matcher_address == address);
-                matcher_address = address;
-                return *this;
-            }
-            auto add_children_from(MatchResult const& other) -> MatchResult& {
-                child_results.reserve( child_results.size() + other.child_results.size() );
-                std::ranges::copy( other.child_results, std::back_inserter( child_results ) );
-                return *this;
-            }
-            auto make_child_of(auto const& matcher) -> MatchResult& {
-                child_results.emplace_back( result, std::exchange( matcher_address, std::bit_cast<uintptr_t>( matcher ) ) );
-                return *this;
-            }
+            auto set_address(uintptr_t address) -> MatchResult&;
+            auto add_children_from(MatchResult const& other) -> MatchResult&;
+            auto make_child_of(uintptr_t address) -> MatchResult&;
+            auto make_child_of(auto const& matcher) -> MatchResult& { return make_child_of( std::bit_cast<uintptr_t>( matcher ) ); }
         };
 
         inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }

@@ -19,7 +19,7 @@ namespace CatchKit {
             return str1 == str2;
         }
         bool CaseSensitive::find(std::string_view str, std::string_view substr) {
-            return str.find(substr) != std::string_view::npos;
+            return str.contains(substr);
         }
         bool CaseInsensitive::equal(std::string_view str1, std::string_view str2) {
             return std::ranges::equal(str1, str2,
