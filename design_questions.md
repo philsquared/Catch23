@@ -11,7 +11,8 @@ But this comes with a number of trade-offs:
 4. Parts of the syntax general warnings and SA violations. Within the macro these are suppressed.
 
 Macro-less test cases are also possible, but haven't been implemented yet.
-The question is, is it worth it? Maybe we wait until C++26 to be able offer these? Reflection should make it easier.
+The question is, is it worth it? Maybe we wait until C++26 to be able to offer these? 
+Reflection should make it easier.
 
 ## Attaching messages to assertions
 
@@ -40,6 +41,17 @@ It's not obvious how we could change that without other trade-offs
 
 There are concepts to detect Matchers, but these currently fail with overloads and constrained templates.
 How can we make this handle more cases without putting more onus on Matcher authors to add extra annotations?
+
+## Matcher API
+
+Can we simplify how matchers are written? Current need one (or more) of:
+    match(arg)
+    lazy_match(lambda)
+    bound_match(arg, matcher)
+    lazy_bound_match(lambda, matcher)
+
+We should probably at least be able to just have match and detect (a) second arg and (b) whether first arg is lambda.
+
 
 ## std::formatter for Stringified types
 
