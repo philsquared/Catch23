@@ -13,6 +13,10 @@
 #include <cassert>
 #include <utility>
 
+namespace CatchKit {
+    struct MatchResult;
+}
+
 namespace CatchKit::Detail {
 
     struct Asserter;
@@ -93,9 +97,6 @@ namespace CatchKit::Detail {
 
     };
 
-
-    struct MatchResult;
-
     template<typename ArgT, typename MatcherT>
     struct MatchExprRef {
         ArgT& arg;
@@ -114,29 +115,6 @@ namespace CatchKit::Detail {
         uintptr_t matcher_address;
     };
 
-    // Holds the result of a match
-    struct MatchResult {
-        bool result;
-        uintptr_t matcher_address = 0;
-        std::vector<SubExpression> child_results;
-        explicit(false) MatchResult(bool result, uintptr_t matcher_address = 0) : result(result), matcher_address(matcher_address) {}
-        explicit operator bool() const { return result; }
-
-        auto set_address(uintptr_t address) -> MatchResult& {
-            assert(matcher_address == 0 || matcher_address == address);
-            matcher_address = address;
-            return *this;
-        }
-        auto add_children_from(MatchResult const& other) -> MatchResult& {
-            child_results.reserve( child_results.size() + other.child_results.size() );
-            std::ranges::copy( other.child_results, std::back_inserter( child_results ) );
-            return *this;
-        }
-        auto make_child_of(auto const& matcher) -> MatchResult& {
-            child_results.emplace_back( result, std::exchange( matcher_address, std::bit_cast<uintptr_t>( matcher ) ) );
-            return *this;
-        }
-    };
 
 } // namespace CatchKit::Detail
 

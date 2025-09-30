@@ -155,7 +155,7 @@ namespace CatchKit::Detail
             asserter->accept_expr(*this);
     }
 
-    inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }
+    auto to_result_type( MatchResult const& result ) -> ResultType; // Implemented in internal_matchers.h
 
     // -------
 
