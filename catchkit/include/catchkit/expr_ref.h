@@ -9,8 +9,6 @@
 #include "expression_info.h"
 #include "operators.h"
 
-#include <vector>
-#include <cassert>
 #include <utility>
 
 

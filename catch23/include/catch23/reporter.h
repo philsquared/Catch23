@@ -13,6 +13,8 @@
 #include "catchkit/assertion_context.h"
 #include "catchkit/report_on.h"
 
+#include <vector>
+
 namespace CatchKit {
 
     struct AssertionInfo {

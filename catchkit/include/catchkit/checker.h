@@ -15,6 +15,7 @@
 #include "variable_capture.h" // NOLINT (misc-include-cleaner)
 
 #include <utility>
+#include <cassert>
 
 namespace CatchKit::Detail
 {

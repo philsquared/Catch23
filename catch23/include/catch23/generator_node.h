@@ -13,7 +13,6 @@
 
 #include "catchkit/checker.h"
 
-#include <vector>
 #include <memory>
 #include <set>
 #include <print> // !DBG
