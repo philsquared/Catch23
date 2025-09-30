@@ -13,9 +13,6 @@
 #include <cassert>
 #include <utility>
 
-namespace CatchKit {
-    struct MatchResult;
-}
 
 namespace CatchKit::Detail {
 
@@ -97,23 +94,6 @@ namespace CatchKit::Detail {
 
     };
 
-    template<typename ArgT, typename MatcherT>
-    struct MatchExprRef {
-        ArgT& arg;
-        MatcherT const& matcher;
-        Asserter* asserter = nullptr;
-        std::string message = {};
-
-        [[nodiscard]] auto evaluate() const -> MatchResult;
-        [[nodiscard]] auto expand( MatchResult const& result ) const -> ExpressionInfo;
-
-        ~MatchExprRef();
-    };
-
-    struct SubExpression {
-        bool result;
-        uintptr_t matcher_address;
-    };
 
 
 } // namespace CatchKit::Detail

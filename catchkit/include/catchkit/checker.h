@@ -19,6 +19,7 @@
 namespace CatchKit::Detail
 {
     struct Asserter;
+    struct MatchResult;
 
     struct Checker {
         ResultHandler* result_handler = nullptr;
@@ -149,11 +150,6 @@ namespace CatchKit::Detail
             operator_to_string<Op>() };
     }
 
-    template<typename ArgT, typename MatcherT>
-    MatchExprRef<ArgT, MatcherT>::~MatchExprRef() {
-        if( asserter )
-            asserter->accept_expr(*this);
-    }
 
     auto to_result_type( MatchResult const& result ) -> ResultType; // Implemented in internal_matchers.h
 

@@ -17,31 +17,36 @@
 
 namespace CatchKit {
 
-    // Holds the result of a match
-    struct MatchResult {
-        bool result;
-        uintptr_t matcher_address = 0;
-        std::vector<Detail::SubExpression> child_results;
-        explicit(false) MatchResult(bool result, uintptr_t matcher_address = 0) : result(result), matcher_address(matcher_address) {}
-        explicit operator bool() const { return result; }
-
-        auto set_address(uintptr_t address) -> MatchResult& {
-            assert(matcher_address == 0 || matcher_address == address);
-            matcher_address = address;
-            return *this;
-        }
-        auto add_children_from(MatchResult const& other) -> MatchResult& {
-            child_results.reserve( child_results.size() + other.child_results.size() );
-            std::ranges::copy( other.child_results, std::back_inserter( child_results ) );
-            return *this;
-        }
-        auto make_child_of(auto const& matcher) -> MatchResult& {
-            child_results.emplace_back( result, std::exchange( matcher_address, std::bit_cast<uintptr_t>( matcher ) ) );
-            return *this;
-        }
-    };
-
     namespace Detail {
+
+        struct SubExpression {
+            bool result;
+            uintptr_t matcher_address;
+        };
+
+        // Holds the result of a match
+        struct MatchResult {
+            bool result;
+            uintptr_t matcher_address = 0;
+            std::vector<Detail::SubExpression> child_results;
+            explicit(false) MatchResult(bool result, uintptr_t matcher_address = 0) : result(result), matcher_address(matcher_address) {}
+            explicit operator bool() const { return result; }
+
+            auto set_address(uintptr_t address) -> MatchResult& {
+                assert(matcher_address == 0 || matcher_address == address);
+                matcher_address = address;
+                return *this;
+            }
+            auto add_children_from(MatchResult const& other) -> MatchResult& {
+                child_results.reserve( child_results.size() + other.child_results.size() );
+                std::ranges::copy( other.child_results, std::back_inserter( child_results ) );
+                return *this;
+            }
+            auto make_child_of(auto const& matcher) -> MatchResult& {
+                child_results.emplace_back( result, std::exchange( matcher_address, std::bit_cast<uintptr_t>( matcher ) ) );
+                return *this;
+            }
+        };
 
         inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }
 
@@ -262,6 +267,23 @@ namespace CatchKit {
         }
 
         template<typename ArgT, typename MatcherT>
+        struct MatchExprRef {
+            ArgT& arg;
+            MatcherT const& matcher;
+            Asserter* asserter = nullptr;
+            std::string message = {};
+
+            ~MatchExprRef() {
+                if( asserter )
+                    asserter->accept_expr(*this);
+            }
+
+            // Implemented in internal_matchers.h:
+            [[nodiscard]] auto evaluate() const -> MatchResult;
+            [[nodiscard]] auto expand( MatchResult const& result ) const -> ExpressionInfo;
+        };
+
+        template<typename ArgT, typename MatcherT>
         [[maybe_unused]] constexpr auto operator, ( MatchExprRef<ArgT, MatcherT>&& matcher_ref, std::string_view message ) noexcept {
             matcher_ref.message = message;
             return matcher_ref;
@@ -323,6 +345,8 @@ namespace CatchKit {
         using Detail::operator >>=;
 
     } // namespace Matchers
+
+    using Detail::MatchResult;
 
 } // namespace CatchKit
 
