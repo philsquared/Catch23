@@ -23,7 +23,7 @@ but if a comparison operator is used then it becomes a BinaryExprRef) the expr o
 hold the final expression until their destructors are called.
 So, currently, the ...Expr destructors call back into Asserter (to which a pointer is being held) to evaluate the expression.
 
-We pass the whole ...Expr object to a function that will perform the evaluation on the final object with requiring the
+We could pass the whole ...Expr object to a function that will perform the evaluation on the final object with requiring the
 expr objects themselves to trigger this. The main reason for not doing that is to keep the macro-less syntax simpler.
 Because the `<<` operator only binds to the first part of the expression we'd need something else to wrap the whole thing
 and that would become something the user would have to write if not using macros.
