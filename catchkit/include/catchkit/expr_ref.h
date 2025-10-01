@@ -56,11 +56,15 @@ namespace CatchKit::Detail {
 
         template<typename RhsT>
         [[maybe_unused]] friend auto operator == ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( !(std::is_pointer_v<T> && !std::is_pointer_v<RhsT> && std::is_integral_v<RhsT>),
+                "Comparing pointers against integrals (even 0) is not supported. Do you mean to use nullptr?");
             static_assert( requires{ lhs.value == rhs; } );
             return lhs.template make_binary_expr<Operators::Equals>( std::forward<RhsT>( rhs ) );
         }
         template<typename RhsT>
         [[maybe_unused]] friend auto operator != ( UnaryExprRef lhs, RhsT&& rhs ) noexcept {
+            static_assert( !(std::is_pointer_v<T> && !std::is_pointer_v<RhsT> && std::is_integral_v<RhsT>),
+                "Comparing pointers against integrals (even 0) is not supported. Do you mean to use nullptr?");
             static_assert( requires{ lhs.value != rhs; } );
             return lhs.template make_binary_expr<Operators::NotEqualTo>( std::forward<RhsT>( rhs ) );
         }

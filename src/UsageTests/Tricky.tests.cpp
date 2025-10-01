@@ -288,9 +288,11 @@ class ClassName {};
 
 TEST_CASE( "pointer to class", "[Tricky]" )
 {
-   // ClassName *p = 0;
-    // !TBD
-   // REQUIRE( p == 0 );
+   ClassName *p = 0;
+   // REQUIRE( p == 0 ); // The original test was this, but we're not supporting this. If you try it you'll get a static_assert
+   // REQUIRE( p != 0 ); // This also fails to compile
+   // REQUIRE( 0 == p ); // This gets a more generic compiler error - !TBD: should we add the specific static_assert?
+   REQUIRE( p == nullptr ); // This works, though
 }
 
 #include <memory>
