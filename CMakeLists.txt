@@ -1,9 +1,5 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.31)
 project(Catch23Test)
-
-#if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU" AND APPLE)
-    set(CMAKE_CXX_SCAN_FOR_MODULES OFF) # Not working on macOS at the moment
-#endif()
 
 set(CMAKE_CXX_STANDARD 23)
 
