@@ -13,4 +13,8 @@
 #define CATCHKIT_INTERNAL_UNIQUE_NAME_CAT( first, second ) CATCHKIT_INTERNAL_UNIQUE_NAME_CAT2( first, second )
 #define CATCHKIT_INTERNAL_UNIQUE_NAME( name ) CATCHKIT_INTERNAL_UNIQUE_NAME_CAT( name, __LINE__ )
 
+// Split list of args into head and tail
+#define CATCHKIT_VA_MACRO_HEAD(first, ...) first
+#define CATCHKIT_VA_MACRO_TAIL(first, ...) __VA_ARGS__
+
 #endif // CATCHKIT_INTERNAL_MACRO_UTILS_H

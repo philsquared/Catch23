@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -43,3 +43,19 @@ add_library(Catch23 STATIC
 target_include_directories(Catch23 PUBLIC include)
 target_link_libraries(Catch23 PUBLIC Catchkit)
 target_compile_options(Catch23 PRIVATE -Wall -Wextra -Wpedantic)
+
+# Optional C++20 module support
+# Enable with: cmake -B build -DCATCH23_BUILD_MODULES=ON
+option(CATCH23_BUILD_MODULES "Build Catch23 as a C++20 module" OFF)
+
+if(CATCH23_BUILD_MODULES)
+    target_sources(Catch23 PUBLIC
+        FILE_SET CXX_MODULES FILES
+        modules/catch23.cppm
+    )
+    # Ensure CatchKit module is also built
+    if(NOT CATCHKIT_BUILD_MODULES)
+        message(WARNING "CATCH23_BUILD_MODULES requires CATCHKIT_BUILD_MODULES=ON")
+        set(CATCHKIT_BUILD_MODULES ON CACHE BOOL "" FORCE)
+    endif()
+endif()

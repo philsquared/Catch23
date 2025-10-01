@@ -2,16 +2,23 @@
 // Created by Phil Nash on 22/07/2025.
 //
 
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+
 #include <catch23/catch2_compat.h>
 #include <catchkit/matchers.h>
+
+#include "catch23/meta_test.h"
+
+#endif
 
 #include <algorithm>
 #include <exception>
 #include <cmath>
 #include <list>
 #include <sstream>
-
-#include "catch23/meta_test.h"
 
 void non_throwing_function() {}
 void throwing_function(std::string const& message = {}) {

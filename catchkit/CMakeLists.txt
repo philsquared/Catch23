@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.28)
 
 set(CMAKE_CXX_STANDARD 23)
 
@@ -44,3 +44,14 @@ add_library(Catchkit STATIC
 
 target_include_directories(Catchkit PUBLIC include)
 target_compile_options(Catchkit PRIVATE -Wall -Wextra -Wpedantic)
+
+# Optional C++20 module support
+# Enable with: cmake -B build -DCATCHKIT_BUILD_MODULES=ON
+option(CATCHKIT_BUILD_MODULES "Build CatchKit as a C++20 module" OFF)
+
+if(CATCHKIT_BUILD_MODULES)
+    target_sources(Catchkit PUBLIC
+        FILE_SET CXX_MODULES FILES
+        modules/catchkit.cppm
+    )
+endif()

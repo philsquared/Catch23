@@ -220,13 +220,4 @@ namespace CatchKit {
 
 } // namespace CatchKit
 
-
-#define GENERATE(...) \
-    [&check]{ using namespace CatchKit::Generators; \
-        CatchKit::Detail::GeneratorAcquirer acquirer(check, {#__VA_ARGS__}); \
-        if( !acquirer.generator_node ) acquirer.make_generator((__VA_ARGS__)); \
-        return acquirer.derived_node<decltype((__VA_ARGS__))>(); \
-    }()->current_value()
-
-
 #endif // CATCH23_GENERATORS_H

@@ -13,6 +13,7 @@
 #include "exceptions.h"
 #include "stringify.h"
 #include "variable_capture.h" // NOLINT (misc-include-cleaner)
+#include "macros.h" // NOLINT (misc-include-cleaner)
 
 #include <utility>
 #include <cassert>
@@ -170,42 +171,10 @@ namespace CatchKit
 {
     using Detail::Checker;
 
-} //namespace CatchKit
+} // namespace CatchKit
 
 // These global instances are used if not using the ones passed in to a function locally
 extern constinit CatchKit::Checker check; // NOSONAR NOLINT (misc-typo)
 extern constinit CatchKit::Checker require; // NOSONAR NOLINT (misc-typo)
-
-
-#define CATCHKIT_ASSERT_INTERNAL(macro_name, checker, ...) \
-    if( checker.should_decompose ) \
-        checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
-            .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
-                CATCHKIT_WARNINGS_SUPPRESS_START \
-                CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
-                asserter << __VA_ARGS__; \
-                CATCHKIT_WARNINGS_SUPPRESS_END \
-            }); \
-    else checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).simple_assert(__VA_ARGS__)
-
-
-#define CATCHKIT_ASSERT_THAT_INTERNAL(macro_name, checker, arg, match_expr) \
-    do { using namespace CatchKit::Matchers; \
-        checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)).that( [&]{ return arg; }, match_expr ); \
-    } while( false )
-
-
-#define CHECK(...) CATCHKIT_ASSERT_INTERNAL( "CHECK", check, __VA_ARGS__ )
-#define REQUIRE(...) CATCHKIT_ASSERT_INTERNAL( "REQUIRE", require, __VA_ARGS__ )
-
-#define CHECK_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "CHECK_THAT", check, arg, matcher )
-#define REQUIRE_THAT( arg, matcher ) CATCHKIT_ASSERT_THAT_INTERNAL( "REQUIRE_THAT", require, arg, matcher )
-
-#define REQUIRE_STATIC(...) static_assert(__VA_ARGS__)
-
-// !TBD: These should have a dedicated internal macro (in Catch2 it was INTERNAL_CATCH_MSG)
-#define PASS(...) CATCHKIT_ASSERT_INTERNAL( "PASS", check, true __VA_OPT__(,) __VA_ARGS__ )
-#define FAIL(...) CATCHKIT_ASSERT_INTERNAL( "FAIL", require, false __VA_OPT__(,) __VA_ARGS__ )
-
 
 #endif // CATCHKIT_CHECKER_H

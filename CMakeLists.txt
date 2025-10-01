@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.28)
 project(Catch23Test)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -22,3 +22,8 @@ add_executable(Catch23Test src/main.cpp src/UsageTests/Condition.tests.cpp
 target_link_libraries(Catch23Test PUBLIC Catch23)
 target_link_libraries(Catch23Test PUBLIC Catchkit)
 target_compile_options(Catch23Test PRIVATE -Wall -Wextra -Wpedantic)
+
+# If modules are enabled, define USE_CATCH23_MODULES for test files
+if(CATCH23_BUILD_MODULES)
+    target_compile_definitions(Catch23Test PRIVATE USE_CATCH23_MODULES)
+endif()
