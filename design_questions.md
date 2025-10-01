@@ -9,10 +9,24 @@ But this comes with a number of trade-offs:
 2. It doesn't catch unexpected exceptions (these are caught at the test case level, so you lose specific file/ line).
 3. The syntax, especially the use of `<<`, becomes part of the API, so needs to be maintained.
 4. Parts of the syntax general warnings and SA violations. Within the macro these are suppressed.
+5. It complicated the expression decomposition design (see below)
 
 Macro-less test cases are also possible, but haven't been implemented yet.
 The question is, is it worth it? Maybe we wait until C++26 to be able to offer these? 
 Reflection should make it easier.
+
+## Performing assertion evaluation in destructor
+
+Within a `CHECK` or `REQUIRE` an expression is decomposed into a XXXExprRef type (UnaryExprRef, BinaryExprRef).
+Because we don't know what the final type will be until the end of the expression (it starts out as a UnaryExprRef,
+but if a comparison operator is used then it becomes a BinaryExprRef) the expr objects themselves don't know if they
+hold the final expression until their destructors are called.
+So, currently, the ...Expr destructors call back into Asserter (to which a pointer is being held) to evaluate the expression.
+
+We pass the whole ...Expr object to a function that will perform the evaluation on the final object with requiring the
+expr objects themselves to trigger this. The main reason for not doing that is to keep the macro-less syntax simpler.
+Because the `<<` operator only binds to the first part of the expression we'd need something else to wrap the whole thing
+and that would become something the user would have to write if not using macros.
 
 ## Attaching messages to assertions
 
