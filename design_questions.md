@@ -8,7 +8,7 @@ But this comes with a number of trade-offs:
 1. It doesn't capture the expression as you wrote it (for printing as  a string).
 2. It doesn't catch unexpected exceptions (these are caught at the test case level, so you lose specific file/ line).
 3. The syntax, especially the use of `<<`, becomes part of the API, so needs to be maintained.
-4. Parts of the syntax general warnings and SA violations. Within the macro these are suppressed.
+4. Parts of the syntax generates warnings and SA violations. Within the macro these are suppressed.
 5. It complicated the expression decomposition design (see below)
 
 Macro-less test cases are also possible, but haven't been implemented yet.
