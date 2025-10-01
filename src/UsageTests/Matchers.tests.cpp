@@ -496,7 +496,7 @@ namespace {
 } // end anonymous namespace
 
 // This is commented out to show that it can work without a Stringifier.
-// but uncomment if you want to SomeType in the output.
+// but uncomment if you want to see SomeType in the output.
 // Note that, without a Stringifier for SomeType, even vector<SomeType> gets printed as just, "{?}"
 
 // template<>

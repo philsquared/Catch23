@@ -19,7 +19,21 @@
 
 namespace CatchKit {
 
-    auto pointer_to_string(void const* p) -> std::string;
+    auto pointer_to_string(std::uintptr_t p) -> std::string;
+
+    inline auto pointer_to_string(void const* p) -> std::string {
+        return pointer_to_string(std::bit_cast<std::uintptr_t>(p));
+    }
+
+    auto function_pointer_to_string(auto p) -> std::string {
+        return pointer_to_string(std::bit_cast<std::uintptr_t>(p));
+    }
+    auto member_pointer_to_string(void const* p, std::size_t size) -> std::string;
+
+    template<typename T>
+    auto member_pointer_to_string(T mp) -> std::string {
+        return member_pointer_to_string(&mp, sizeof(T));
+    }
 
     // Specialise this with a stringify member function for your own conversions
     template<typename T>
@@ -64,6 +78,8 @@ namespace CatchKit {
                 return std::string("nullptr");
             if constexpr( std::is_convertible_v<T, char const*> )
                 return std::format("\"{}\"", value);
+            else if constexpr (std::is_function_v<std::remove_pointer_t<T>>)
+                return function_pointer_to_string(value);
             else
                 return pointer_to_string( value );
         }
@@ -78,8 +94,12 @@ namespace CatchKit {
             return oss.str();
         }
 #endif
+        else if constexpr (std::is_function_v<T>)
+            return function_pointer_to_string( &value );
+        else if constexpr( std::is_member_pointer_v<T> )
+            return member_pointer_to_string( value );
         else
-            return "{?}";
+            return std::format( "{}(?)", type_to_string<T>() );
     }
 
 } // namespace CatchKit

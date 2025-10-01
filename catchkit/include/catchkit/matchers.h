@@ -197,7 +197,7 @@ namespace CatchKit {
                 if constexpr(std::is_void_v<E>)
                     return "throws()";
                 else
-                    return std::format("throws<{}>()", get_type_name<E>());
+                    return std::format("throws<{}>()", type_to_string<E>());
             }
         };
 

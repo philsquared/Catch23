@@ -33,7 +33,7 @@ namespace CatchKit::Detail
         [[nodiscard]] auto get_value() const -> std::string override { return stringify( value ); }
 
         TypedVariableCapture(T const& value, std::string_view name, Checker& checker)
-        :   VariableCapture( name, get_type_name<T>(), checker ),
+        :   VariableCapture( name, type_to_string<T>(), checker ),
             value(value)
         {}
     };

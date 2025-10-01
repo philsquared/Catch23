@@ -6,6 +6,7 @@
 #define CATCH23_SECTIONS_H
 
 #include "internal_execution_nodes.h"
+#include "test_result_handler.h"
 
 namespace CatchKit::Detail {
 

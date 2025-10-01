@@ -13,7 +13,7 @@ namespace CatchKit {
     namespace Detail {
         auto parse_templated_name( std::string const& templated_name, std::source_location location = std::source_location::current() ) -> std::string_view;
         template<typename T>
-        auto get_type_name() -> std::string_view {
+        auto type_to_string() -> std::string_view {
             return parse_templated_name("T");
         }
 
@@ -46,7 +46,7 @@ namespace CatchKit {
 
     } // namespace Detail
 
-    using Detail::get_type_name;
+    using Detail::type_to_string;
     using Detail::enum_to_string;
 
 } // namespace CatchKit

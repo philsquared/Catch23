@@ -10,32 +10,32 @@ struct MyCustomType {};
 inline CatchKit::Tag reflection_tag("reflection");
 
 TEST( "Names can be obtained from simple, built-in, types", [reflection_tag] ) {
-    CHECK(CatchKit::get_type_name<int>() == "int");
-    CHECK(CatchKit::get_type_name<float>() == "float");
-    CHECK(CatchKit::get_type_name<double>() == "double");
-    CHECK(CatchKit::get_type_name<char>() == "char");
-    CHECK(CatchKit::get_type_name<bool>() == "bool");
+    CHECK(CatchKit::type_to_string<int>() == "int");
+    CHECK(CatchKit::type_to_string<float>() == "float");
+    CHECK(CatchKit::type_to_string<double>() == "double");
+    CHECK(CatchKit::type_to_string<char>() == "char");
+    CHECK(CatchKit::type_to_string<bool>() == "bool");
 }
 TEST( "Names can be obtained from simple, custom, types", [reflection_tag] ) {
-    CHECK(CatchKit::get_type_name<MyCustomType>() == "MyCustomType");
+    CHECK(CatchKit::type_to_string<MyCustomType>() == "MyCustomType");
 }
 TEST("Names can be obtained from pointers", [reflection_tag]) {
     // We have to be a bit careful because different compilers have different spacing around the *
-    CHECK_THAT(CatchKit::get_type_name<int*>(), starts_with("int") && ends_with("*"));
-    CHECK_THAT(CatchKit::get_type_name<char*>(), starts_with("char") && ends_with("*"));
-    CHECK_THAT(CatchKit::get_type_name<MyCustomType*>(), starts_with("MyCustomType") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<int*>(), starts_with("int") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<char*>(), starts_with("char") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<MyCustomType*>(), starts_with("MyCustomType") && ends_with("*"));
 }
 TEST("Names can be obtained from pointers to const", [reflection_tag]) {
     // const may come before or after the type name (although most compilers put it before)
-    CHECK_THAT(CatchKit::get_type_name<int const*>(), contains("int") && contains("const") && ends_with("*"));
-    CHECK_THAT(CatchKit::get_type_name<char const*>(), contains("char") && contains("const") && ends_with("*"));
-    CHECK_THAT(CatchKit::get_type_name<MyCustomType const*>(), contains("MyCustomType") && contains("const") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<int const*>(), contains("int") && contains("const") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<char const*>(), contains("char") && contains("const") && ends_with("*"));
+    CHECK_THAT(CatchKit::type_to_string<MyCustomType const*>(), contains("MyCustomType") && contains("const") && ends_with("*"));
 }
 
 TEST("pairs and tuples can be converted to strings", [reflection_tag]) {
     // tested separately because the `,` may confuse parsing
-    CHECK(CatchKit::get_type_name<std::pair<int, int>>() == "std::pair<int, int>");
-    CHECK(CatchKit::get_type_name<std::tuple<float, double, bool>>() == "std::tuple<float, double, bool>");
+    CHECK(CatchKit::type_to_string<std::pair<int, int>>() == "std::pair<int, int>");
+    CHECK(CatchKit::type_to_string<std::tuple<float, double, bool>>() == "std::tuple<float, double, bool>");
 }
 
 enum class Colours{ red, green, blue };
