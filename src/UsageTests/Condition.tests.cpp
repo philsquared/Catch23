@@ -5,13 +5,20 @@
 // These test have been taken from the Catch2 test suite, with minor modifications applied
 // (mostly using matchers instead of Approx)
 
-#include "catch23/catch2_compat.h"
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
 #include "catch23/meta_test.h"
 
 #include "catchkit/internal_warnings.h"
+#endif
+
+#include "catch23/catch2_compat.h"
 
 #include <string>
 #include <limits>
+#include <stdint.h>
 
 namespace {
 

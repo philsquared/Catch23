@@ -2,14 +2,20 @@
 // Created by Phil Nash on 23/07/2025.
 //
 
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/test.h"
+    #include "catch23/meta_test.h"
+
+    #include "catch23/internal_test.h"
+#endif
+
+#include "catch23/catch2_compat.h"
+
 #include <iostream>
 #include <ostream>
-
-#include "catch23/test.h"
-#include "catch23/catch2_compat.h"
-#include "catch23/meta_test.h"
-
-#include "catch23/internal_test.h"
 
 TEST_CASE( "random SECTION tests", "[.][sections][failing]" ) {
     int a = 1;

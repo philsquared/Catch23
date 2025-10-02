@@ -33,7 +33,6 @@ export module catch23;
 // Re-export CatchKit for convenience
 export import catchkit;
 
-// Export all Catch23 namespaces (declarations only, macros are in macros.h)
 export namespace CatchKit {
     using CatchKit::MetaTestRunner;
 
@@ -42,34 +41,37 @@ export namespace CatchKit {
 }
 export namespace CatchKit::Detail {
     using Detail::try_enter_section;
+    using Detail::RandomNumberGenerator;
+    using Detail::operator,;
 }
 
-// NOTE: Inline constexpr variables in Tags namespace need explicit export
-// If you add new tags to internal_test.h, add them here too
 export namespace CatchKit::Tags {
-    using CatchKit::Tags::mute;
-    using CatchKit::Tags::solo;
-    using CatchKit::Tags::may_fail;
-    using CatchKit::Tags::should_fail;
-    using CatchKit::Tags::always_report;
+    using Tags::mute;
+    using Tags::solo;
+    using Tags::may_fail;
+    using Tags::should_fail;
+    using Tags::always_report;
 }
 
-// NOTE: Template/inline functions in Generators namespace need explicit export
-// If you add new generator functions to generators.h, add them here too
 export namespace CatchKit::Generators {
-    using CatchKit::Generators::generate;
-    using CatchKit::Generators::values_of;
-    using CatchKit::Generators::from_values;
-    using CatchKit::Generators::inclusive_range_of;
-    namespace Charsets = CatchKit::Detail::Charsets;
+    using Generators::generate;
+    using Generators::values_of;
+    using Generators::from_values;
+    using Generators::inclusive_range_of;
+
+    namespace Charsets = Detail::Charsets;
 }
 
-// Export Detail types needed by macros
+export namespace CatchKit::Detail::Charsets {
+    using Detail::Charsets::symbols;
+}
+
 export namespace CatchKit::Detail {
     using Detail::AutoReg;
     using Detail::Test;
     using Detail::SectionInfo;
     using Detail::ExecutionNodes;
+    using Detail::GeneratorAcquirer;
     using Detail::get_execution_nodes_from_result_handler;
     using Detail::make_test_info;
 }

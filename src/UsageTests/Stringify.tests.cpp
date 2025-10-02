@@ -1,5 +1,13 @@
-#include "catch23/test.h"
-#include "catchkit/matchers.h"
+
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/test.h"
+    #include "catchkit/matchers.h"
+#endif
+
+#include <string>
 
 TEST("Built-ins can be converted to strings") {
     CHECK( CatchKit::stringify( 0 ) == "0" );

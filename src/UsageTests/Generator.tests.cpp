@@ -2,9 +2,17 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#include "catch23/test.h"
-#include "catch23/generators.h"
-#include "catch23/meta_test.h"
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/test.h"
+    #include "catch23/generators.h"
+    #include "catch23/meta_test.h"
+#endif
+
+#include <string>
+#include <vector>
 
 TEST("Generators", [mute]) {
     auto i = GENERATE(values_of<int>{.up_to=100}); // Defaults to 100 values

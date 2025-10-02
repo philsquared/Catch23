@@ -72,7 +72,7 @@ namespace CatchKit {
         if constexpr( std::is_enum_v<T> )
             return enum_to_string( value );
         else if constexpr( std::is_null_pointer_v<T> )
-            return "nullptr";
+            return std::string("nullptr");
         else if constexpr( std::is_pointer_v<T> ) {
             if( !value )
                 return std::string("nullptr");

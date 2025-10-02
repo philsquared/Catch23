@@ -31,6 +31,7 @@ export module catchkit;
 
 export namespace CatchKit {
     using CatchKit::MatchResult;
+    using CatchKit::stringify;
 
     using Detail::Checker;
     using Detail::Asserter;
@@ -40,6 +41,7 @@ export namespace CatchKit {
 }
 export namespace CatchKit::Detail {
     using Detail::Asserter;
+    using Detail::TypedVariableCapture;
 }
 export namespace CatchKit::GenericMatchers {}
 export namespace CatchKit::StringMatchers {}
