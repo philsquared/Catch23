@@ -2,8 +2,15 @@
 // Created by Phil Nash on 23/09/2025.
 //
 
-#include "catch23/test.h"
-#include "catchkit/matchers.h"
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/test.h"
+    #include "catchkit/matchers.h"
+#endif
+
+#include "catchkit/reflection.h"
 
 struct MyCustomType {};
 

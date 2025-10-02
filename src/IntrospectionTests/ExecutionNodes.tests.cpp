@@ -1,7 +1,15 @@
 //
 // Created by Phil Nash on 23/07/2025.
 //
-#include "catch23/test.h"
+
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/test.h"
+#endif
+
+#include "catch23/internal_execution_nodes.h"
 
 TEST("execution nodes") {
     using namespace CatchKit::Detail;

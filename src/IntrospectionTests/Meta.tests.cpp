@@ -2,10 +2,16 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
-#include "catch23/meta_test.h"
-#include "catch23/test.h"
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/meta_test.h"
+    #include "catch23/test.h"
+    #include "catchkit/matchers.h"
+#endif
 
-#include "catchkit/matchers.h"
+#include "catchkit/expression_info.h"
 
 TEST("A test that can run tests") {
 

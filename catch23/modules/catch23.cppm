@@ -35,6 +35,7 @@ export import catchkit;
 
 export namespace CatchKit {
     using CatchKit::MetaTestRunner;
+    using CatchKit::Tag;
 
     using Detail::TestRunner;
     using Detail::TestResultHandler;
