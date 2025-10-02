@@ -39,6 +39,7 @@ add_library(Catch23 STATIC
         src/adjusted_result.cpp
         include/catch23/adjusted_result.h
         include/catch23/catch23_mod.h
+        include/catch23/catch23_main_mod.h
 )
 
 target_include_directories(Catch23 PUBLIC include)
@@ -53,6 +54,7 @@ if(CATCH23_BUILD_MODULES)
     target_sources(Catch23 PUBLIC
         FILE_SET CXX_MODULES FILES
         modules/catch23.cppm
+        modules/catch23.main.cppm
     )
     # Ensure CatchKit module is also built
     if(NOT CATCHKIT_BUILD_MODULES)
