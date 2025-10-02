@@ -1,0 +1,8 @@
+//
+// Created by Phil Nash on 02/10/2025.
+//
+
+#ifndef CATCH23TEST_CATCH23_MAIN_MOD_H
+#define CATCH23TEST_CATCH23_MAIN_MOD_H
+
+#endif //CATCH23TEST_CATCH23_MAIN_MOD_H

@@ -3,8 +3,7 @@
 //
 
 #ifdef USE_CATCH23_MODULES
-    #include "catch23/macros.h"
-    import catch23;
+    #include "catch23/catch23_mod.h"
 #else
     #include "catch23/catch2_compat.h"
 #endif

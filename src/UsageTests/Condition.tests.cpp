@@ -6,19 +6,17 @@
 // (mostly using matchers instead of Approx)
 
 #ifdef USE_CATCH23_MODULES
-    #include "catch23/macros.h"
-    import catch23;
+    #include "catch23/catch23_mod.h"
 #else
-#include "catch23/meta_test.h"
-
-#include "catchkit/internal_warnings.h"
+    #include "catch23/meta_test.h"
+    #include "catchkit/internal_warnings.h"
 #endif
 
 #include "catch23/catch2_compat.h"
 
 #include <string>
 #include <limits>
-#include <stdint.h>
+#include <cstdint>
 
 namespace {
 
