@@ -14,7 +14,12 @@
                                  // that is triggered when compiling as Win32|Release
 #endif
 
-#include <catch23/catch2_compat.h>
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#endif
+
+#include "catch23/catch2_compat.h"
 
 #include <cstdio>
 #include <sstream>

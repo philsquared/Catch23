@@ -2,7 +2,16 @@
 // Created by Phil Nash on 23/09/2025.
 //
 
-#include "catch23/catch2_compat.h"
+#ifdef USE_CATCH23_MODULES
+    #include "catch23/macros.h"
+    import catch23;
+#else
+    #include "catch23/catch2_compat.h"
+#endif
+
+#include <utility>
+#include <string>
+#include <vector>
 
 // Based on the same file in the Catch2 codebase ---
 
