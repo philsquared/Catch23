@@ -21,7 +21,7 @@
 
 namespace CatchKit::Detail
 {
-    struct Asserter;
+    class Asserter;
     struct MatchResult;
 
     struct Checker {
@@ -32,9 +32,16 @@ namespace CatchKit::Detail
         auto operator()(AssertionContext const& context) -> Asserter;
     };
 
-    struct Asserter {
+    inline auto to_result_type( ResultType result ) -> ResultType { return result; }
+    auto to_result_type( MatchResult const& result ) -> ResultType; // Implemented in internal_matchers.h
+
+    class Asserter {
         Checker& checker;
 
+        void report_current_exception() const;
+        std::optional<ExpressionInfo> expression_info;
+        std::ostringstream message_stream;
+    public:
         explicit Asserter( Checker& checker ) : checker(checker) {}
         ~Asserter() noexcept(false); // NOSONAR NOLINT (misc-typo)
 
@@ -48,15 +55,22 @@ namespace CatchKit::Detail
             return *this;
         }
 
-        void simple_assert(std::nullptr_t, std::string_view message = {}) const noexcept {
+        void simple_assert(std::nullptr_t, std::string_view message = {}) noexcept {
             simple_assert(false, message);
         }
-        void simple_assert(auto const& result, std::string_view message = {}) const noexcept {
-            if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes )
-                checker.result_handler->on_assertion_result_detail(std::monostate(), message);
+        void simple_assert(auto const& result, std::string_view message = {}) noexcept {
+            if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes ) {
+                expression_info = std::monostate();
+                message_stream << message;
+            }
         }
-        void accept_expr(auto&& expr) noexcept; // Implemented after the definitions of the Expr Ref types
-
+        void accept_expr(auto&& expr) noexcept {
+            auto raw_result = expr.evaluate();
+            if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes ) {
+                expression_info = expr.expand( raw_result );
+                message_stream << expr.message;
+            }
+        }
         template<typename T>
         void accept_expr(T&& expr, std::string const& message) noexcept {
             // !TBD Temporary hack to add message until we change the interface
@@ -71,9 +85,6 @@ namespace CatchKit::Detail
         [[maybe_unused]] friend constexpr auto operator <=> ( Asserter const&, auto&& value ) noexcept { // NOSONAR NOLINT (misc-typo)
             return UnaryExprRef{ value };
         }
-
-    private:
-        void report_current_exception() const;
     };
 
     // --------------
@@ -88,14 +99,9 @@ namespace CatchKit::Detail
             return !value ? Failed : Passed;
             CATCHKIT_WARNINGS_SUPPRESS_END
         }
-        else if constexpr( std::is_null_pointer_v<T> ) {
-            // Special case for GCC
-            return Failed;
-        }
         else {
-            // Have to do this at runtime because we can get here from the destructor of a UnaryExpr,
-            // even if it doesn't happen at runtime because it's actually a binary expression
-            assert(false);
+            // Special case for GCC
+            static_assert( std::is_null_pointer_v<T> );
             return Failed;
         }
     }
@@ -133,19 +139,6 @@ namespace CatchKit::Detail
             std::string( stringify(lhs) ),
             std::string( stringify(rhs) ),
             operator_to_string<Op>() };
-    }
-
-
-    auto to_result_type( MatchResult const& result ) -> ResultType; // Implemented in internal_matchers.h
-
-    // -------
-
-    inline auto to_result_type( ResultType result ) -> ResultType { return result; }
-
-    void Asserter::accept_expr( auto&& expr ) noexcept {
-        auto raw_result = expr.evaluate();
-        if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes )
-            checker.result_handler->on_assertion_result_detail( expr.expand( raw_result ), expr.message );
     }
 
 } // namespace CatchKit::Detail

@@ -20,6 +20,9 @@ namespace CatchKit::Detail {
     }
 
     Asserter::~Asserter() noexcept(false) {
+        if( expression_info )
+            checker.result_handler->on_assertion_result_detail( *expression_info, message_stream.str() );
+
         checker.result_handler->on_assertion_end(); // This may throw to cancel the test
     }
 

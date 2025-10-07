@@ -13,8 +13,6 @@
 
 namespace CatchKit::Detail {
 
-    struct Asserter;
-
     // Holds binary expression
     template<typename LhsT, typename RhsT, Operators Op>
     struct BinaryExprRef {
