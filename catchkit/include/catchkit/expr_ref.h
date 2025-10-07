@@ -18,7 +18,6 @@ namespace CatchKit::Detail {
     struct BinaryExprRef {
         LhsT& lhs;
         RhsT& rhs;
-        std::string message = {};
 
         [[nodiscard]] auto evaluate() const -> ResultType;
         [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
@@ -30,7 +29,6 @@ namespace CatchKit::Detail {
     template<typename T>
     struct UnaryExprRef {
         T& value;
-        std::string message = {};
 
         [[nodiscard]] auto evaluate() const -> ResultType;
         [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
@@ -75,8 +73,6 @@ namespace CatchKit::Detail {
             return lhs.template make_binary_expr<Operators::GreaterThanOrEqual>( std::forward<RhsT>( rhs ) );
         }
     };
-
-
 
 } // namespace CatchKit::Detail
 

@@ -19,9 +19,17 @@ namespace CatchKit::Detail {
         return Asserter( *this );
     }
 
+    Asserter::Asserter( Checker& checker ) : checker(checker) {
+        if( checker.message_stream )
+            checker.message_stream->clear();
+    }
     Asserter::~Asserter() noexcept(false) {
-        if( expression_info )
-            checker.result_handler->on_assertion_result_detail( *expression_info, message_stream.str() );
+        if( expression_info ) {
+            if( checker.message_stream )
+                checker.result_handler->on_assertion_result_detail( *expression_info, checker.message_stream->str() );
+            else
+                checker.result_handler->on_assertion_result_detail( *expression_info, {} );
+        }
 
         checker.result_handler->on_assertion_end(); // This may throw to cancel the test
     }

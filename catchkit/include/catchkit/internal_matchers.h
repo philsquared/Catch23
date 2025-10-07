@@ -261,7 +261,6 @@ namespace CatchKit {
         struct MatchExprRef {
             ArgT& arg;
             MatcherT const& matcher;
-            std::string message = {};
 
             // Implemented in internal_matchers.h:
             [[nodiscard]] auto evaluate() const -> MatchResult;

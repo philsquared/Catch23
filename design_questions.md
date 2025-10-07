@@ -6,24 +6,11 @@ This is somewhere to track some outstanding design questions that I'd ideally li
 This support was removed as it had minimal benefit and a lot of knock-on effects.
 We will wait until C++26 to be able to offer these as reflection should make it easier.
 
-## Performing assertion evaluation in destructor
-
-Within a `CHECK` or `REQUIRE` an expression is decomposed into a XXXExprRef type (UnaryExprRef, BinaryExprRef).
-Because we don't know what the final type will be until the end of the expression (it starts out as a UnaryExprRef,
-but if a comparison operator is used then it becomes a BinaryExprRef) the expr objects themselves don't know if they
-hold the final expression until their destructors are called.
-So, currently, the ...Expr destructors call back into Asserter (to which a pointer is being held) to evaluate the expression.
-
-We could pass the whole ...Expr object to a function that will perform the evaluation on the final object without requiring the
-expr objects themselves to trigger this. The main reason for not doing that is to keep the macro-less syntax simpler.
-Because the `<<` operator only binds to the first part of the expression we'd need something else to wrap the whole thing
-and that would become something the user would have to write if not using macros.
-
 ## Attaching messages to assertions
 
 In Catch2 you had to use `INFO` before the assertion.
 Many other frameworks support a syntax where you can attach messages more directly, and there is something to be said for this.
-For now I have added support for adding a message after a , operator overload.
+I considered (and originally implemented) a comma syntax that mirrors how you supply a message to static_assert.
 
 e.g.:
 
@@ -31,16 +18,14 @@ e.g.:
 CHECK( a != b, "One of these things is not like the other");
 ```
 
-This "works" but has some downsides:
+However this has the problem that, because it was within the macro, it got caught in the stringification.
+So I have moved it outside the macro, "streamed in" with the << operator (similar to some other frameworks);
 
-1. It may not be immediately obvious what it's doing
-2. It gets caught in the `#__VA_ARGS__` conversion to string. There is an attempt to filter it out - but that breaks if you, e.g. use std::format.
-3. It involves an overloaded comma operator!
+```c++
+CHECK( a != b ) << "One of these things is not like the other";
+```
 
-(2) Is probably the biggest concern, and would apply to any solution that was "in-macro" (unless a way of avoiding it can be found).
-Some other frameworks allow you to tag the message outside the macro, usually using the `<<` operator.
-I'm not sure how that could be done in our case since we're in a do...while. 
-It's not obvious how we could change that without other trade-offs
+I think this the best trade-off, but leaving it here for now.
 
 ## Matcher detection
 

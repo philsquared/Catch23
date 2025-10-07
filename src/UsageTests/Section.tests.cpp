@@ -111,8 +111,8 @@ TEST_CASE( "looped tests", "[.][failing]" ) {
     static const int fib[]  = { 1, 1, 2, 3, 5, 8, 13, 21 };
 
     for( std::size_t i=0; i < sizeof(fib)/sizeof(int); ++i ) {
-        CHECK( ( fib[i] % 2 ) == 0,
-            std::format("Testing if fib[{}] ({}) is even", i, fib[i] ) );
+        CHECK( ( fib[i] % 2 ) == 0 )
+            << "Testing if fib[" << i <<"] (" << fib[i] << ") is even";
     }
 }
 TEST( "Meta: looped tests", ["meta"] ) {

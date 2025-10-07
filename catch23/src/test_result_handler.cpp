@@ -105,17 +105,6 @@ namespace CatchKit::Detail {
         assert(current_test_info);
         assert(current_context);
 
-        if( !message.empty() ) {
-            // Attempt to strip out an inline message
-            // note: this is quite brittle, so if it seems to have stopped working
-            // check that this logic still matches usage
-            std::string_view& expr = current_context->original_expression;
-            if( auto pos = expr.rfind(message); pos != std::string::npos ) {
-                assert( pos > 3 && expr[pos-3] == ',' );
-                expr = expr.substr( 0, pos-3 );
-            }
-        }
-
         std::string full_message(message);
 
         // Add in any captured variables

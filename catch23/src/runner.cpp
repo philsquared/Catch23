@@ -16,10 +16,10 @@ namespace CatchKit::Detail {
                 .result_handler=&test_handler,
                 .result_disposition=ResultDisposition::Abort };
 
-            Checker old_check = ::check;
-            Checker old_require = ::require;
-            ::check = check;
-            ::require = require;
+            Checker old_check = std::move(::check);
+            Checker old_require = std::move(::require);
+            ::check = std::move(check);
+            ::require = std::move(require);
 
             try {
                 test.test_fun(check, require);
@@ -42,8 +42,8 @@ namespace CatchKit::Detail {
                         {} );
                 }
             }
-            ::check = old_check;
-            ::require = old_require;
+            ::check = std::move(old_check);
+            ::require = std::move(old_require);
         }
     }
     auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {

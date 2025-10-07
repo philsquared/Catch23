@@ -28,6 +28,7 @@ namespace CatchKit::Detail
         ResultHandler* result_handler = nullptr;
         ResultDisposition result_disposition = ResultDisposition::Abort;
         bool should_decompose = true;
+        std::optional<std::ostringstream> message_stream = {};
 
         auto operator()(AssertionContext const& context) -> Asserter;
     };
@@ -40,9 +41,8 @@ namespace CatchKit::Detail
 
         void report_current_exception() const;
         std::optional<ExpressionInfo> expression_info;
-        std::ostringstream message_stream;
     public:
-        explicit Asserter( Checker& checker ) : checker(checker) {}
+        explicit Asserter( Checker& checker );
         ~Asserter() noexcept(false); // NOSONAR NOLINT (misc-typo)
 
         auto& handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
@@ -55,34 +55,30 @@ namespace CatchKit::Detail
             return *this;
         }
 
-        void simple_assert(std::nullptr_t, std::string_view message = {}) noexcept {
-            simple_assert(false, message);
+        void simple_assert(std::nullptr_t) noexcept {
+            simple_assert(false);
         }
-        void simple_assert(auto const& result, std::string_view message = {}) noexcept {
+        void simple_assert(auto const& result) noexcept {
             if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes ) {
                 expression_info = std::monostate();
-                message_stream << message;
             }
         }
         void accept_expr(auto&& expr) noexcept {  // NOSONAR NOLINT (misc-typo)
             auto raw_result = expr.evaluate();
             if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes ) {
                 expression_info = expr.expand( raw_result );
-                message_stream << expr.message;
             }
-        }
-        template<typename T>
-        void accept_expr(T&& expr, std::string const& message) noexcept {
-            // !TBD Temporary hack to add message until we change the interface
-            expr.message += message;
-            accept_expr(std::forward<T>(expr));
         }
 
         template<typename ArgT, typename MatcherT>
         constexpr void that( ArgT&& arg, MatcherT&& matcher ) noexcept;
 
         [[maybe_unused]] friend auto& operator << ( Asserter& asserter, auto&& message ) {
-            asserter.message_stream << message;
+            if( asserter.expression_info ) {
+                if( !asserter.checker.message_stream )
+                    asserter.checker.message_stream.emplace();
+                *asserter.checker.message_stream << message;
+            }
             return asserter;
         }
 
