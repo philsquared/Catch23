@@ -45,14 +45,6 @@ namespace CatchKit::Detail
                 report_current_exception();
             }
         }
-        void handle_unexpected_exceptions(std::invocable auto const& expr_call) const {
-            try {
-                expr_call();
-            }
-            catch(...) {
-                report_current_exception();
-            }
-        }
 
         template<typename T>
         void simple_assert(auto const&, T&&) const noexcept {
@@ -71,10 +63,10 @@ namespace CatchKit::Detail
         constexpr auto that( ArgT&& arg, MatcherT&& matcher ) noexcept;
 
         // To kick off an expression decomposition
-        [[maybe_unused]] friend constexpr auto operator << ( Asserter& asserter, auto&& lhs ) noexcept {
+        [[maybe_unused]] friend constexpr auto operator <=> ( Asserter& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
-        [[maybe_unused]] friend constexpr auto operator << ( Asserter&& asserter, auto&& lhs ) noexcept {
+        [[maybe_unused]] friend constexpr auto operator <=> ( Asserter&& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
     private:

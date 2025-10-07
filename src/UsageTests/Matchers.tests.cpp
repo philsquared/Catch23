@@ -73,16 +73,6 @@ TEST("throws matcher") {
     }
 }
 
-TEST("throws matcher - macro free") {
-    using namespace CatchKit::Matchers;
-    check().that( []{ throwing_function(); }, throws() );
-}
-// TBD This one should go somewhere else as it's not a matcher
-TEST("incidentally throwing assertion - macro free", [should_fail]) {
-    check().handle_unexpected_exceptions(
-        [&]{ throw std::domain_error("hello"); } );
-}
-
 TEST("!throws matcher succeeds when call doesn't throw") {
     CHECK_THAT( non_throwing_function(), !throws() );
 }

@@ -11,21 +11,25 @@
 #include "internal_warnings.h"
 
 #define CATCHKIT_INTERNAL_ASSERT(macro_name, checker, ...) \
-    if( checker.should_decompose ) \
-        checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
-            .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
+    checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
+        .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
+            if( checker.should_decompose ) { \
                 CATCHKIT_WARNINGS_SUPPRESS_START \
                 CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
-                asserter << __VA_ARGS__; \
+                asserter <=> __VA_ARGS__; \
                 CATCHKIT_WARNINGS_SUPPRESS_END \
-            }); \
-    else checker(CatchKit::AssertionContext(macro_name, #__VA_ARGS__)).simple_assert(__VA_ARGS__)
+            } else { \
+                asserter.simple_assert(__VA_ARGS__); \
+            } \
+        })
 
 
 #define CATCHKIT_INTERNAL_ASSERT_THAT(macro_name, checker, arg, match_expr) \
-    do { using namespace CatchKit::Matchers; \
-        checker(CatchKit::AssertionContext(macro_name, #arg ", " #match_expr)).that( [&]{ return arg; }, match_expr ); \
-    } while( false )
+    checker( CatchKit::AssertionContext(macro_name, #arg ", " #match_expr) ) \
+        .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
+            using namespace CatchKit::Matchers; \
+            asserter.that( [&]{ return arg; }, match_expr ); \
+        })
 
 
 #define CHECK(...) CATCHKIT_INTERNAL_ASSERT( "CHECK", check, __VA_ARGS__ )

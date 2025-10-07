@@ -93,29 +93,6 @@ But I'm saving the best for last. In Catch23, enums are automatically covertible
 That's with the caveat that it uses a nasty tricky involving `std::source_location` and some templated probing.
 It's a cutdown version of the technique used by libraries like Magic Enum.
 
-## Macros? Where we're going we don't need macros!
-
-Some modern test frameworks, using C++20 facilities, have been able to avoid using macros altogether.
-Catch23 allows the same - but you do forego a couple of capabilities (or need to add a lot of boilerplate):
-
-```c++
-int const two = 2;
-check() << 1 == two;
-
-using namespace CatchKit::Matchers;
-check() << "hello", starts_with("hell") && ends_with("lo");
-require.handle_unexpected_exceptions( [&]{ require("this_throws()") << this_throws(); } );
-```
-
-The first two examples work as-is, but any unexpected exceptions are not recoverable (they cancel the test),
-and we don't get the original expression captured as a string. The final example shows how we can get them back:
-`require.handle_unexpected_exceptions` gives us the exception handling, 
-and the string passed to the inner `require()` call serves the role of the expression string capture.
-
-Indeed, the macros essentially just do these two things for you, now (not exactly, as they pass an AssertionContext to `require()`/`check()`).
-
-So the macros are still the recommended approach, but if you want to go macro free it's good to know that you can.
-
 ## Getting the message
 
 Catch2 has macros like `INFO` and `CAPTURE` for capturing extra strings that can printed along with the results.

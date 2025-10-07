@@ -3,17 +3,8 @@
 This is somewhere to track some outstanding design questions that I'd ideally like to resolve before first release.
 
 ## Support for macro-less tests?
-You can currently do, e.g. `check() << a == b` (any expressions after the `<<`), or `check().that( /* matcher */ )`.
-But this comes with a number of trade-offs:
-1. It doesn't capture the expression as you wrote it (for printing as  a string).
-2. It doesn't catch unexpected exceptions (these are caught at the test case level, so you lose specific file/ line).
-3. The syntax, especially the use of `<<`, becomes part of the API, so needs to be maintained.
-4. Parts of the syntax generates warnings and SA violations. Within the macro these are suppressed.
-5. It complicated the expression decomposition design (see below)
-
-Macro-less test cases are also possible, but haven't been implemented yet.
-The question is, is it worth it? Maybe we wait until C++26 to be able to offer these? 
-Reflection should make it easier.
+This support was removed as it had minimal benefit and a lot of knock-on effects.
+We will wait until C++26 to be able to offer these as reflection should make it easier.
 
 ## Performing assertion evaluation in destructor
 
