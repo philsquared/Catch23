@@ -20,7 +20,7 @@ namespace CatchKit::Detail {
 
     auto Checker::operator()(AssertionContext const& context) -> Asserter {
         result_handler->on_assertion_start(result_disposition, context);
-        return Asserter{*this};
+        return Asserter( *this );
     }
 
     Asserter::~Asserter() noexcept(false) {

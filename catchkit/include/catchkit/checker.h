@@ -17,6 +17,7 @@
 
 #include <utility>
 #include <cassert>
+#include <sstream>
 
 namespace CatchKit::Detail
 {
@@ -35,15 +36,17 @@ namespace CatchKit::Detail
     struct Asserter {
         Checker& checker;
 
+        explicit Asserter( Checker& checker ) : checker(checker) {}
         ~Asserter() noexcept(false); // NOSONAR NOLINT (misc-typo)
 
-        void handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
+        auto& handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
             try {
                 expr_call(*this);
             }
             catch(...) {
                 report_current_exception();
             }
+            return *this;
         }
 
         template<typename T>
@@ -69,6 +72,7 @@ namespace CatchKit::Detail
         [[maybe_unused]] friend constexpr auto operator <=> ( Asserter&& asserter, auto&& lhs ) noexcept {
             return UnaryExprRef{ lhs, &asserter };
         }
+
     private:
         void report_current_exception() const;
     };
