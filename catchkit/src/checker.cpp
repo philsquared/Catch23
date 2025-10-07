@@ -14,10 +14,6 @@ constinit CatchKit::Checker require{ &default_assertion_handler, CatchKit::Resul
 
 namespace CatchKit::Detail {
 
-    auto Checker::operator()(std::string_view message, std::source_location assertion_location) -> Asserter {
-        return operator()(AssertionContext{{}, {}, message, assertion_location});
-    }
-
     auto Checker::operator()(AssertionContext const& context) -> Asserter {
         result_handler->on_assertion_start(result_disposition, context);
         return Asserter( *this );

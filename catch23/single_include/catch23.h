@@ -728,7 +728,7 @@ namespace CatchKit::Detail
             if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes )
                 checker.result_handler->on_assertion_result_detail(std::monostate(), message);
         }
-        void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
+        void accept_expr(auto&& expr) noexcept; // Implemented after the definitions of the Expr Ref types
 
         template<typename ArgT, typename MatcherT>
         constexpr auto that( ArgT&& arg, MatcherT const& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)

@@ -16,7 +16,7 @@
             if( checker.should_decompose ) { \
                 CATCHKIT_WARNINGS_SUPPRESS_START \
                 CATCHKIT_WARNINGS_SUPPRESS_UNUSED_COMPARISON \
-                asserter <=> __VA_ARGS__; \
+                asserter.accept_expr( asserter <=> __VA_ARGS__ ); \
                 CATCHKIT_WARNINGS_SUPPRESS_END \
             } else { \
                 asserter.simple_assert(__VA_ARGS__); \

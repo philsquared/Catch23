@@ -261,24 +261,12 @@ namespace CatchKit {
         struct MatchExprRef {
             ArgT& arg;
             MatcherT const& matcher;
-            Asserter* asserter = nullptr;
             std::string message = {};
-
-            ~MatchExprRef() {
-                if( asserter )
-                    asserter->accept_expr(*this);
-            }
 
             // Implemented in internal_matchers.h:
             [[nodiscard]] auto evaluate() const -> MatchResult;
             [[nodiscard]] auto expand( MatchResult const& result ) const -> ExpressionInfo;
         };
-
-        template<typename ArgT, typename MatcherT>
-        [[maybe_unused]] constexpr auto operator, ( MatchExprRef<ArgT, MatcherT>&& matcher_ref, std::string_view message ) noexcept {
-            matcher_ref.message = message;
-            return matcher_ref;
-        }
 
         void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results, uintptr_t matcher_address, std::string const& description );
 
@@ -297,9 +285,9 @@ namespace CatchKit {
         }
 
         template<typename ArgT, typename MatcherT>
-        constexpr auto Asserter::that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
+        constexpr void Asserter::that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
             enforce_composite_matchers_are_rvalues<MatcherT>();
-            return MatchExprRef{ arg, matcher, this };
+            accept_expr( MatchExprRef{ arg, matcher } );
         }
 
         template<typename ArgT, typename MatcherT>

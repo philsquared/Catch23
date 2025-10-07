@@ -11,7 +11,6 @@
 
 #include <utility>
 
-
 namespace CatchKit::Detail {
 
     struct Asserter;
@@ -21,18 +20,10 @@ namespace CatchKit::Detail {
     struct BinaryExprRef {
         LhsT& lhs;
         RhsT& rhs;
-        Asserter* asserter = nullptr;
         std::string message = {};
 
         [[nodiscard]] auto evaluate() const -> ResultType;
         [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
-
-        ~BinaryExprRef();
-
-        [[maybe_unused]] auto&& operator, ( std::string_view new_message ) noexcept {
-            this->message = new_message;
-            return *this;
-        }
 
     };
 
@@ -41,17 +32,14 @@ namespace CatchKit::Detail {
     template<typename T>
     struct UnaryExprRef {
         T& value;
-        Asserter* asserter = nullptr;
         std::string message = {};
 
         [[nodiscard]] auto evaluate() const -> ResultType;
         [[nodiscard]] auto expand( ResultType result ) const -> ExpressionInfo;
 
-        ~UnaryExprRef();
-
         template<Operators Op, typename RhsT>
         auto make_binary_expr( RhsT&& rhs ) noexcept { // NOSONAR (ref is used within its lifetime) NOLINT (misc-typo)
-            return BinaryExprRef<T, std::remove_reference_t<RhsT>, Op>{ value, rhs, std::exchange(asserter, nullptr) };
+            return BinaryExprRef<T, std::remove_reference_t<RhsT>, Op>{ value, rhs };
         }
 
         template<typename RhsT>
@@ -88,12 +76,6 @@ namespace CatchKit::Detail {
             static_assert( requires{ lhs.value >= rhs; } );
             return lhs.template make_binary_expr<Operators::GreaterThanOrEqual>( std::forward<RhsT>( rhs ) );
         }
-
-        [[maybe_unused]] auto&& operator, ( std::string_view new_message ) noexcept {
-            this->message = new_message;
-            return *this;
-        }
-
     };
 
 

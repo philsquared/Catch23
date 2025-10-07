@@ -29,7 +29,6 @@ namespace CatchKit::Detail
         ResultDisposition result_disposition = ResultDisposition::Abort;
         bool should_decompose = true;
 
-        auto operator()(std::string_view message = {}, std::source_location assertion_location = std::source_location::current()) -> Asserter;
         auto operator()(AssertionContext const& context) -> Asserter;
     };
 
@@ -49,10 +48,6 @@ namespace CatchKit::Detail
             return *this;
         }
 
-        template<typename T>
-        void simple_assert(auto const&, T&&) const noexcept {
-            static_assert(std::is_convertible_v<T, std::string_view>, "Only matchers or strings can follow the comma operator");
-        }
         void simple_assert(std::nullptr_t, std::string_view message = {}) const noexcept {
             simple_assert(false, message);
         }
@@ -60,17 +55,21 @@ namespace CatchKit::Detail
             if( checker.result_handler->on_assertion_result(!result ? ResultType::Failed : ResultType::Passed) == ResultDetailNeeded::Yes )
                 checker.result_handler->on_assertion_result_detail(std::monostate(), message);
         }
-        void accept_expr(auto& expr) noexcept; // Implemented after the definitions of the Expr Ref types
+        void accept_expr(auto&& expr) noexcept; // Implemented after the definitions of the Expr Ref types
+
+        template<typename T>
+        void accept_expr(T&& expr, std::string const& message) noexcept {
+            // !TBD Temporary hack to add message until we change the interface
+            expr.message += message;
+            accept_expr(std::forward<T>(expr));
+        }
 
         template<typename ArgT, typename MatcherT>
-        constexpr auto that( ArgT&& arg, MatcherT&& matcher ) noexcept;
+        constexpr void that( ArgT&& arg, MatcherT&& matcher ) noexcept;
 
         // To kick off an expression decomposition
-        [[maybe_unused]] friend constexpr auto operator <=> ( Asserter& asserter, auto&& lhs ) noexcept {
-            return UnaryExprRef{ lhs, &asserter };
-        }
-        [[maybe_unused]] friend constexpr auto operator <=> ( Asserter&& asserter, auto&& lhs ) noexcept {
-            return UnaryExprRef{ lhs, &asserter };
+        [[maybe_unused]] friend constexpr auto operator <=> ( Asserter const&, auto&& value ) noexcept { // NOSONAR NOLINT (misc-typo)
+            return UnaryExprRef{ value };
         }
 
     private:
@@ -78,12 +77,6 @@ namespace CatchKit::Detail
     };
 
     // --------------
-
-    template<typename T>
-    UnaryExprRef<T>::~UnaryExprRef() {
-        if( asserter )
-            asserter->accept_expr(*this);
-    }
 
     template<typename T>
     auto UnaryExprRef<T>::evaluate() const -> ResultType {
@@ -109,12 +102,6 @@ namespace CatchKit::Detail
     template<typename T>
     auto UnaryExprRef<T>::expand(ResultType) const -> ExpressionInfo {
         return UnaryExpressionInfo{ stringify(value) };
-    }
-
-    template<typename LhsT, typename RhsT, Operators Op>
-    BinaryExprRef<LhsT, RhsT, Op>::~BinaryExprRef() {
-        if( asserter )
-            asserter->accept_expr(*this);
     }
 
     CATCHKIT_WARNINGS_SUPPRESS_START
@@ -155,7 +142,7 @@ namespace CatchKit::Detail
 
     inline auto to_result_type( ResultType result ) -> ResultType { return result; }
 
-    void Asserter::accept_expr( auto& expr ) noexcept {
+    void Asserter::accept_expr( auto&& expr ) noexcept {
         auto raw_result = expr.evaluate();
         if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes )
             checker.result_handler->on_assertion_result_detail( expr.expand( raw_result ), expr.message );
