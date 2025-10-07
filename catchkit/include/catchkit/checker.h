@@ -64,7 +64,7 @@ namespace CatchKit::Detail
                 message_stream << message;
             }
         }
-        void accept_expr(auto&& expr) noexcept {
+        void accept_expr(auto&& expr) noexcept {  // NOSONAR NOLINT (misc-typo)
             auto raw_result = expr.evaluate();
             if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes ) {
                 expression_info = expr.expand( raw_result );
@@ -80,6 +80,11 @@ namespace CatchKit::Detail
 
         template<typename ArgT, typename MatcherT>
         constexpr void that( ArgT&& arg, MatcherT&& matcher ) noexcept;
+
+        [[maybe_unused]] friend auto& operator << ( Asserter& asserter, auto&& message ) {
+            asserter.message_stream << message;
+            return asserter;
+        }
 
         // To kick off an expression decomposition
         [[maybe_unused]] friend constexpr auto operator <=> ( Asserter const&, auto&& value ) noexcept { // NOSONAR NOLINT (misc-typo)
