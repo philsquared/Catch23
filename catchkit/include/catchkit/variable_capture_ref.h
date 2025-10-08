@@ -2,8 +2,8 @@
 // Created by Phil Nash on 31/07/2025.
 //
 
-#ifndef CATCHKIT_VARIABLE_CAPTURE_H
-#define CATCHKIT_VARIABLE_CAPTURE_H
+#ifndef CATCHKIT_VARIABLE_CAPTURE_REF_H
+#define CATCHKIT_VARIABLE_CAPTURE_REF_H
 
 #include "stringify.h"
 
@@ -40,4 +40,4 @@ namespace CatchKit::Detail
 
 } // namespace CatchKit::Detail
 
-#endif // CATCHKIT_VARIABLE_CAPTURE_H
+#endif // CATCHKIT_VARIABLE_CAPTURE_REF_H

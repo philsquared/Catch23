@@ -40,6 +40,8 @@ add_library(Catchkit STATIC
         include/catchkit/internal_compilers.h
         src/internal_compilers.cpp
         src/internal_platform.cpp
+        src/captured_variable.cpp
+        include/catchkit/captured_variable.h
 )
 
 target_include_directories(Catchkit PUBLIC include)

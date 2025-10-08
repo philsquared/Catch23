@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <utility>
+#include <ranges>
 
 namespace CatchKit::Detail {
 
@@ -105,19 +106,15 @@ namespace CatchKit::Detail {
         assert(current_test_info);
         assert(current_context);
 
-        std::string full_message(message);
+        auto variables =
+            variable_captures
+            | std::views::transform([](VariableCaptureRef const* var) {
+                    return CapturedVariable{ std::string(var->name), normalise_type_name(var->type), var->get_value() };
+                })
+            | std::ranges::to<std::vector>();
 
-        // Add in any captured variables
-        // !TBD: improve formatting - or should we pass this through in a more fine-grained way to the reporter?
-        if( !variable_captures.empty() ) {
-            if( !full_message.empty() )
-                full_message += "\n" "with";
-            full_message += "captured variables:";
-            for( auto var : variable_captures ) {
-                full_message += std::format("\n    {} : {} = {}", var->name, var->type, var->get_value() );
-            }
-        }
-        reporter.on_assertion_end(*current_context, AssertionInfo{ last_result, expression_info, full_message } );
+        reporter.on_assertion_end(*current_context,
+            AssertionInfo{ last_result, expression_info, std::string(message), std::move(variables) } );
     }
 
     void TestResultHandler::on_assertion_end() {

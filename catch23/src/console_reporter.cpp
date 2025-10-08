@@ -144,7 +144,12 @@ namespace CatchKit {
             }
             std::println();
         }
-        if (!assertion_info.message.empty()) {
+        if( !assertion_info.variables.empty() ) {
+            std::println("with captured variables:");
+            for( auto const& var : assertion_info.variables )
+                println( ColourIntent::SecondaryText, "  {} : {} = {}", var.name, var.type, var.value );
+        }
+        if( !assertion_info.message.empty() ) {
             std::println("with message:");
             println(ColourIntent::SecondaryText, "  {}", assertion_info.message);
         }

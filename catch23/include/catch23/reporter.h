@@ -12,6 +12,7 @@
 #include "catchkit/result_type.h"
 #include "catchkit/assertion_context.h"
 #include "catchkit/report_on.h"
+#include "catchkit/captured_variable.h"
 
 #include <vector>
 
@@ -21,7 +22,7 @@ namespace CatchKit {
         AdjustedResult result;
         ExpressionInfo expression_info;
         std::string message;
-        // !TBD: include variable captures, here?
+        std::vector<CapturedVariable> variables;
 
         [[nodiscard]] auto failed() const { return result == AdjustedResult::Failed; }
         [[nodiscard]] auto passed() const { return !failed(); }
