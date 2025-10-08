@@ -14,7 +14,7 @@ namespace CatchKit::Detail
     struct Checker;
     struct ResultHandler;
 
-    struct VariableCapture {
+    struct VariableCaptureRef {
         std::string_view name;
         std::string_view type;
         ResultHandler& result_handler;
@@ -22,18 +22,18 @@ namespace CatchKit::Detail
         [[nodiscard]] virtual auto get_value() const -> std::string = 0;
 
     protected:
-        VariableCapture(std::string_view name, std::string_view type, Checker& checker);
-        ~VariableCapture(); // not virtual because we never destroy polymorphically
+        VariableCaptureRef(std::string_view name, std::string_view type, Checker& checker);
+        ~VariableCaptureRef(); // not virtual because we never destroy polymorphically
     };
 
     template<typename T>
-    struct TypedVariableCapture final : VariableCapture {
+    struct TypedVariableCaptureRef final : VariableCaptureRef {
         T const& value;
 
         [[nodiscard]] auto get_value() const -> std::string override { return stringify( value ); }
 
-        TypedVariableCapture(T const& value, std::string_view name, Checker& checker)
-        :   VariableCapture( name, type_to_string<T>(), checker ),
+        TypedVariableCaptureRef(T const& value, std::string_view name, Checker& checker)
+        :   VariableCaptureRef( name, type_to_string<T>(), checker ),
             value(value)
         {}
     };

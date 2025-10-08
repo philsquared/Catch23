@@ -33,8 +33,8 @@ add_library(Catchkit STATIC
         include/catchkit/report_on.h
         src/internal_matchers.cpp
         include/catchkit/internal_matchers.h
-        src/variable_capture.cpp
-        include/catchkit/variable_capture.h
+        src/variable_capture_ref.cpp
+        include/catchkit/variable_capture_ref.h
         src/reflection.cpp
         include/catchkit/reflection.h
         include/catchkit/internal_compilers.h

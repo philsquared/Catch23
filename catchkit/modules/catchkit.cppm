@@ -41,7 +41,7 @@ export namespace CatchKit {
 }
 export namespace CatchKit::Detail {
     using Detail::Asserter;
-    using Detail::TypedVariableCapture;
+    using Detail::TypedVariableCaptureRef;
 }
 export namespace CatchKit::GenericMatchers {}
 export namespace CatchKit::StringMatchers {}

@@ -12,7 +12,7 @@
 #include "operator_to_string.h"
 #include "exceptions.h"
 #include "stringify.h"
-#include "variable_capture.h" // NOLINT (misc-include-cleaner)
+#include "variable_capture_ref.h" // NOLINT (misc-include-cleaner)
 #include "macros.h" // NOLINT (misc-include-cleaner)
 
 #include <utility>

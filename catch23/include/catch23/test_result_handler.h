@@ -26,7 +26,7 @@ namespace CatchKit::Detail
         ResultDisposition current_result_disposition = ResultDisposition::Abort;
         ExecutionNodes* execution_nodes = nullptr;
 
-        std::vector<VariableCapture*> variable_captures;
+        std::vector<VariableCaptureRef*> variable_captures;
         Counters assertions;
         ShrinkingMode shrinking_mode = ShrinkingMode::Normal;
         int shrink_count = 0;
@@ -48,8 +48,8 @@ namespace CatchKit::Detail
         void on_shrink_found( std::vector<std::string> const& values );
         void on_shrink_end();
 
-        void add_variable_capture( VariableCapture* capture ) override;
-        void remove_variable_capture( VariableCapture* capture ) override;
+        void add_variable_capture( VariableCaptureRef* capture ) override;
+        void remove_variable_capture( VariableCaptureRef* capture ) override;
 
         [[nodiscard]] auto get_reporter() const -> Reporter& { return reporter; }
         [[nodiscard]] auto passed() const { return last_result != AdjustedResult::Failed; }

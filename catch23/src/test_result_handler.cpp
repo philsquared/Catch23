@@ -5,7 +5,7 @@
 #include "catch23/test_result_handler.h"
 #include "catchkit/assertion_context.h"
 
-#include "catchkit/variable_capture.h"
+#include "catchkit/variable_capture_ref.h"
 
 #include <cassert>
 #include <utility>
@@ -127,10 +127,10 @@ namespace CatchKit::Detail {
         }
     }
 
-    void TestResultHandler::add_variable_capture( VariableCapture* capture ) {
+    void TestResultHandler::add_variable_capture( VariableCaptureRef* capture ) {
         variable_captures.push_back(capture);
     }
-    void TestResultHandler::remove_variable_capture( VariableCapture* capture ) {
+    void TestResultHandler::remove_variable_capture( VariableCaptureRef* capture ) {
         std::erase(variable_captures, capture);
     }
 

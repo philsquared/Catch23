@@ -14,7 +14,7 @@
 namespace CatchKit::Detail
 {
     struct AssertionContext;
-    struct VariableCapture;
+    struct VariableCaptureRef;
 
     enum class ResultDisposition { Abort, Continue };
     enum class ResultDetailNeeded { Yes, No };
@@ -30,8 +30,8 @@ namespace CatchKit::Detail
         virtual void on_assertion_result_detail( ExpressionInfo const& expression_info, std::string_view message ) = 0;
         virtual void on_assertion_end() = 0;
 
-        virtual void add_variable_capture(VariableCapture*) { /* do nothing by default */ };
-        virtual void remove_variable_capture(VariableCapture*) { /* do nothing by default */ };
+        virtual void add_variable_capture(VariableCaptureRef*) { /* do nothing by default */ };
+        virtual void remove_variable_capture(VariableCaptureRef*) { /* do nothing by default */ };
 
     };
 
