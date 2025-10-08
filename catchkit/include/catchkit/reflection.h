@@ -14,7 +14,21 @@ namespace CatchKit {
         auto parse_templated_name( std::string const& templated_name, std::source_location location = std::source_location::current() ) -> std::string_view;
         template<typename T>
         auto type_to_string() -> std::string_view {
-            return parse_templated_name("T");
+            // Handle common built-in types directly to save instantiating a std::source_location
+            if constexpr( std::is_same_v<T, int> )
+                return "int";
+            if constexpr( std::is_same_v<T, bool> )
+                return "bool";
+            if constexpr( std::is_same_v<T, float> )
+                return "float";
+            if constexpr( std::is_same_v<T, double> )
+                return "double";
+            if constexpr( std::is_same_v<T, std::string> )
+                return "std::string";
+            if constexpr( std::is_same_v<T, std::string_view> )
+                return "std::string_view";
+            else
+                return parse_templated_name("T");
         }
 
         auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified = false) -> std::string_view;
@@ -43,6 +57,7 @@ namespace CatchKit {
                 return std::string(val);
             return unknown_enum_to_string(static_cast<size_t>(e));
         }
+        auto normalise_type_name(std::string_view type_name) -> std::string;
 
     } // namespace Detail
 

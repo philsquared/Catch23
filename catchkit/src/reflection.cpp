@@ -33,4 +33,29 @@ namespace CatchKit::Detail {
         return std::format("<unknown enum value: {}>", enum_value);
     }
 
+    auto normalise_type_name(std::string_view type_name) -> std::string {
+        if( type_name.starts_with("std::") ) {
+            auto substr = type_name.substr(5);
+            if( auto pos = substr.find( "basic_" ); pos != std::string_view::npos ) {
+                substr = substr.substr(pos+6);
+                if( substr.starts_with( "string<wchar_t>" ) )
+                    return "std::wstring";
+                if( substr.starts_with( "string_view<wchar_t>" ) )
+                    return "std::wstring_view";
+
+                if( substr.starts_with( "string<char8_t>" ) )
+                    return "std::u8string";
+                if( substr.starts_with( "string_view<char8_t>" ) )
+                    return "std::u8string_view";
+
+                if( substr.starts_with( "string<char16_t>" ) )
+                    return "std::u16string";
+                if( substr.starts_with( "string_view<char16_t>" ) )
+                    return "std::u16string_view";
+            }
+            // !TBD: add more matches
+        }
+        return std::string(type_name);
+    }
+
 } // namespace CatchKit::Detail

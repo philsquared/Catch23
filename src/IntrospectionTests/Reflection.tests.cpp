@@ -45,6 +45,20 @@ TEST("pairs and tuples can be converted to strings", [reflection_tag]) {
     CHECK(CatchKit::type_to_string<std::tuple<float, double, bool>>() == "std::tuple<float, double, bool>");
 }
 
+TEST("std alias type names are normalised", [reflection_tag]) {
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::string>() ) == "std::string" );
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::string_view>() ) == "std::string_view" );
+
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::wstring>() ) == "std::wstring" );
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::wstring_view>() ) == "std::wstring_view" );
+
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::u8string>() ) == "std::u8string" );
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::u8string_view>() ) == "std::u8string_view" );
+
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::u16string>() ) == "std::u16string" );
+    CHECK( CatchKit::Detail::normalise_type_name( CatchKit::type_to_string<std::u16string_view>() ) == "std::u16string_view" );
+}
+
 enum class Colours{ red, green, blue };
 
 TEST("Enum classes can be converted to strings", [reflection_tag]) {
