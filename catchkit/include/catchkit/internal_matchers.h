@@ -60,23 +60,23 @@ namespace CatchKit {
         // 2. ... or an embedded tag type or constant
         // 3. See if there is any other way to bring that the argument type in.
         template<typename M, typename T>
-        concept IsEagerMatcher = requires(M m, T something) {
-            { m.match(something) } -> std::same_as<MatchResult>;
+        concept IsEagerMatcher = requires(M m, T arg) {
+            { m.match(arg) } -> std::same_as<MatchResult>;
         };
 
         template<typename M, typename T>
-        concept IsLazyMatcher = requires(M m, T(*f)()) { // NOSONAR NOLINT (misc-typo)
+        concept IsLazyMatcher = requires(M m, T(*f)()) {
             { m.lazy_match(f) } -> std::same_as<MatchResult>;
         };
 
-        template<typename M>
-        concept IsEagerBindableMatcher = requires(M m, CouldBeAnything something, AlwaysMatcher matcher) {
-            { m.bound_match(something, matcher) } -> std::same_as<MatchResult>;
+        template<typename M, typename T>
+        concept IsEagerBindableMatcher = requires(M m, T arg, AlwaysMatcher matcher) {
+            { m.bound_match(arg, matcher) } -> std::same_as<MatchResult>;
         };
 
-        template<typename M>
-        concept IsLazyBindableMatcher = requires(M m, AlwaysMatcher matcher) {
-            { m.lazy_bound_match([]{/* any callable */}, matcher) } -> std::same_as<MatchResult>;
+        template<typename M, typename T>
+        concept IsLazyBindableMatcher = requires(M m, T(*f)(), AlwaysMatcher matcher) {
+            { m.lazy_bound_match(f, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
@@ -233,7 +233,7 @@ namespace CatchKit {
 
             template<typename ArgT>
             auto lazy_match( ArgT const& arg ) const -> MatchResult {
-                if constexpr ( IsLazyBindableMatcher<M1> ) {
+                if constexpr ( IsLazyBindableMatcher<M1, ArgT> ) {
                     static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
                     return matcher1.lazy_bound_match(arg, matcher2)
                         .set_address( std::bit_cast<uintptr_t>(&matcher1) )
@@ -245,7 +245,7 @@ namespace CatchKit {
 
             template<typename ArgT>
             auto match( ArgT const& arg ) const -> MatchResult {
-                static_assert( IsEagerBindableMatcher<M1>, "The LHS of >>= must be a bindable matcher" );
+                static_assert( IsEagerBindableMatcher<M1, ArgT>, "The LHS of >>= must be a bindable matcher" );
                 if constexpr( std::invocable<ArgT> )
                     return matcher1.bound_match(arg(), matcher2)
                         .set_address( std::bit_cast<uintptr_t>(&matcher1) )
