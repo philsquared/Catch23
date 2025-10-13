@@ -103,28 +103,24 @@ namespace CatchKit {
 
         template<typename ArgT, typename MatcherT>
         auto invoke_matcher( MatcherT& matcher, ArgT&& arg ) -> MatchResult {
-            if constexpr( IsLazyMatcher<MatcherT> ) {
-                auto address = std::bit_cast<uintptr_t>( &matcher );
-                if constexpr( std::invocable<ArgT> )
-                // static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
+            auto address = std::bit_cast<uintptr_t>( &matcher );
+            if constexpr( std::invocable<ArgT> ) {
+                if constexpr( IsLazyMatcher<MatcherT> ) {
                     return matcher.lazy_match( arg ).set_address( address );
-                else if constexpr( IsEagerMatcher<MatcherT> )
-                    return matcher.match( arg ).set_address( address );
+                }
                 else {
-                    static_assert( false, "Lazy matchers must be matched against lambdas" );
-                    std::unreachable();
+                    static_assert( IsEagerMatcher<MatcherT, decltype(arg())> );
+                    return matcher.match( arg() ).set_address( address );
                 }
             }
-            else if constexpr( IsEagerMatcher<MatcherT> ) {
-                auto address = std::bit_cast<uintptr_t>( &matcher );
-                if constexpr( std::invocable<ArgT> )
-                    return matcher.match( arg() ).set_address( address );
-                else
-                    return matcher.match( arg ).set_address( address );
-            }
             else {
-                static_assert( false, "RHS of match statement is not a matcher" );
-                std::unreachable();
+                if constexpr( IsEagerMatcher<MatcherT, ArgT> ) {
+                    return matcher.match( arg ).set_address( address );
+                }
+                else {
+                    static_assert( IsLazyMatcher<MatcherT> );
+                    return matcher.match( [&arg]{ return arg; } ).set_address( address );
+                }
             }
         }
 
