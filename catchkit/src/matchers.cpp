@@ -12,6 +12,7 @@ namespace CatchKit {
     static_assert(Detail::IsMatcher<GenericMatchers::Equals<bool>>);
     static_assert(Detail::IsEagerMatcher<ExceptionMatchers::HasMessage>);
     static_assert(Detail::IsMatcher<ExceptionMatchers::HasMessage>);
+    static_assert( Detail::IsCompositeMatcher<Detail::AndMatcher<GenericMatchers::Equals<bool>, GenericMatchers::Equals<bool>>> );
 
     namespace StringMatchers {
 

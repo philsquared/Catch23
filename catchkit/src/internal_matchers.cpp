@@ -23,4 +23,4 @@ namespace CatchKit::Detail {
         return *this;
     }
 
-} //namespace CatchKit::Detail
+} // namespace CatchKit::Detail

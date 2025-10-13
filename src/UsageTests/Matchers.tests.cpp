@@ -93,6 +93,7 @@ TEST("Composed matchers cannot be stored") {
     // The following should not compile if uncommented:
     // auto is_close_to_but_not_zero = is_close_to(0.0, 0.1) && !is_close_to(0.0, 0.0);
     // CHECK_THAT( 0.01, is_close_to_but_not_zero ); // dangling refs
+    // CHECK_THAT( 0.01, is_close_to_but_not_zero && is_zero );
 }
 
 // The following tests have been taken from the Catch2 test suite,

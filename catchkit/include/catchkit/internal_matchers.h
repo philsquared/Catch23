@@ -41,7 +41,6 @@ namespace CatchKit {
 
         inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }
 
-
         struct CouldBeAnything {
             template <typename T> explicit(false) operator T() const; // NOLINT
         };
@@ -82,18 +81,18 @@ namespace CatchKit {
         };
 
         template<typename M>
-        concept IsBinaryCompositeMatcher = requires(M const m) {
-            { m.matcher1 } -> IsMatcher;
-            { m.matcher2 } -> IsMatcher;
+        concept IsCompositeMatcher = requires {
+            typename std::remove_cvref_t<M>::ComposedMatcher1;
         };
 
         template<typename M>
-        concept IsUnaryCompositeMatcher = requires(M const m) {
-            { m.base_matcher } -> IsMatcher;
+        concept IsBinaryCompositeMatcher = requires {
+            typename M::ComposedMatcher1;
+            typename M::ComposedMatcher2;
         };
 
         template<typename M>
-        concept IsCompositeMatcher = IsBinaryCompositeMatcher<M> || IsUnaryCompositeMatcher<M>;
+        concept IsUnaryCompositeMatcher = IsCompositeMatcher<M> && !IsBinaryCompositeMatcher<M>;
 
         template<typename MatcherT>
         constexpr void enforce_composite_matchers_are_rvalues() {
@@ -133,6 +132,8 @@ namespace CatchKit {
         // The result of a && expression
         template<typename M1, typename M2>
         struct AndMatcher {
+            using ComposedMatcher1 = M1;
+            using ComposedMatcher2 = M2;
             M1& matcher1;
             M2& matcher2;
 
@@ -153,6 +154,8 @@ namespace CatchKit {
         // The result of a || expression
         template<typename M1, typename M2>
         struct OrMatcher {
+            using ComposedMatcher1 = M1;
+            using ComposedMatcher2 = M2;
             M1& matcher1;
             M2& matcher2;
 
@@ -172,6 +175,7 @@ namespace CatchKit {
         // The result of a ! expression
         template<typename M>
         struct NotMatcher {
+            using ComposedMatcher1 = M;
             M& base_matcher;
 
             auto match( auto const& value ) const -> MatchResult {
@@ -218,6 +222,8 @@ namespace CatchKit {
         // If so, the left operand must implement bound_match() or lazy_bound_match()
         template<typename M1, typename M2>
         struct BoundMatchers {
+            using ComposedMatcher1 = M1;
+            using ComposedMatcher2 = M2;
             M1 matcher1;
             M2 matcher2;
 
