@@ -57,9 +57,9 @@ namespace CatchKit {
             { m.match(something) } -> std::same_as<MatchResult>;
         };
 
-        template<typename M>
-        concept IsLazyMatcher = requires(M m) {
-            { m.lazy_match([]{/* any callable */}) } -> std::same_as<MatchResult>;
+        template<typename M, typename T>
+        concept IsLazyMatcher = requires(M m, T(*f)()) { // NOSONAR NOLINT (misc-typo)
+            { m.lazy_match(f) } -> std::same_as<MatchResult>;
         };
 
         template<typename M>
@@ -73,7 +73,7 @@ namespace CatchKit {
         };
 
         template<typename M>
-        concept IsMatcher = IsEagerMatcher<M, CouldBeAnything> || IsLazyMatcher<M>;
+        concept IsMatcher = IsEagerMatcher<M, CouldBeAnything> || IsLazyMatcher<M, CouldBeAnything>;
 
         template<typename M>
         concept MatcherHasDescribeMethod = requires(M const m) {
@@ -105,11 +105,12 @@ namespace CatchKit {
         auto invoke_matcher( MatcherT& matcher, ArgT&& arg ) -> MatchResult {
             auto address = std::bit_cast<uintptr_t>( &matcher );
             if constexpr( std::invocable<ArgT> ) {
-                if constexpr( IsLazyMatcher<MatcherT> ) {
+                using ReturnedArgType = decltype(arg());
+                if constexpr( IsLazyMatcher<MatcherT, ReturnedArgType> ) {
                     return matcher.lazy_match( arg ).set_address( address );
                 }
                 else {
-                    static_assert( IsEagerMatcher<MatcherT, decltype(arg())> );
+                    static_assert( IsEagerMatcher<MatcherT, ReturnedArgType> );
                     return matcher.match( arg() ).set_address( address );
                 }
             }
@@ -118,7 +119,7 @@ namespace CatchKit {
                     return matcher.match( arg ).set_address( address );
                 }
                 else {
-                    static_assert( IsLazyMatcher<MatcherT> );
+                    static_assert( IsLazyMatcher<MatcherT, ArgT> );
                     return matcher.match( [&arg]{ return arg; } ).set_address( address );
                 }
             }
