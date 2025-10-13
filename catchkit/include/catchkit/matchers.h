@@ -126,7 +126,7 @@ namespace CatchKit {
             }
             template<typename BoundMatcherT>
             [[nodiscard]] auto bound_match(auto const& ex, BoundMatcherT const& bound_matcher ) const -> MatchResult {
-                static_assert(Detail::IsEagerMatcher<BoundMatcherT>);
+                static_assert(Detail::IsEagerMatcher<BoundMatcherT, std::string>);
 
                 std::string message = Detail::get_exception_message(ex);
                 if( what && message != *what )
@@ -147,7 +147,7 @@ namespace CatchKit {
 
         template<typename E=void>
         struct Throws {
-            template<Detail::IsEagerMatcher MessageMatcher>
+            template<Detail::IsEagerMatcher<std::string> MessageMatcher>
             auto constexpr with_message_that( MessageMatcher const& message_matcher ) {
                 using Detail::operator >>=;
                 return *this >>= HasMessage() >>= message_matcher;

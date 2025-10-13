@@ -52,7 +52,7 @@ namespace CatchKit {
 
         // !TBD: refactor this all in terms of marker interfaces, or something
         // * currently we don't handle overloads or constrained-template match functions properly
-        template<typename M, typename T=CouldBeAnything>
+        template<typename M, typename T>
         concept IsEagerMatcher = requires(M m, T something) {
             { m.match(something) } -> std::same_as<MatchResult>;
         };
@@ -73,7 +73,7 @@ namespace CatchKit {
         };
 
         template<typename M>
-        concept IsMatcher = IsEagerMatcher<M> || IsLazyMatcher<M>;
+        concept IsMatcher = IsEagerMatcher<M, CouldBeAnything> || IsLazyMatcher<M>;
 
         template<typename M>
         concept MatcherHasDescribeMethod = requires(M const m) {

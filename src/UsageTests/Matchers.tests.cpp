@@ -88,7 +88,7 @@ TEST("Composed matchers cannot be stored") {
     using namespace CatchKit::Matchers;
     auto is_close_to_zero = is_close_to(0.0, 0.1);
     auto is_zero = is_close_to(0.0, 0.0);
-    CHECK_THAT( 0.01, is_close_to_zero && !is_zero ); // ol
+    CHECK_THAT( 0.01, is_close_to_zero && !is_zero ); // ok
 
     // The following should not compile if uncommented:
     // auto is_close_to_but_not_zero = is_close_to(0.0, 0.1) && !is_close_to(0.0, 0.0);
