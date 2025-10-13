@@ -79,8 +79,8 @@ namespace CatchKit {
             { m.lazy_bound_match(f, matcher) } -> std::same_as<MatchResult>;
         };
 
-        template<typename M>
-        concept IsMatcher = IsEagerMatcher<M, CouldBeAnything> || IsLazyMatcher<M, CouldBeAnything>;
+        template<typename M, typename ArgT=CouldBeAnything>
+        concept IsMatcher = IsEagerMatcher<M, ArgT> || IsLazyMatcher<M, ArgT>;
 
         template<typename M>
         concept MatcherHasDescribeMethod = requires(M const m) {
