@@ -125,7 +125,7 @@ namespace CatchKit {
                 return what ? Detail::get_exception_message(ex) == *what : true;
             }
             template<typename BoundMatcherT>
-            [[nodiscard]] auto bound_match(auto const& ex, BoundMatcherT const& bound_matcher ) const -> MatchResult {
+            [[nodiscard]] auto match(auto const& ex, BoundMatcherT const& bound_matcher ) const -> MatchResult {
                 static_assert(Detail::IsEagerMatcher<BoundMatcherT, std::string>);
 
                 std::string message = Detail::get_exception_message(ex);
@@ -159,11 +159,11 @@ namespace CatchKit {
 
             template<typename ArgT>
             [[nodiscard]] constexpr auto lazy_match(ArgT&& f) const -> MatchResult {
-                return lazy_bound_match(std::forward<ArgT>(f), Detail::AlwaysMatcher()).make_child_of(this);
+                return lazy_match(std::forward<ArgT>(f), Detail::AlwaysMatcher()).make_child_of(this);
             }
 
             template<typename BoundMatcherT>
-            [[nodiscard]] constexpr auto lazy_bound_match(auto&& f, BoundMatcherT const& bound_matcher) const -> MatchResult {
+            [[nodiscard]] constexpr auto lazy_match(auto&& f, BoundMatcherT const& bound_matcher) const -> MatchResult {
                 if constexpr( std::is_void_v<E> ) {
                     try {
                         f();

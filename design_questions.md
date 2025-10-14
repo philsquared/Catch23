@@ -36,9 +36,9 @@ How can we make this handle more cases without putting more onus on Matcher auth
 
 Can we simplify how matchers are written? Current need one (or more) of:
     match(arg)
+    match(arg, matcher)
     lazy_match(lambda)
-    bound_match(arg, matcher)
-    lazy_bound_match(lambda, matcher)
+    lazy_match(lambda, matcher)
 
 We should probably at least be able to just have match and detect (a) second arg and (b) whether first arg is lambda.
 

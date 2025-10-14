@@ -74,12 +74,12 @@ namespace CatchKit {
 
         template<typename M, typename T>
         concept IsEagerBindableMatcher = requires(M m, T arg, AlwaysMatcher matcher) {
-            { m.bound_match(arg, matcher) } -> std::same_as<MatchResult>;
+            { m.match(arg, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M, typename T>
         concept IsLazyBindableMatcher = requires(M m, T(*f)(), AlwaysMatcher matcher) {
-            { m.lazy_bound_match(f, matcher) } -> std::same_as<MatchResult>;
+            { m.lazy_match(f, matcher) } -> std::same_as<MatchResult>;
         };
 
         template<typename M, typename ArgT=CouldBeAnything>
@@ -221,7 +221,7 @@ namespace CatchKit {
         }
 
         // Matchers may be monadically bound with the >>= operator.
-        // If so, the left operand must implement bound_match() or lazy_bound_match()
+        // If so, the left operand must implement match(arg, bound_matcher)
         template<typename M1, typename M2>
         struct BoundMatchers {
             using ComposedMatcher1 = M1;
@@ -233,7 +233,7 @@ namespace CatchKit {
             auto lazy_match( ArgT const& arg ) const -> MatchResult {
                 if constexpr ( IsLazyBindableMatcher<M1, ArgT> ) {
                     static_assert( std::invocable<ArgT>, "Lazy matchers must be matched against lambdas" );
-                    return matcher1.lazy_bound_match(arg, matcher2)
+                    return matcher1.lazy_match(arg, matcher2)
                         .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
                 }
@@ -245,11 +245,11 @@ namespace CatchKit {
             auto match( ArgT const& arg ) const -> MatchResult {
                 static_assert( IsEagerBindableMatcher<M1, ArgT>, "The LHS of >>= must be a bindable matcher" );
                 if constexpr( std::invocable<ArgT> )
-                    return matcher1.bound_match(arg(), matcher2)
+                    return matcher1.match(arg(), matcher2)
                         .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
                 else
-                    return matcher1.bound_match(arg, matcher2)
+                    return matcher1.match(arg, matcher2)
                         .set_address( std::bit_cast<uintptr_t>(&matcher1) )
                         .make_child_of(this);
             }
