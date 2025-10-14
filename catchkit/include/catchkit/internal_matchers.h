@@ -125,13 +125,8 @@ namespace CatchKit {
                 }
             }
             else {
-                if constexpr( IsEagerMatcher<MatcherT, ArgT> ) {
-                    return matcher.match( arg ).set_address( address );
-                }
-                else {
-                    static_assert( IsLazyMatcher<MatcherT, ArgT> );
-                    return matcher.match( [&arg]{ return arg; } ).set_address( address );
-                }
+                static_assert( IsEagerMatcher<MatcherT, ArgT> );
+                return matcher.match( arg ).set_address( address );
             }
         }
 
@@ -297,7 +292,7 @@ namespace CatchKit {
         }
 
         template<typename ArgT, typename MatcherT>
-        constexpr void Asserter::that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
+        constexpr void Asserter::assert_that( ArgT&& arg, MatcherT&& matcher ) noexcept { // NOSONAR (we use the ref in its lifetime) NOLINT (misc-typo)
             enforce_composite_matchers_are_rvalues<MatcherT>();
             accept_expr( MatchExprRef{ arg, matcher } );
         }

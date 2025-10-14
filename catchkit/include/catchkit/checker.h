@@ -71,7 +71,7 @@ namespace CatchKit::Detail
         }
 
         template<typename ArgT, typename MatcherT>
-        constexpr void that( ArgT&& arg, MatcherT&& matcher ) noexcept;
+        constexpr void assert_that( ArgT&& arg, MatcherT&& matcher ) noexcept;
 
         [[maybe_unused]] friend auto& operator << ( Asserter& asserter, auto&& message ) {
             if( asserter.expression_info ) {

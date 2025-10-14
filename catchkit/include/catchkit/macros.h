@@ -28,7 +28,7 @@
     checker( CatchKit::AssertionContext(macro_name, #arg ", " #match_expr) ) \
         .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
             using namespace CatchKit::Matchers; \
-            asserter.that( [&]{ return arg; }, match_expr ); \
+            asserter.assert_that( [&]{ return arg; }, match_expr ); \
         })
 
 
