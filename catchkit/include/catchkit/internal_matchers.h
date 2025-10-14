@@ -52,13 +52,16 @@ namespace CatchKit {
 
         // !TBD: refactor this all in terms of marker interfaces, or something
         // * currently we don't handle overloads or constrained-template match functions properly
-        // Most usages have an Arg type, but the one place that doesn't that is problematic is
+        // Most usages have an Arg type, but the one place that doesn't which is problematic is
         // the operators for composite matchers (&&, ||, etc). These are composed before an argument
         // type is supplied - and we must *only* compose matchers.
         // So options seem to be:
-        // 1. require matchers to opt-in, either through a marker type base class (breaks CTAD)
-        // 2. ... or an embedded tag type or constant
-        // 3. See if there is any other way to bring that the argument type in.
+        // 1. require matchers to opt-in, either:
+        //  (a) through a marker type base class (breaks aggregate initialisation), or
+        //  (b) an embedded tag type or constant (ugly, extra syntax, tedious to remember)
+        // 2. Require that a trait template (`is_matcher<>`?) is specialised for the type. Ugly, tedious, and non-local.
+        // 3. Detect the `describe()` method instead (have it return `MatcherDescription`. Less explicit - is that problem?
+        // 4. A hybrid approach of (1a) and (1b) or (2) - detect match() but allow embedded identifier or trait-based detection as a fallback for the problem cases.
         template<typename M, typename T>
         concept IsEagerMatcher = requires(M m, T arg) {
             { m.match(arg) } -> std::same_as<MatchResult>;
