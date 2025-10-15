@@ -27,22 +27,6 @@ CHECK( a != b ) << "One of these things is not like the other";
 
 I think this the best trade-off, but leaving it here for now.
 
-## Matcher detection
-
-There are concepts to detect Matchers, but these currently fail with overloads and constrained templates.
-How can we make this handle more cases without putting more onus on Matcher authors to add extra annotations?
-
-## Matcher API
-
-Can we simplify how matchers are written? Current need one (or more) of:
-    match(arg)
-    match(arg, matcher)
-    lazy_match(lambda)
-    lazy_match(lambda, matcher)
-
-We should probably at least be able to just have match and detect (a) second arg and (b) whether first arg is lambda.
-
-
 ## std::formatter for Stringified types
 
 There is a specialisation of std::formatter for types that are specialised for Stringify.
