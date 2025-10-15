@@ -22,7 +22,7 @@ namespace CatchKit {
             [[nodiscard]] constexpr auto match(T const& value) const -> MatchResult {
                 return value == match_value;
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("equals( {} )", stringify(match_value));
             }
         };
@@ -33,7 +33,7 @@ namespace CatchKit {
             [[nodiscard]] auto match(auto&& val) const -> MatchResult { // NOSONAR NOLINT(misc-type)
                 return std::size(val) == size;
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("has_size(\"{}\")", size);
             }
         };
@@ -49,7 +49,7 @@ namespace CatchKit {
             [[nodiscard]] auto match( auto const& arg ) const -> MatchResult {
                 return pred(arg);
             }
-            [[nodiscard]] auto describe() const -> std::string {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return description;
             }
         };
@@ -75,7 +75,7 @@ namespace CatchKit {
                     return false;
                 return CasePolicy::equal(str.substr(0, match_str.size()), match_str);
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("starts_with(\"{}\")", match_str);
             }
         };
@@ -88,7 +88,7 @@ namespace CatchKit {
                     return false;
                 return CasePolicy::equal(str.substr(str.size()-match_str.size()), match_str);
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("ends_with(\"{}\")", match_str);
             }
         };
@@ -98,7 +98,7 @@ namespace CatchKit {
             [[nodiscard]] auto match(std::string_view str) const -> MatchResult {
                 return CasePolicy::find(str, match_str);
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("contains(\"{}\")", match_str);
             }
         };
@@ -109,7 +109,7 @@ namespace CatchKit {
             [[nodiscard]] auto match(std::string_view str) const -> MatchResult {
                 return CasePolicy::equal(str, match_str);
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("equals(\"{}\")", match_str);
             }
         };
@@ -137,7 +137,7 @@ namespace CatchKit {
                     .make_child_of(this);
             }
 
-            [[nodiscard]] auto describe() const -> std::string {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 if( what )
                     return std::format("has_message(\"{}\")", *what);
                 else
@@ -193,7 +193,7 @@ namespace CatchKit {
                 }
                 return false;
             }
-            [[nodiscard]] auto describe() const -> std::string{
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 if constexpr(std::is_void_v<E>)
                     return "throws()";
                 else
@@ -211,7 +211,7 @@ namespace CatchKit {
             [[nodiscard]] auto match(double value) const -> MatchResult {
                 return std::fabs(value-target) < epsilon;
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("is_close_to({})", target);
             }
         };
@@ -229,7 +229,7 @@ namespace CatchKit {
                     return false;
                 return std::equal( match_vec.begin(), match_vec.end(), std::begin(vec) );
             }
-            [[nodiscard]] auto describe() const {
+            [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("equals({})", stringify(match_vec));
             }
         };

@@ -39,29 +39,26 @@ namespace CatchKit {
             auto make_child_of(auto const& matcher) -> MatchResult& { return make_child_of( std::bit_cast<uintptr_t>( matcher ) ); }
         };
 
-        inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }
+        struct MatcherDescription {
+            std::string description;
 
-        struct CouldBeAnything {
-            template <typename T> explicit(false) operator T() const; // NOLINT
+            template<typename T> requires std::is_convertible_v<T, std::string>
+            explicit(false) MatcherDescription( T&& description) // NOSONAR NOLINT (misc-typo)
+            : description(std::forward<T>( description )) {}
         };
+
+        inline auto to_result_type( MatchResult const& result ) -> ResultType { return result ? ResultType::Passed : ResultType::Failed; }
 
         struct AlwaysMatcher {
             static auto match(auto&&) -> MatchResult { return true; }
             static auto lazy_match(auto&&) -> MatchResult  { return true; }
         };
 
-        // !TBD: refactor this all in terms of marker interfaces, or something
-        // * currently we don't handle overloads or constrained-template match functions properly
-        // Most usages have an Arg type, but the one place that doesn't which is problematic is
-        // the operators for composite matchers (&&, ||, etc). These are composed before an argument
-        // type is supplied - and we must *only* compose matchers.
-        // So options seem to be:
-        // 1. require matchers to opt-in, either:
-        //  (a) through a marker type base class (breaks aggregate initialisation), or
-        //  (b) an embedded tag type or constant (ugly, extra syntax, tedious to remember)
-        // 2. Require that a trait template (`is_matcher<>`?) is specialised for the type. Ugly, tedious, and non-local.
-        // 3. Detect the `describe()` method instead (have it return `MatcherDescription`. Less explicit - is that problem?
-        // 4. A hybrid approach of (1a) and (1b) or (2) - detect match() but allow embedded identifier or trait-based detection as a fallback for the problem cases.
+        template<typename M>
+        concept IsMatcher = requires(M m) {
+            { m.describe() } -> std::same_as<MatcherDescription>;
+        };
+
         template<typename M, typename T>
         concept IsEagerMatcher = requires(M m, T arg) {
             { m.match(arg) } -> std::same_as<MatchResult>;
@@ -80,14 +77,6 @@ namespace CatchKit {
         template<typename M, typename T>
         concept IsLazyBindableMatcher = requires(M m, T(*f)(), AlwaysMatcher matcher) {
             { m.lazy_match(f, matcher) } -> std::same_as<MatchResult>;
-        };
-
-        template<typename M, typename ArgT=CouldBeAnything>
-        concept IsMatcher = IsEagerMatcher<M, ArgT> || IsLazyMatcher<M, ArgT>;
-
-        template<typename M>
-        concept MatcherHasDescribeMethod = requires(M const m) {
-            { m.describe() } -> std::convertible_to<std::string>;
         };
 
         template<typename M>
@@ -148,8 +137,8 @@ namespace CatchKit {
                     .add_children_from(result1); // add in the other result
 
             }
-            [[nodiscard]] auto describe() const {
-                return std::format("({} && {})", matcher1.describe(), matcher2.describe());
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("({} && {})", matcher1.describe().description, matcher2.describe().description);
             }
         };
 
@@ -169,8 +158,8 @@ namespace CatchKit {
                     .make_child_of(this) // Create new matcher for this level
                     .add_children_from(result1); // add in the other result
             }
-            [[nodiscard]] auto describe() const {
-                return std::format("({} || {})", matcher1.describe(), matcher2.describe());
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("({} || {})", matcher1.describe().description, matcher2.describe().description);
             }
         };
 
@@ -193,8 +182,8 @@ namespace CatchKit {
                 return result;
 
             }
-            [[nodiscard]] auto describe() const {
-                return std::format("!({})", base_matcher.describe());
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("!({})", base_matcher.describe().description);
             }
         };
 
@@ -254,8 +243,8 @@ namespace CatchKit {
                         .make_child_of(this);
             }
 
-            [[nodiscard]] auto describe() const -> std::string {
-                return std::format("({} >>= {})", matcher1.describe(), matcher2.describe());
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("({} >>= {})", matcher1.describe().description, matcher2.describe().description);
             }
         };
 
@@ -287,7 +276,7 @@ namespace CatchKit {
                 collect_subexpressions(matcher.base_matcher, sub_expressions, results);
             }
             else {
-                add_subexpressions( sub_expressions, results, std::bit_cast<uintptr_t>(&matcher), matcher.describe() );
+                add_subexpressions( sub_expressions, results, std::bit_cast<uintptr_t>(&matcher), matcher.describe().description );
             }
         }
 
@@ -318,7 +307,7 @@ namespace CatchKit {
             catch(...) {
                 arg_as_string = std::format("exception thrown while evaluating matcher: {}", get_current_exception_message() );
             }
-            return MatchExpressionInfo{ arg_as_string, matcher.describe(), std::move(sub_expressions) };
+            return MatchExpressionInfo{ arg_as_string, matcher.describe().description, std::move(sub_expressions) };
         }
 
     } // namespace Detail
@@ -333,6 +322,7 @@ namespace CatchKit {
     } // namespace Matchers
 
     using Detail::MatchResult;
+    using Detail::MatcherDescription;
 
 } // namespace CatchKit
 

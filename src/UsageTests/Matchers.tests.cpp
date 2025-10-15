@@ -162,7 +162,7 @@ namespace {
             return se.i == m_expected;
         }
 
-        auto describe() const -> std::string {
+        auto describe() const -> CatchKit::MatcherDescription {
             std::ostringstream ss;
             ss << "special exception has value of " << m_expected;
             return ss.str();
@@ -786,7 +786,7 @@ struct CheckedTestingMatcher {
         matchCalled = true;
         return matchSucceeds;
     }
-    auto describe() const {
+    auto describe() const -> CatchKit::MatcherDescription {
         return "CheckedTestingMatcher set to " +
                ( matchSucceeds ? std::string( "succeed" )
                                : std::string( "fail" ) );
@@ -825,7 +825,7 @@ struct CheckedTestingGenericMatcher {
         matchCalled = true;
         return matchSucceeds;
     }
-    auto describe() const {
+    auto describe() const -> CatchKit::MatcherDescription {
         return "CheckedTestingGenericMatcher set to " +
                ( matchSucceeds ? std::string( "succeed" )
                                : std::string( "fail" ) );
@@ -869,7 +869,7 @@ struct EqualsRangeMatcher {
         return std::equal( begin( m_range ), end( m_range ), begin( other ), end( other ) );
     }
 
-    [[nodiscard]] auto describe() const {
+    [[nodiscard]] auto describe() const -> CatchKit::MatcherDescription {
         // return "Equals: " + Catch::rangeToString( m_range );
         return "EqualsRange x"; // !TBD
     }
@@ -941,7 +941,7 @@ struct EvilCommaOperatorUsed : std::exception {
 };
 
 struct EvilMatcher {
-    auto describe() const { return "equals: 45"; }
+    auto describe() const -> CatchKit::MatcherDescription { return "equals: 45"; }
 
     auto match( int i ) const -> CatchKit::MatchResult { return i == 45; }
 
@@ -968,7 +968,7 @@ struct ImmovableMatcher {
     ImmovableMatcher& operator=( ImmovableMatcher const& ) = delete;
     ImmovableMatcher& operator=( ImmovableMatcher&& ) = delete;
 
-    std::string describe() const { return "always false"; }
+    CatchKit::MatcherDescription describe() const { return "always false"; }
 
     template <typename T> CatchKit::MatchResult match( T&& ) const { return false; }
 };
@@ -997,7 +997,7 @@ struct ThrowOnCopyOrMoveMatcher {
         throw MatcherWasMovedOrCopied();
     }
 
-    std::string describe() const { return "always false"; }
+    CatchKit::MatcherDescription describe() const { return "always false"; }
 
     template <typename T> CatchKit::MatchResult match( T&& ) const { return false; }
 };
@@ -1018,7 +1018,7 @@ TEST_CASE( "Immovable matchers can be used",
 }
 
 struct ReferencingMatcher {
-    std::string describe() const { return "takes reference"; }
+    CatchKit::MatcherDescription describe() const { return "takes reference"; }
     CatchKit::MatchResult match( int const& i ) const { return i == 22; }
 };
 
