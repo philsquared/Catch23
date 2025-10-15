@@ -38,7 +38,7 @@ namespace CatchKit {
     } // namespace StringMatchers
 
     namespace Detail {
-        void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, MatchResult const& results, uintptr_t matcher_address, std::string const& description ) {
+        void add_subexpressions( std::vector<SubExpressionInfo>& sub_expressions, CompositeMatchResult const& results, uintptr_t matcher_address, std::string const& description ) {
             if( auto it = std::ranges::find( results.child_results, matcher_address, &SubExpression::matcher_address ); it != results.child_results.end() )
                 sub_expressions.emplace_back(description, it->result);
             else if( results.matcher_address == matcher_address )

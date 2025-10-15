@@ -125,16 +125,16 @@ namespace CatchKit {
                 return what ? Detail::get_exception_message(ex) == *what : true;
             }
             template<typename BoundMatcherT>
-            [[nodiscard]] auto match(auto const& ex, BoundMatcherT const& bound_matcher ) const -> MatchResult {
+            [[nodiscard]] auto match(auto const& ex, BoundMatcherT const& bound_matcher ) const -> CompositeMatchResult {
                 static_assert(Detail::IsEagerMatcher<BoundMatcherT, std::string>);
 
                 std::string message = Detail::get_exception_message(ex);
                 if( what && message != *what )
                     return false;
 
-                return bound_matcher.match(message)
-                    .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
-                    .make_child_of(this);
+                return CompositeMatchResult( bound_matcher.match(message) )
+                    .set_address_of( bound_matcher )
+                    .make_child_of( this );
             }
 
             [[nodiscard]] auto describe() const -> MatcherDescription {
@@ -158,20 +158,20 @@ namespace CatchKit {
             }
 
             template<typename ArgT>
-            [[nodiscard]] constexpr auto lazy_match(ArgT&& f) const -> MatchResult {
+            [[nodiscard]] constexpr auto lazy_match(ArgT&& f) const -> CompositeMatchResult {
                 return lazy_match(std::forward<ArgT>(f), Detail::AlwaysMatcher()).make_child_of(this);
             }
 
             template<typename BoundMatcherT>
-            [[nodiscard]] constexpr auto lazy_match(auto&& f, BoundMatcherT const& bound_matcher) const -> MatchResult {
+            [[nodiscard]] constexpr auto lazy_match(auto&& f, BoundMatcherT const& bound_matcher) const -> CompositeMatchResult {
                 if constexpr( std::is_void_v<E> ) {
                     try {
                         f();
                         return false;
                     }
                     catch(...) {
-                        return bound_matcher.match(std::current_exception())
-                            .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
+                        return CompositeMatchResult( bound_matcher.match(std::current_exception()) )
+                            .set_address_of( bound_matcher )
                             .make_child_of(this);
                     }
                 }
@@ -183,9 +183,9 @@ namespace CatchKit {
                         return false;
                     }
                     catch(E& ex) {
-                        return bound_matcher.match(ex)
-                            .set_address( std::bit_cast<uintptr_t>(&bound_matcher) )
-                            .make_child_of(this);
+                        return CompositeMatchResult( bound_matcher.match(ex) )
+                            .set_address_of( bound_matcher )
+                            .make_child_of( this );
                     }
                     catch(...) {
                         return false;
