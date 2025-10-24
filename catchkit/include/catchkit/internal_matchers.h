@@ -301,7 +301,8 @@ namespace CatchKit {
                         return stringify(arg);
                     else if constexpr (!std::is_void_v<decltype(arg())>)
                         return stringify(arg());
-                    return {};
+                    else
+                        return {};
                 }
                 catch(...) {
                     return std::format("exception thrown while evaluating matcher: {}", get_current_exception_message() );
