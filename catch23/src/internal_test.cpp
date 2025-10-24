@@ -7,6 +7,7 @@
 #include <stdexcept>
 #include <vector>
 #include <unordered_map>
+#include <ranges>
 
 namespace CatchKit::Detail {
     namespace {
@@ -16,6 +17,11 @@ namespace CatchKit::Detail {
         }
         auto& get_tests_by_name_impl() {
             static std::unordered_map<std::string, std::size_t> tests_by_name; // NOSONAR NOLINT (misc-typo)
+            if( tests_by_name.empty() ) {
+                for(auto&& [i, test] : std::views::enumerate( get_all_tests_impl() ) ) {
+                    tests_by_name.try_emplace( test.test_info.name, i );
+                }
+            }
             return tests_by_name;
         }
     }
@@ -49,7 +55,6 @@ namespace CatchKit::Detail {
     void register_test(Test&& test) {
         auto& all_tests = get_all_tests_impl();
         all_tests.emplace_back(std::move(test));
-        get_tests_by_name_impl().try_emplace( all_tests.back().test_info.name, all_tests.size()-1 );
     }
     auto find_test_by_name(std::string const& name) -> Test const* {
         if( auto it = get_tests_by_name_impl().find( name ); it != get_tests_by_name_impl().end() )
