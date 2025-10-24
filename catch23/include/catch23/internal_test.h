@@ -22,6 +22,9 @@ namespace CatchKit::Detail {
         std::function<void(Checker&, Checker&)> test_fun;
         TestInfo test_info;
 
+        Test( std::function<void(Checker&, Checker&)>&& test_fun, TestInfo&& test_info );
+        Test(Test&&) = default;
+
         template<TagConvertible... T>
         auto&& operator[](T&&...tags) {
             test_info.tags = std::vector{Tag{std::forward<T>(tags)}...};

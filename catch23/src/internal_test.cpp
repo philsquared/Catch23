@@ -26,6 +26,10 @@ namespace CatchKit::Detail {
         }
     }
 
+    Test::Test( std::function<void(Checker&, Checker&)>&& test_fun, TestInfo&& test_info )
+    : test_fun(std::move(test_fun)), test_info(std::move(test_info))
+    {}
+
     // This is a legacy, compatibility, feature that should probably be moved out of the core
     auto make_test_info(std::source_location location, std::string name, std::string_view tag_spec ) -> TestInfo {
         std::vector<Tag> tags;
