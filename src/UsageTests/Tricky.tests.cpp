@@ -326,24 +326,12 @@ namespace {
     };
 }
 
-// TEST_CASE("Commas in various macros are allowed") {
-//     REQUIRE_THROWS( std::vector<constructor_throws>{constructor_throws{}, constructor_throws{}} );
-//     CHECK_THROWS( std::vector<constructor_throws>{constructor_throws{}, constructor_throws{}} );
-//     REQUIRE_NOTHROW( std::vector<int>{1, 2, 3} == std::vector<int>{1, 2, 3} );
-//     CHECK_NOTHROW( std::vector<int>{1, 2, 3} == std::vector<int>{1, 2, 3} );
-//
-//     REQUIRE(std::vector<int>{1, 2} == std::vector<int>{1, 2});
-//     CHECK( std::vector<int>{1, 2} == std::vector<int>{1, 2} );
-//     REQUIRE_FALSE(std::vector<int>{1, 2} == std::vector<int>{1, 2, 3});
-//     CHECK_FALSE( std::vector<int>{1, 2} == std::vector<int>{1, 2, 3} );
-//
-//     CHECK_NOFAIL( std::vector<int>{1, 2} == std::vector<int>{1, 2} );
-//     CHECKED_IF( std::vector<int>{1, 2} == std::vector<int>{1, 2} ) {
-//         REQUIRE(true);
-//     } CHECKED_ELSE( std::vector<int>{1, 2} == std::vector<int>{1, 2} ) {
-//         CHECK(true);
-//     }
-// }
+TEST_CASE("Commas in various macros are allowed") {
+    REQUIRE(std::vector<int>{1, 2} == std::vector<int>{1, 2});
+    CHECK( std::vector<int>{1, 2} == std::vector<int>{1, 2} );
+    // REQUIRE_FALSE(std::vector<int>{1, 2} == std::vector<int>{1, 2, 3});
+    // CHECK_FALSE( std::vector<int>{1, 2} == std::vector<int>{1, 2, 3} );
+}
 
 TEST_CASE( "non-copyable objects", "[.][failing]" ) {
     // Thanks to Agustin Bergé (@k-ballo on the cpplang Slack) for raising this
