@@ -16,8 +16,6 @@ namespace CatchKit::Detail {
     template<typename T>
     concept TagConvertible = std::constructible_from<Tag, T>;
 
-    auto make_test_info(std::source_location location, std::string name = {}, std::string_view tag_spec = {} ) -> TestInfo;
-
     struct Test {
         std::function<void(Checker&, Checker&)> test_fun;
         TestInfo test_info;

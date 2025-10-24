@@ -8,6 +8,13 @@
 #include "catch23/test.h"
 #include "catchkit/matchers.h"
 
+namespace CatchKit::Detail {
+
+    auto make_test_info(std::source_location location, std::string name = {}, std::string_view tag_spec = {} ) -> TestInfo;
+
+} // namespace CatchKit::Detail
+
+
 // TEST_CASE macro is now in macros.h
 
 // !TBD: these lose the expression decomposition, currently (which defeats the purpose)
