@@ -93,6 +93,14 @@ But I'm saving the best for last. In Catch23, enums are automatically covertible
 That's with the caveat that it uses a nasty tricky involving `std::source_location` and some templated probing.
 It's a cutdown version of the technique used by libraries like Magic Enum.
 
+```
+/../example.cpp:65:43: ❌ FAILED
+for expression:
+  CHECK( Colours::red == Colours::green )
+with expansion:
+  red == green
+```
+
 ## Getting the message
 
 Catch2 has macros like `INFO` and `CAPTURE` for capturing extra strings that can printed along with the results.
