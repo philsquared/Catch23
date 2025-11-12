@@ -98,18 +98,18 @@ It's a cutdown version of the technique used by libraries like Magic Enum.
 Catch2 has macros like `INFO` and `CAPTURE` for capturing extra strings that can printed along with the results.
 Some frameworks support a syntax like using `<<` after an assertion to "stream" a message in.
 
-Catch23 allows you to tag a string onto an assertion as just an extra argument:
+Catch23 now supports the streaming syntax:
 
 ```c++
-CHECK( 6*9 == 42, "This is not the answer you were looking for" );
+CHECK( 6*9 == 42 ) << "This is not the answer you were looking for";
 ```
 
 This works with Matchers, too:
 
 ```c++
 std::vector ints{ 1, 2, 3 };
-CHECK_THAT( ints, equals(std::vector{1, 2, 3}),
-    "It's as easy as that" );
+CHECK_THAT( ints, equals(std::vector{1, 2, 3}) )
+    << "It's as easy as that";
 ```
 
 `CAPTURE` is also supported and works as in Catch2 (including being able to pass multiple variables), 
