@@ -26,7 +26,7 @@ namespace CatchKit::Detail {
         }
     }
 
-    Test::Test( std::function<void(Checker&, Checker&)>&& test_fun, TestInfo&& test_info )
+    Test::Test( TestFunction&& test_fun, TestInfo&& test_info )
     : test_fun(std::move(test_fun)), test_info(std::move(test_info))
     {}
 

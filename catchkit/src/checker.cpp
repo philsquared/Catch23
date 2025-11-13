@@ -9,13 +9,16 @@ namespace {
     CatchKit::Detail::AssertResultHandler default_assertion_handler; // NOSONAR NOLINT (misc-typo)
 }
 
-constinit CatchKit::Checker check{ &default_assertion_handler, CatchKit::ResultDisposition::Continue }; // NOSONAR NOLINT (misc-typo)
-constinit CatchKit::Checker require{ &default_assertion_handler, CatchKit::ResultDisposition::Abort }; // NOSONAR NOLINT (misc-typo)
+constinit CatchKit::Checker checker{ &default_assertion_handler }; // NOSONAR NOLINT (misc-typo)
 
 namespace CatchKit::Detail {
 
-    auto Checker::operator()(AssertionContext const& context) -> Asserter {
-        result_handler->on_assertion_start(result_disposition, context);
+    auto Checker::check(AssertionContext const& context) -> Asserter {
+        result_handler->on_assertion_start(ResultDisposition::Continue, context);
+        return Asserter( *this );
+    }
+    auto Checker::require(AssertionContext const& context) -> Asserter {
+        result_handler->on_assertion_start(ResultDisposition::Abort, context);
         return Asserter( *this );
     }
 

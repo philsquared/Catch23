@@ -81,7 +81,7 @@ namespace CatchKit {
         auto run( Detail::Test const& test ) && -> MetaTestResults;
         auto run_test_by_name( std::string const& name_to_find ) && -> MetaTestResults;
 
-        friend auto operator << ( MetaTestRunner&& runner, std::invocable<Checker&, Checker&> auto const& test_fun ) {
+        friend auto operator << ( MetaTestRunner&& runner, std::invocable<Checker&> auto const& test_fun ) {
             return std::move(runner).run(Detail::Test{test_fun, {runner.location, std::move(runner.name)}});
         }
     };

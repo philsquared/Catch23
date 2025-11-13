@@ -34,14 +34,11 @@ This allows us to use std::format's support for formatting ranges, while recursi
 It does mean that if you have you own formatter you can't write a different Stringify for it, but that's probably a narrow case.
 Any other consequences?
 
-## check and require objects
+## shadowed checker object
 
-Instances of the Checker class called `check` and `require` are passed into the test function, 
-but are also available as (shadowed) global variables, which is used when outside the test function.
-This lets us use a more optimised path when in the test function. But
-1. Is this a good idea? and
-2. Do we need two objects?
-One of the reasons for having two objects is to support the macroless syntax.
+An instance of the Checker class called `checker` is passed into the test function, 
+but is also available as a (shadowed) global variable, which is used when outside the test function.
+This lets us use a more optimised path when in the test function. But is this a good idea?
 
 ## Mocking
 

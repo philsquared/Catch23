@@ -26,11 +26,11 @@ namespace CatchKit::Detail
 
     struct Checker {
         ResultHandler* result_handler = nullptr;
-        ResultDisposition result_disposition = ResultDisposition::Abort;
         bool should_decompose = true;
         std::optional<std::ostringstream> message_stream = {};
 
-        auto operator()(AssertionContext const& context) -> Asserter;
+        auto check(AssertionContext const& context) -> Asserter;
+        auto require(AssertionContext const& context) -> Asserter;
     };
 
     inline auto to_result_type( ResultType result ) -> ResultType { return result; }
@@ -150,8 +150,7 @@ namespace CatchKit
 
 } // namespace CatchKit
 
-// These global instances are used if not using the ones passed in to a function locally
-extern constinit CatchKit::Checker check; // NOSONAR NOLINT (misc-typo)
-extern constinit CatchKit::Checker require; // NOSONAR NOLINT (misc-typo)
+// This global instance is used if not using the one passed in to a function locally
+extern constinit CatchKit::Checker checker; // NOSONAR NOLINT (misc-typo)
 
 #endif // CATCHKIT_CHECKER_H

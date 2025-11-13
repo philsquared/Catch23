@@ -17,11 +17,12 @@ namespace CatchKit::Detail {
     concept TagConvertible = std::constructible_from<Tag, T>;
 
     struct Test {
-        std::function<void(Checker&, Checker&)> test_fun;
+        using TestFunction = std::function<void(Checker&)>;
+        TestFunction test_fun;
         TestInfo test_info;
 
-        Test( std::function<void(Checker&, Checker&)>&& test_fun, TestInfo&& test_info );
-        Test(Test&&) = default;
+        Test( TestFunction&& test_fun, TestInfo&& test_info );
+        Test( Test&& ) = default;
 
         template<TagConvertible... T>
         auto&& operator[](T&&...tags) {

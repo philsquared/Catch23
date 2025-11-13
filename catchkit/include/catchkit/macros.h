@@ -10,8 +10,8 @@
 
 #include "internal_warnings.h"
 
-#define CATCHKIT_INTERNAL_ASSERT(macro_name, checker, ...) \
-    checker( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
+#define CATCHKIT_INTERNAL_ASSERT(macro_name, checker_fun, ...) \
+    checker.checker_fun( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
         .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
             if( checker.should_decompose ) { \
                 CATCHKIT_WARNINGS_SUPPRESS_START \
@@ -24,8 +24,8 @@
         })
 
 
-#define CATCHKIT_INTERNAL_ASSERT_THAT(macro_name, checker, arg, match_expr) \
-    checker( CatchKit::AssertionContext(macro_name, #arg ", " #match_expr) ) \
+#define CATCHKIT_INTERNAL_ASSERT_THAT(macro_name, checker_fun, arg, match_expr) \
+    checker.checker_fun( CatchKit::AssertionContext(macro_name, #arg ", " #match_expr) ) \
         .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
             using namespace CatchKit::Matchers; \
             asserter.assert_that( [&]{ return arg; }, match_expr ); \
@@ -39,7 +39,7 @@
 #define REQUIRE_THAT( arg, matcher ) CATCHKIT_INTERNAL_ASSERT_THAT( "REQUIRE_THAT", require, arg, matcher )
 
 // Variable capture
-#define CATCHKIT_INTERNAL_DECLARE_VAR_X(suffix, var) CatchKit::Detail::TypedVariableCaptureRef CATCHKIT_INTERNAL_UNIQUE_NAME(var_capture##suffix)(var, #var, check)
+#define CATCHKIT_INTERNAL_DECLARE_VAR_X(suffix, var) CatchKit::Detail::TypedVariableCaptureRef CATCHKIT_INTERNAL_UNIQUE_NAME(var_capture##suffix)(var, #var, checker)
 
 #define CATCHKIT_INTERNAL_DECLARE_VARS_1(a) CATCHKIT_INTERNAL_DECLARE_VAR_X(_1, a)
 #define CATCHKIT_INTERNAL_DECLARE_VARS_2(a, b) CATCHKIT_INTERNAL_DECLARE_VAR_X(_1, a); CATCHKIT_INTERNAL_DECLARE_VAR_X(_2, b)

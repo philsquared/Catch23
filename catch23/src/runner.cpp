@@ -9,20 +9,12 @@ namespace CatchKit::Detail {
 
     namespace {
         void invoke_test( Test const& test, TestResultHandler& test_handler ) {
-            Checker check{
-                .result_handler=&test_handler,
-                .result_disposition=ResultDisposition::Continue };
-            Checker require{
-                .result_handler=&test_handler,
-                .result_disposition=ResultDisposition::Abort };
-
-            Checker old_check = std::move(::check);
-            Checker old_require = std::move(::require);
-            ::check = std::move(check);
-            ::require = std::move(require);
+            Checker checker{.result_handler=&test_handler };
+            Checker old_checker = std::move(::checker);
+            ::checker = std::move(checker);
 
             try {
-                test.test_fun(check, require);
+                test.test_fun(checker);
             }
             catch( TestCancelled ) { /* allow to pass through */ } // NOSONAR NOLINT (misc-typo)
             catch( ... ) { // NOSONAR NOLINT (misc-typo)
@@ -42,8 +34,7 @@ namespace CatchKit::Detail {
                         {} );
                 }
             }
-            ::check = std::move(old_check);
-            ::require = std::move(old_require);
+            ::checker = std::move(old_checker);
         }
     }
     auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {
