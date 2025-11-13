@@ -45,14 +45,36 @@ TEST("A test that can run tests") {
     CHECK( expr2->op == "==" );
 }
 
-TEST("Variables can be captured", [mute]) {
-    // !TBD: When we have richer reporting in the local test interface use that to check this
-    int x = 7, y = 42;
-    std::string s = "hello world";
-    float f = 3.14;
-    CAPTURE(x, y, s, f);
+TEST( "Variables can be captured" ) {
+    auto results = LOCAL_TEST() {
+        int x = 7, y = 42;
+        std::string s = "hello world";
+        float f = 3.14;
+        CAPTURE(x, y, s, f);
 
-    FAIL();
+        FAIL();
+    };
+
+    REQUIRE( results.size() == 1 );
+    auto const& result = results[0];
+    CHECK( result.failed() );
+    auto const& vars = result.info.variables;
+    REQUIRE( vars.size() == 4 );
+    CHECK( vars[0].name == "x" );
+    CHECK( vars[0].type == "int" );
+    CHECK( vars[0].value == "7" );
+
+    CHECK( vars[1].name == "y" );
+    CHECK( vars[1].type == "int" );
+    CHECK( vars[1].value == "42" );
+
+    CHECK( vars[2].name == "s" );
+    CHECK( vars[2].type == "std::string" );
+    CHECK( vars[2].value == "\"hello world\"" );
+
+    CHECK( vars[3].name == "f" );
+    CHECK( vars[3].type == "float" );
+    CHECK( vars[3].value == "3.14" );
 }
 
 struct NonConstEqualsNonConstRef {
