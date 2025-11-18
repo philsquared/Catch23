@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <unordered_map>
+#include <generator>
 
 namespace CatchKit::Detail {
 
@@ -22,6 +23,11 @@ namespace CatchKit::Detail {
             return all_tests;
         }
         auto find_test_by_name( std::string const& name ) const -> Test const*;
+
+        auto find_tests_by_tag( std::string tag_name ) const -> std::generator<Test const*>;
+        auto find_all_tests_by_tag( std::string tag_name ) const {
+            return find_tests_by_tag( std::move(tag_name) ) | std::ranges::to<std::vector>();
+        }
     };
 
     void register_test( Test&& test );

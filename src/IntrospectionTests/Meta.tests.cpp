@@ -2,6 +2,7 @@
 // Created by Phil Nash on 24/07/2025.
 //
 
+#include "catch23/test_registry.h"
 #ifdef USE_CATCH23_MODULES
     #include "catch23/macros.h"
     import catch23;
@@ -100,3 +101,21 @@ TEST("Types with non-const equality operators can be used") {
     }
 }
 
+TEST("Tests can be queried", ["test-tag"]) {
+    auto& reg = CatchKit::get_test_registry();
+
+    SECTION("Lookup by name") {
+        auto test = reg.find_test_by_name("Tests can be queried");
+        REQUIRE( test != nullptr );
+        auto const& test_loc = test->test_info.location;
+        auto this_loc = std::source_location::current();
+        CHECK(test_loc.file_name() == this_loc.file_name());
+        CHECK(test_loc.line() < this_loc.line());
+    }
+    SECTION("Lookup by tag") {
+        auto tests = reg.find_all_tests_by_tag("test-tag");
+        REQUIRE( tests.size() == 1 );
+        auto const& info = tests[0]->test_info;
+        REQUIRE( info.name == "Tests can be queried" );
+    }
+}

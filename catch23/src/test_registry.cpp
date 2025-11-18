@@ -50,5 +50,14 @@ namespace CatchKit::Detail {
             return &all_tests[it->second];
         return nullptr;
     }
+    auto TestRegistry::find_tests_by_tag(std::string tag_name) const -> std::generator<Test const*> {
+        for(auto const& test : all_tests) {
+            for( auto const& tag : test.test_info.tags ) {
+                if( tag.name == tag_name ) {
+                    co_yield &test;
+                }
+            }
+        }
+    }
 
 } // namespace CatchKit::Detail
