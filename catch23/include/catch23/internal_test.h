@@ -30,8 +30,6 @@ namespace CatchKit::Detail {
             return std::move(*this);
         }
     };
-    std::vector<Test> const& get_all_tests();
-    auto find_test_by_name(std::string const& name) -> Test const*;
 
     struct AutoReg {
         explicit AutoReg(Test&& test);

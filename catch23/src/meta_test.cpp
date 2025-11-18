@@ -3,10 +3,10 @@
 //
 
 #include "catch23/meta_test.h"
+#include "catch23/runner.h"
+#include "catch23/test_registry.h"
 
 #include <algorithm>
-
-#include "catch23/runner.h"
 
 namespace CatchKit {
 
@@ -29,7 +29,7 @@ namespace CatchKit {
     }
 
     auto MetaTestRunner::run_test_by_name( std::string const& name_to_find ) && -> MetaTestResults {
-        auto const* test = Detail::find_test_by_name( name_to_find );
+        auto const* test = get_test_registry().find_test_by_name( name_to_find );
         if( test == nullptr )
             throw std::domain_error( "No such test: " + name_to_find );
         return std::move(*this).run(*test);

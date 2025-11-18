@@ -81,6 +81,10 @@ namespace CatchKit::Detail {
 
     }
 
+    void TestRunner::run_tests( TestRegistry const& tests ) {
+        run_tests( tests.get_all_tests() );
+    }
+
     void TestRunner::run_test( Test const& test ) {
         ExecutionNodes execution_nodes({test.test_info.name, test.test_info.location});
         auto& root_node = execution_nodes.get_root();

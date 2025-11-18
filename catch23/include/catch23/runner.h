@@ -6,6 +6,7 @@
 #define CATCH23_RUNNER_H
 
 #include "print.h"
+#include "test_registry.h"
 #include "test.h"
 #include "reporter.h"
 #include "test_result_handler.h"
@@ -22,6 +23,8 @@ namespace CatchKit::Detail {
         explicit TestRunner( Reporter& reporter ) : result_handler(reporter) {}
 
         void run_test( Test const& test );
+
+        void run_tests( TestRegistry const& tests );
 
         void run_tests( range_of<Test> auto const& tests ) {
             result_handler.get_reporter().on_test_run_start();

@@ -34,6 +34,5 @@ export namespace CatchKit {
 // Export Detail types and functions needed by main macro
 export namespace CatchKit::Detail {
     using Detail::Test;
-    using Detail::get_all_tests;
     using Detail::range_of;
 }

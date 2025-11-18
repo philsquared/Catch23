@@ -40,6 +40,8 @@ add_library(Catch23 STATIC
         include/catch23/adjusted_result.h
         include/catch23/catch23_mod.h
         include/catch23/catch23_main_mod.h
+        include/catch23/test_registry.h
+        src/test_registry.cpp
 )
 
 target_include_directories(Catch23 PUBLIC include)
