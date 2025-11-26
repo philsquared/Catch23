@@ -222,8 +222,7 @@ TEST_CASE( "Objects that evaluated in boolean contexts can be checked", "[Tricky
 
     CHECK( True );
     CHECK( !False );
-    // !TBD - need to do CHECK_FALSE properly
-    // CHECK_FALSE( False );
+    CHECK_FALSE( False );
 }
 
 TEST_CASE( "Assertions then sections", "[Tricky]" )
