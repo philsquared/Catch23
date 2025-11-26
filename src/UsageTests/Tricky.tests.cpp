@@ -328,8 +328,8 @@ namespace {
 TEST_CASE("Commas in various macros are allowed") {
     REQUIRE(std::vector<int>{1, 2} == std::vector<int>{1, 2});
     CHECK( std::vector<int>{1, 2} == std::vector<int>{1, 2} );
-    // REQUIRE_FALSE(std::vector<int>{1, 2} == std::vector<int>{1, 2, 3});
-    // CHECK_FALSE( std::vector<int>{1, 2} == std::vector<int>{1, 2, 3} );
+    REQUIRE_FALSE(std::vector<int>{1, 2} == std::vector<int>{1, 2, 3});
+    CHECK_FALSE( std::vector<int>{1, 2} == std::vector<int>{1, 2, 3} );
 }
 
 TEST_CASE( "non-copyable objects", "[.][failing]" ) {
