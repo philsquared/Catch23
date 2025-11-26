@@ -101,7 +101,7 @@ namespace CatchKit {
             if( !context.original_expression.empty() )
                 println( ColourIntent::OriginalExpression, "  {}( {} )", context.macro_name, context.original_expression );
             else
-                println( ColourIntent::OriginalExpression, "  for {}", context.macro_name );
+                println( ColourIntent::OriginalExpression, "  for {}()", context.macro_name );
         }
 
         if( auto const& expr_info = assertion_info.expression_info;

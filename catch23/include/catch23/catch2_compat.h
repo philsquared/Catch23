@@ -20,6 +20,10 @@ namespace CatchKit::Detail {
 #define CHECK_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "CHECK_FALSE", check, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
 #define REQUIRE_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE_FALSE", require, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
 
-#define SUCCEED(...) PASS(__VA_ARGS__)
+#ifdef FAIL
+#undef FAIL
+#endif
+#define SUCCEED(...) CATCHKIT_INTERNAL_BOOL_ASSERT( "SUCCEED", check, true ) __VA_OPT__(<<) __VA_ARGS__
+#define FAIL(...) CATCHKIT_INTERNAL_BOOL_ASSERT( "FAIL", require, false ) __VA_OPT__(<<) __VA_ARGS__
 
 #endif // CATCH23_CATCH2_H
