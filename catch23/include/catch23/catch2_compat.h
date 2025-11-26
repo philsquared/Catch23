@@ -17,9 +17,8 @@ namespace CatchKit::Detail {
 
 // TEST_CASE macro is now in macros.h
 
-// !TBD: these lose the expression decomposition, currently (which defeats the purpose)
-#define CHECK_FALSE(...) CATCHKIT_INTERNAL_ASSERT_THAT( "CHECK_TRUE", check, __VA_ARGS__, is_false() )
-#define REQUIRE_FALSE(...) CATCHKIT_INTERNAL_ASSERT_THAT( "REQUIRE_TRUE", require, __VA_ARGS__, is_false() )
+#define CHECK_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "CHECK_FALSE", check, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
+#define REQUIRE_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE_FALSE", require, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
 
 #define SUCCEED(...) PASS(__VA_ARGS__)
 

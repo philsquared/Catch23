@@ -24,13 +24,15 @@ namespace CatchKit::Detail
     class Asserter;
     struct MatchResult;
 
+    enum class InvertResult { No = 0, Yes = 1 };
+
     struct Checker {
         ResultHandler* result_handler = nullptr;
         bool should_decompose = true;
         std::optional<std::ostringstream> message_stream = {};
 
-        auto check(AssertionContext const& context) -> Asserter;
-        auto require(AssertionContext const& context) -> Asserter;
+        auto check(AssertionContext const& context, InvertResult invert_result=InvertResult::No) -> Asserter;
+        auto require(AssertionContext const& context, InvertResult invert_result=InvertResult::No) -> Asserter;
     };
 
     inline auto to_result_type( ResultType result ) -> ResultType { return result; }
@@ -38,11 +40,13 @@ namespace CatchKit::Detail
 
     class Asserter {
         Checker& checker;
+        InvertResult invert_result = InvertResult::No;
+
+        std::optional<ExpressionInfo> expression_info;
 
         void report_current_exception() const;
-        std::optional<ExpressionInfo> expression_info;
     public:
-        explicit Asserter( Checker& checker );
+        explicit Asserter( Checker& checker, InvertResult invert_result );
         ~Asserter() noexcept(false); // NOSONAR NOLINT (misc-typo)
 
         auto& handle_unexpected_exceptions(std::invocable<Asserter&> auto const& expr_call) {
@@ -65,7 +69,10 @@ namespace CatchKit::Detail
         }
         void accept_expr(auto&& expr) noexcept {  // NOSONAR NOLINT (misc-typo)
             auto raw_result = expr.evaluate();
-            if( checker.result_handler->on_assertion_result( to_result_type( raw_result ) ) == ResultDetailNeeded::Yes ) {
+            auto result = to_result_type( raw_result );
+            if( invert_result == InvertResult::Yes )
+                result = result == ResultType::Failed ? ResultType::Passed : ResultType::Failed;
+            if( checker.result_handler->on_assertion_result( result ) == ResultDetailNeeded::Yes ) {
                 expression_info = expr.expand( raw_result );
             }
         }

@@ -8,8 +8,8 @@
 namespace CatchKit {
 
     enum class ResultType {
-        Passed,
-        Failed
+        Failed = 0,
+        Passed = 1
     };
 
     inline bool operator! (ResultType result) {

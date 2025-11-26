@@ -10,8 +10,8 @@
 
 #include "internal_warnings.h"
 
-#define CATCHKIT_INTERNAL_ASSERT(macro_name, checker_fun, ...) \
-    checker.checker_fun( CatchKit::AssertionContext(macro_name, #__VA_ARGS__) ) \
+#define CATCHKIT_INTERNAL_ASSERT2(macro_name, checker_fun, invert_result, expr_as_str, ...) \
+    checker.checker_fun( CatchKit::AssertionContext(macro_name, expr_as_str), invert_result ) \
         .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
             if( checker.should_decompose ) { \
                 CATCHKIT_WARNINGS_SUPPRESS_START \
@@ -23,6 +23,8 @@
             } \
         })
 
+#define CATCHKIT_INTERNAL_ASSERT(macro_name, checker_fun, invert_result, ...) \
+    CATCHKIT_INTERNAL_ASSERT2(macro_name, checker_fun, invert_result, #__VA_ARGS__, __VA_ARGS__)
 
 #define CATCHKIT_INTERNAL_ASSERT_THAT(macro_name, checker_fun, arg, match_expr) \
     checker.checker_fun( CatchKit::AssertionContext(macro_name, #arg ", " #match_expr) ) \
@@ -32,8 +34,8 @@
         })
 
 
-#define CHECK(...) CATCHKIT_INTERNAL_ASSERT( "CHECK", check, __VA_ARGS__ )
-#define REQUIRE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE", require, __VA_ARGS__ )
+#define CHECK(...) CATCHKIT_INTERNAL_ASSERT( "CHECK", check, CatchKit::Detail::InvertResult::No, __VA_ARGS__ )
+#define REQUIRE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE", require, CatchKit::Detail::InvertResult::No, __VA_ARGS__ )
 
 #define CHECK_THAT( arg, matcher ) CATCHKIT_INTERNAL_ASSERT_THAT( "CHECK_THAT", check, arg, matcher )
 #define REQUIRE_THAT( arg, matcher ) CATCHKIT_INTERNAL_ASSERT_THAT( "REQUIRE_THAT", require, arg, matcher )
@@ -62,7 +64,7 @@
 #define REQUIRE_STATIC(...) static_assert(__VA_ARGS__)
 
 // !TBD: These should have a dedicated internal macro (in Catch2 it was INTERNAL_CATCH_MSG)
-#define PASS(...) CATCHKIT_INTERNAL_ASSERT( "PASS", check, true ) __VA_OPT__(<<) __VA_ARGS__
-#define FAIL(...) CATCHKIT_INTERNAL_ASSERT( "FAIL", require, false ) __VA_OPT__(<<) __VA_ARGS__
+#define PASS(...) CATCHKIT_INTERNAL_ASSERT( "PASS", check, CatchKit::Detail::InvertResult::No, true ) __VA_OPT__(<<) __VA_ARGS__
+#define FAIL(...) CATCHKIT_INTERNAL_ASSERT( "FAIL", require, CatchKit::Detail::InvertResult::No, false ) __VA_OPT__(<<) __VA_ARGS__
 
 #endif // CATCHKIT_MACROS_H

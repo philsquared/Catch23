@@ -13,16 +13,16 @@ constinit CatchKit::Checker checker{ &default_assertion_handler }; // NOSONAR NO
 
 namespace CatchKit::Detail {
 
-    auto Checker::check(AssertionContext const& context) -> Asserter {
+    auto Checker::check(AssertionContext const& context, InvertResult invert_result) -> Asserter {
         result_handler->on_assertion_start(ResultDisposition::Continue, context);
-        return Asserter( *this );
+        return Asserter( *this, invert_result );
     }
-    auto Checker::require(AssertionContext const& context) -> Asserter {
+    auto Checker::require(AssertionContext const& context, InvertResult invert_result) -> Asserter {
         result_handler->on_assertion_start(ResultDisposition::Abort, context);
-        return Asserter( *this );
+        return Asserter( *this, invert_result );
     }
 
-    Asserter::Asserter( Checker& checker ) : checker(checker) {
+    Asserter::Asserter( Checker& checker, InvertResult invert_result ) : checker(checker), invert_result(invert_result) {
         if( checker.message_stream )
             checker.message_stream->clear();
     }
