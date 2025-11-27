@@ -600,81 +600,81 @@ TEST_CASE( "Floating point matchers: float", "[matchers][floating-point]" ) {
          REQUIRE_THAT( NAN, is_nan() );
      }
 }
-//
-// TEST_CASE( "Floating point matchers: double", "[matchers][floating-point]" ) {
-//     SECTION( "Relative" ) {
-//         REQUIRE_THAT( 10., WithinRel( 11.1, 0.1 ) );
-//         REQUIRE_THAT( 10., !WithinRel( 11.2, 0.1 ) );
-//         REQUIRE_THAT( 1., !WithinRel( 0., 0.99 ) );
-//         REQUIRE_THAT( -0., WithinRel( 0. ) );
-//         SECTION( "Some subnormal values" ) {
-//             auto v1 = std::numeric_limits<double>::min();
-//             auto v2 = v1;
-//             for ( int i = 0; i < 5; ++i ) {
-//                 v2 = std::nextafter( v1, 0 );
-//             }
-//             REQUIRE_THAT( v1, WithinRel( v2 ) );
-//         }
-//     }
-//     SECTION( "Margin" ) {
-//         REQUIRE_THAT( 1., WithinAbs( 1., 0 ) );
-//         REQUIRE_THAT( 0., WithinAbs( 1., 1 ) );
-//
-//         REQUIRE_THAT( 0., !WithinAbs( 1., 0.99 ) );
-//         REQUIRE_THAT( 0., !WithinAbs( 1., 0.99 ) );
-//
-//         REQUIRE_THAT( 11., !WithinAbs( 10., 0.5 ) );
-//         REQUIRE_THAT( 10., !WithinAbs( 11., 0.5 ) );
-//         REQUIRE_THAT( -10., WithinAbs( -10., 0.5 ) );
-//         REQUIRE_THAT( -10., WithinAbs( -9.6, 0.5 ) );
-//     }
-//     SECTION( "ULPs" ) {
-//         REQUIRE_THAT( 1., WithinULP( 1., 0 ) );
-//
-//         REQUIRE_THAT( nextafter( 1., 2. ), WithinULP( 1., 1 ) );
-//         REQUIRE_THAT( 0., WithinULP( nextafter( 0., 1. ), 1 ) );
-//         REQUIRE_THAT( 1., WithinULP( nextafter( 1., 0. ), 1 ) );
-//         REQUIRE_THAT( 1., !WithinULP( nextafter( 1., 2. ), 0 ) );
-//
-//         REQUIRE_THAT( 1., WithinULP( 1., 0 ) );
-//         REQUIRE_THAT( -0., WithinULP( 0., 0 ) );
-//     }
-//     SECTION( "Composed" ) {
-//         REQUIRE_THAT( 1., WithinAbs( 1., 0.5 ) || WithinULP( 2., 1 ) );
-//         REQUIRE_THAT( 1., WithinAbs( 2., 0.5 ) || WithinULP( 1., 0 ) );
-//         REQUIRE_THAT( 0.0001, WithinAbs( 0., 0.001 ) || WithinRel( 0., 0.1 ) );
-//     }
-//     SECTION( "Constructor validation" ) {
-//         REQUIRE_NOTHROW( WithinAbs( 1., 0. ) );
-//         REQUIRE_THROWS_AS( WithinAbs( 1., -1. ), std::domain_error );
-//
-//         REQUIRE_NOTHROW( WithinULP( 1., 0 ) );
-//
-//         REQUIRE_NOTHROW( WithinRel( 1., 0. ) );
-//         REQUIRE_THROWS_AS( WithinRel( 1., -0.2 ), std::domain_error );
-//         REQUIRE_THROWS_AS( WithinRel( 1., 1. ), std::domain_error );
-//     }
-//     SECTION("IsNaN") {
-//         REQUIRE_THAT( 1., !IsNaN() );
-//     }
-// }
-//
-// TEST_CASE( "Floating point matchers that are problematic in approvals",
-//            "[approvals][matchers][floating-point]" ) {
-//     REQUIRE_THAT( NAN, !WithinAbs( NAN, 0 ) );
-//     REQUIRE_THAT( NAN, !( WithinAbs( NAN, 100 ) || WithinULP( NAN, 123 ) ) );
-//     REQUIRE_THAT( NAN, !WithinULP( NAN, 123 ) );
-//     REQUIRE_THAT( INFINITY, WithinRel( INFINITY ) );
-//     REQUIRE_THAT( -INFINITY, !WithinRel( INFINITY ) );
-//     REQUIRE_THAT( 1., !WithinRel( INFINITY ) );
-//     REQUIRE_THAT( INFINITY, !WithinRel( 1. ) );
-//     REQUIRE_THAT( NAN, !WithinRel( NAN ) );
-//     REQUIRE_THAT( 1., !WithinRel( NAN ) );
-//     REQUIRE_THAT( NAN, !WithinRel( 1. ) );
-//     REQUIRE_THAT( NAN, IsNaN() );
-//     REQUIRE_THAT( static_cast<double>(NAN), IsNaN() );
-// }
-//
+
+TEST_CASE( "Floating point matchers: double", "[matchers][floating-point]" ) {
+    SECTION( "Relative" ) {
+        REQUIRE_THAT( 10., is_close_to_rel( 11.1, 0.1 ) );
+        REQUIRE_THAT( 10., !is_close_to_rel( 11.2, 0.1 ) );
+        REQUIRE_THAT( 1., !is_close_to_rel( 0., 0.99 ) );
+        REQUIRE_THAT( -0., is_close_to_rel( 0. ) );
+        SECTION( "Some subnormal values" ) {
+            auto v1 = std::numeric_limits<double>::min();
+            auto v2 = v1;
+            for ( int i = 0; i < 5; ++i ) {
+                v2 = std::nextafter( v1, 0 );
+            }
+            REQUIRE_THAT( v1, is_close_to_rel( v2 ) );
+        }
+    }
+    SECTION( "Margin" ) {
+        REQUIRE_THAT( 1., is_close_to( 1., 0 ) );
+        REQUIRE_THAT( 0., is_close_to( 1., 1 ) );
+
+        REQUIRE_THAT( 0., !is_close_to( 1., 0.99 ) );
+        REQUIRE_THAT( 0., !is_close_to( 1., 0.99 ) );
+
+        REQUIRE_THAT( 11., !is_close_to( 10., 0.5 ) );
+        REQUIRE_THAT( 10., !is_close_to( 11., 0.5 ) );
+        REQUIRE_THAT( -10., is_close_to( -10., 0.5 ) );
+        REQUIRE_THAT( -10., is_close_to( -9.6, 0.5 ) );
+    }
+    SECTION( "ULPs" ) {
+        REQUIRE_THAT( 1., is_within_ulp( 1., 0 ) );
+
+        REQUIRE_THAT( nextafter( 1., 2. ), is_within_ulp( 1., 1 ) );
+        REQUIRE_THAT( 0., is_within_ulp( nextafter( 0., 1. ), 1 ) );
+        REQUIRE_THAT( 1., is_within_ulp( nextafter( 1., 0. ), 1 ) );
+        REQUIRE_THAT( 1., !is_within_ulp( nextafter( 1., 2. ), 0 ) );
+
+        REQUIRE_THAT( 1., is_within_ulp( 1., 0 ) );
+        REQUIRE_THAT( -0., is_within_ulp( 0., 0 ) );
+    }
+    SECTION( "Composed" ) {
+        REQUIRE_THAT( 1., is_close_to( 1., 0.5 ) || is_within_ulp( 2., 1 ) );
+        REQUIRE_THAT( 1., is_close_to( 2., 0.5 ) || is_within_ulp( 1., 0 ) );
+        REQUIRE_THAT( 0.0001, is_close_to( 0., 0.001 ) || is_close_to_rel( 0., 0.1 ) );
+    }
+    SECTION( "Validation" ) {
+        REQUIRE_THAT( is_close_to( 1., 0. ).match(0), !throws() );
+        REQUIRE_THAT( is_close_to( 1., -1. ).match(0), throws<std::domain_error>() );
+
+        REQUIRE_THAT( is_within_ulp( 1., 0 ).match(0), !throws() );
+
+        REQUIRE_THAT( is_close_to_rel( 1., 0. ).match(0), !throws() );
+        REQUIRE_THAT( is_close_to_rel( 1., -0.2 ).match(0), throws<std::domain_error>() );
+        REQUIRE_THAT( is_close_to_rel( 1., 1. ).match(0), throws<std::domain_error>() );
+    }
+    SECTION("IsNaN") {
+        REQUIRE_THAT( 1., !is_nan() );
+    }
+}
+
+TEST_CASE( "Floating point matchers that are problematic in approvals",
+           "[approvals][matchers][floating-point]" ) {
+    CHECK_THAT( NAN, !is_close_to( NAN, 0 ) );
+    CHECK_THAT( NAN, !( is_close_to( NAN, 100 ) || is_within_ulp( NAN, 123 ) ) );
+    CHECK_THAT( NAN, !is_within_ulp( NAN, 123 ) );
+    CHECK_THAT( INFINITY, is_close_to_rel( INFINITY ) );
+    CHECK_THAT( -INFINITY, !is_close_to_rel( INFINITY ) );
+    CHECK_THAT( 1., !is_close_to_rel( INFINITY ) );
+    CHECK_THAT( INFINITY, !is_close_to_rel( 1. ) );
+    CHECK_THAT( NAN, !is_close_to_rel( NAN ) );
+    CHECK_THAT( 1., !is_close_to_rel( NAN ) );
+    CHECK_THAT( NAN, !is_close_to_rel( 1. ) );
+    CHECK_THAT( NAN, is_nan() );
+    CHECK_THAT( static_cast<double>(NAN), is_nan() );
+}
+
 TEST_CASE( "Arbitrary predicate matcher", "[matchers][generic]" ) {
     SECTION( "Function pointer" ) {
         REQUIRE_THAT( 1, matches_predicate( alwaysTrue, "always true" ) );

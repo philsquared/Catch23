@@ -215,8 +215,8 @@ namespace CatchKit {
             [[nodiscard]] auto match( double value ) const -> MatchResult {
                 if( epsilon < 0 || epsilon >= 1 )
                     throw std::domain_error( "epsilon must be positive and < 1" );
-                return margin_compare( value, target,
-                    epsilon * (std::max)(std::fabs(value), std::fabs(target)) );
+                auto rel_margin = epsilon * (std::max)(std::fabs(value), std::fabs(target));
+                return margin_compare( value, target, std::isinf(rel_margin) ? 0 : rel_margin );
             }
             [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("is_close_to({})", target);
