@@ -536,8 +536,7 @@ TEST("Meta: Exception matchers that fail", ["meta"]) {
     CHECK( RUN_TEST_BY_NAME( "Exception matchers that fail" ).failures() == 6 );
 }
 
-//
-// TEST_CASE( "Floating point matchers: float", "[matchers][floating-point]" ) {
+TEST_CASE( "Floating point matchers: float", "[matchers][floating-point]" ) {
 //     SECTION( "Relative" ) {
 //         REQUIRE_THAT( 10.f, WithinRel( 11.1f, 0.1f ) );
 //         REQUIRE_THAT( 10.f, !WithinRel( 11.2f, 0.1f ) );
@@ -566,18 +565,18 @@ TEST("Meta: Exception matchers that fail", ["meta"]) {
 //         REQUIRE_THAT( -10.f, WithinAbs( -10.f, 0.5f ) );
 //         REQUIRE_THAT( -10.f, WithinAbs( -9.6f, 0.5f ) );
 //     }
-//     SECTION( "ULPs" ) {
-//         REQUIRE_THAT( 1.f, WithinULP( 1.f, 0 ) );
-//         REQUIRE_THAT(-1.f, WithinULP( -1.f, 0 ) );
-//
-//         REQUIRE_THAT( nextafter( 1.f, 2.f ), WithinULP( 1.f, 1 ) );
-//         REQUIRE_THAT( 0.f, WithinULP( nextafter( 0.f, 1.f ), 1 ) );
-//         REQUIRE_THAT( 1.f, WithinULP( nextafter( 1.f, 0.f ), 1 ) );
-//         REQUIRE_THAT( 1.f, !WithinULP( nextafter( 1.f, 2.f ), 0 ) );
-//
-//         REQUIRE_THAT( 1.f, WithinULP( 1.f, 0 ) );
-//         REQUIRE_THAT( -0.f, WithinULP( 0.f, 0 ) );
-//     }
+     SECTION( "ULPs" ) {
+         REQUIRE_THAT( 1.f, is_within_ulp( 1.f, 0 ) );
+         REQUIRE_THAT(-1.f, is_within_ulp( -1.f, 0 ) );
+
+         REQUIRE_THAT( nextafter( 1.f, 2.f ), is_within_ulp( 1.f, 1 ) );
+         REQUIRE_THAT( 0.f, is_within_ulp( nextafter( 0.f, 1.f ), 1 ) );
+         REQUIRE_THAT( 1.f, is_within_ulp( nextafter( 1.f, 0.f ), 1 ) );
+         REQUIRE_THAT( 1.f, !is_within_ulp( nextafter( 1.f, 2.f ), 0 ) );
+
+         REQUIRE_THAT( 1.f, is_within_ulp( 1.f, 0 ) );
+         REQUIRE_THAT( -0.f, is_within_ulp( 0.f, 0 ) );
+     }
 //     SECTION( "Composed" ) {
 //         REQUIRE_THAT( 1.f, WithinAbs( 1.f, 0.5 ) || WithinULP( 1.f, 1 ) );
 //         REQUIRE_THAT( 1.f, WithinAbs( 2.f, 0.5 ) || WithinULP( 1.f, 0 ) );
@@ -599,7 +598,7 @@ TEST("Meta: Exception matchers that fail", ["meta"]) {
 //     SECTION( "IsNaN" ) {
 //         REQUIRE_THAT( 1., !IsNaN() );
 //     }
-// }
+}
 //
 // TEST_CASE( "Floating point matchers: double", "[matchers][floating-point]" ) {
 //     SECTION( "Relative" ) {

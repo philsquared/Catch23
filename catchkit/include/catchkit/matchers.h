@@ -215,6 +215,23 @@ namespace CatchKit {
                 return std::format("is_close_to({})", target);
             }
         };
+
+        template<std::floating_point T>
+        struct IsWithinUlp {
+            T target = 0;
+            uint ulps = 1;
+
+            static constexpr T infinity = std::numeric_limits<T>::infinity();
+
+            [[nodiscard]] auto match(T value) const -> MatchResult {
+                return value == target ||
+                    ( std::nextafter( target, infinity )*ulps >= value &&
+                    std::nextafter( target, -infinity )*ulps <= value );
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("is_within_ulp( {} )", target);
+            }
+        };
     } // namespace FloatMatchers
 
     namespace VectorMatchers {
@@ -263,6 +280,8 @@ namespace CatchKit {
         inline auto is_close_to(double target) { return FloatMatchers::IsCloseTo{target}; }
         inline auto is_close_to(float target, float epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
         inline auto is_close_to(double target, double epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
+
+        auto is_within_ulp(std::floating_point auto target, uint ulps=1) { return FloatMatchers::IsWithinUlp{target, ulps}; }
 
         inline auto is_true() { static bool true_value = true; return equals(true_value); }
         inline auto is_false() { static bool false_value = false; return equals(false_value); }
