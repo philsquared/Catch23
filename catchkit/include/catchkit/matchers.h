@@ -204,12 +204,19 @@ namespace CatchKit {
     } // namespace ExceptionMatchers
 
     namespace FloatMatchers {
-        struct IsCloseTo {
-            double target = 0;
-            double epsilon = 100*std::numeric_limits<float>::epsilon();
+        inline auto margin_compare( double lhs, double rhs, double margin ) -> bool {
+            return (lhs + margin >= rhs) && (rhs + margin >= lhs);
+        }
 
-            [[nodiscard]] auto match(double value) const -> MatchResult {
-                return std::fabs(value-target) < epsilon;
+        struct IsCloseToRel {
+            double target;
+            double epsilon;
+
+            [[nodiscard]] auto match( double value ) const -> MatchResult {
+                if( epsilon < 0 || epsilon >= 1 )
+                    throw std::domain_error( "epsilon must be positive and < 1" );
+                return margin_compare( value, target,
+                    epsilon * (std::max)(std::fabs(value), std::fabs(target)) );
             }
             [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("is_close_to({})", target);
@@ -217,19 +224,47 @@ namespace CatchKit {
         };
 
         template<std::floating_point T>
+        struct IsCloseToAbs {
+            T target;
+            double margin;
+
+            [[nodiscard]] auto match(T value) const -> MatchResult {
+                if( margin < 0 )
+                    throw std::domain_error( "margin must be positive" );
+                return margin_compare( value, target, margin );
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("is_close_to_abs({})", target);
+            }
+        };
+
+        template<std::floating_point T>
         struct IsWithinUlp {
-            T target = 0;
-            uint ulps = 1;
+            T target;
+            std::uint64_t ulps;
 
             static constexpr T infinity = std::numeric_limits<T>::infinity();
 
             [[nodiscard]] auto match(T value) const -> MatchResult {
+                if constexpr( std::same_as<T, float> ) {
+                    if( ulps >= (std::numeric_limits<std::uint32_t>::max)())
+                        throw std::domain_error( "ulps is too large for a float" );
+                }
                 return value == target ||
                     ( std::nextafter( target, infinity )*ulps >= value &&
                     std::nextafter( target, -infinity )*ulps <= value );
             }
             [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("is_within_ulp( {} )", target);
+            }
+        };
+
+        struct IsNaN {
+            [[nodiscard]] auto match(std::floating_point auto value) const -> MatchResult {
+                return std::isnan( value );
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("is_nan()");
             }
         };
     } // namespace FloatMatchers
@@ -276,12 +311,20 @@ namespace CatchKit {
         template<typename CasePolicy=CaseSensitive>
         auto equals(std::string_view str) { return StringMatchers::Equals<CasePolicy>{str}; }
 
-        inline auto is_close_to(float target) { return FloatMatchers::IsCloseTo{target}; }
-        inline auto is_close_to(double target) { return FloatMatchers::IsCloseTo{target}; }
-        inline auto is_close_to(float target, float epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
-        inline auto is_close_to(double target, double epsilon) { return FloatMatchers::IsCloseTo{target, epsilon}; }
-
-        auto is_within_ulp(std::floating_point auto target, uint ulps=1) { return FloatMatchers::IsWithinUlp{target, ulps}; }
+        template<std::floating_point T>
+        auto is_close_to(T target, double margin = 100*std::numeric_limits<T>::epsilon() ) {
+            return FloatMatchers::IsCloseToAbs{ target, margin };
+        }
+        template<std::floating_point T>
+        auto is_close_to_rel( T target, double epsilon = 100*std::numeric_limits<T>::epsilon() ) {
+            return FloatMatchers::IsCloseToRel{ target, epsilon };
+        }
+        auto is_within_ulp(std::floating_point auto target, std::uint64_t ulps=1) {
+            return FloatMatchers::IsWithinUlp{ target, ulps };
+        }
+        inline auto is_nan() {
+            return FloatMatchers::IsNaN();
+        }
 
         inline auto is_true() { static bool true_value = true; return equals(true_value); }
         inline auto is_false() { static bool false_value = false; return equals(false_value); }
