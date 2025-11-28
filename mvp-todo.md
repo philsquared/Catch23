@@ -41,7 +41,6 @@ Need to build and run tests on GitHub
 ## Matchers
 
 * More container matchers
-* Floating point matchers
 
 ## Break into debugger
 
