@@ -164,7 +164,6 @@ namespace CatchKit::Detail {
         void rebase_shrink() override {
             assert( shrinker );
             shrinker->rebase();
-            // shrinker.emplace( generator, current_generated_value, cache );
         }
 
         auto shrink() -> bool override {

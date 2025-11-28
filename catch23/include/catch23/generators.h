@@ -20,7 +20,7 @@ namespace CatchKit {
         // 1. specialise values_of for your type and generate_value for valuesOf<your type>, or
         // 2. for something more general/ operators on multiple values, specialise size_of and generate_at
 
-        template<typename T> struct values_of {}; // Specialise this for your own types
+        template<typename> struct values_of {}; // Specialise this for your own types
 
 
         // Adapter to specify number of repetitions:

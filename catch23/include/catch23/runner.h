@@ -45,7 +45,7 @@ namespace CatchKit::Detail {
             }
             if( soloing )
                 println( ColourIntent::Warning, "\nWarning: Running soloed test(s) (tests with the [solo] tag) only.\n");
-            for( auto test : tests_to_run) {
+            for( auto const test : tests_to_run) {
                 run_test( *test );
             }
 
