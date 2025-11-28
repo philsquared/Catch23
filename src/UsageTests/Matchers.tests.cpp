@@ -491,15 +491,6 @@ namespace {
     };
 } // end anonymous namespace
 
-// This is commented out to show that it can work without a Stringifier.
-// but uncomment if you want to see SomeType in the output.
-// Note that, without a Stringifier for SomeType, even vector<SomeType> gets printed as just, "{?}"
-
-// template<>
-// struct CatchKit::Stringifier<SomeType> {
-//     static auto stringify(SomeType v) { return std::format("SomeType({})", v.i); }
-// };
-
 TEST_CASE( "Vector matcher with elements without !=", "[matchers][vector][approvals]" ) {
     std::vector<SomeType> lhs, rhs;
     lhs.push_back( { 1 } );
@@ -710,47 +701,7 @@ TEST_CASE( "Predicate matcher can accept const char*",
                       return true;
                   } ) );
 }
-//
-// TEST_CASE( "Vector Approx matcher", "[matchers][approx][vector]" ) {
-//     using Catch::Matchers::Approx;
-//     SECTION( "Empty vector is roughly equal to an empty vector" ) {
-//         std::vector<double> empty;
-//         REQUIRE_THAT( empty, Approx( empty ) );
-//     }
-//     SECTION( "Vectors with elements" ) {
-//         std::vector<double> v1( { 1., 2., 3. } );
-//         SECTION( "A vector is approx equal to itself" ) {
-//             REQUIRE_THAT( v1, Approx( v1 ) );
-//             REQUIRE_THAT( v1, Approx<double>( { 1., 2., 3. } ) );
-//         }
-//         std::vector<double> v2( { 1.5, 2.5, 3.5 } );
-//         SECTION( "Different length" ) {
-//             auto temp( v1 );
-//             temp.push_back( 4 );
-//             REQUIRE_THAT( v1, !Approx( temp ) );
-//         }
-//         SECTION( "Same length, different elements" ) {
-//             REQUIRE_THAT( v1, !Approx( v2 ) );
-//             REQUIRE_THAT( v1, Approx( v2 ).margin( 0.5 ) );
-//             REQUIRE_THAT( v1, Approx( v2 ).epsilon( 0.5 ) );
-//             REQUIRE_THAT( v1, Approx( v2 ).epsilon( 0.1 ).scale( 500 ) );
-//         }
-//     }
-// }
-//
-// TEST_CASE( "Vector Approx matcher -- failing",
-//            "[matchers][approx][vector][.failing]" ) {
-//     using Catch::Matchers::Approx;
-//     SECTION( "Empty and non empty vectors are not approx equal" ) {
-//         std::vector<double> empty, t1( { 1, 2 } );
-//         CHECK_THAT( empty, Approx( t1 ) );
-//     }
-//     SECTION( "Just different vectors" ) {
-//         std::vector<double> v1( { 2., 4., 6. } ), v2( { 1., 3., 5. } );
-//         CHECK_THAT( v1, Approx( v2 ) );
-//     }
-// }
-//
+
 TEST_CASE( "Exceptions matchers", "[matchers][exceptions][!throws]" ) {
     REQUIRE_THAT( throwsDerivedException(),
                 throws<DerivedException>().with_message( "DerivedException::what" ) );
@@ -869,8 +820,7 @@ struct EqualsRangeMatcher {
     }
 
     [[nodiscard]] auto describe() const -> CatchKit::MatcherDescription {
-        // return "Equals: " + Catch::rangeToString( m_range );
-        return "EqualsRange x"; // !TBD
+        return std::format("EqualsRange {}", m_range);
     }
 
 private:
