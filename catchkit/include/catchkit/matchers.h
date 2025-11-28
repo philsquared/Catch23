@@ -14,6 +14,19 @@
 
 namespace CatchKit {
 
+    template<class T>
+    concept IsStringViewable = std::is_convertible_v<T, std::string_view>;
+
+    template<class T>
+    concept NotStringViewable = !std::is_convertible_v<T, std::string_view>;
+
+    template<class T>
+    concept NonStringRange = NotStringViewable<T> && std::ranges::sized_range<T>;
+
+    template<class T>
+    concept NotARange = NotStringViewable<T> && !std::ranges::sized_range<T>;
+
+
     namespace GenericMatchers {
         template<typename T>
         struct Equals {
@@ -57,6 +70,80 @@ namespace CatchKit {
             }
         };
     }
+
+    namespace RangeMatchers {
+
+        struct InOrder {
+            static auto equals(auto const& range1, auto const& range2 ) {
+                if( std::size(range1) != std::size(range2) )
+                    return false;
+                for( const auto& [e1, e2] : std::views::zip(range1, range2) )
+                    if( e1 != e2 )
+                        return false;
+                return true;
+            }
+        };
+        struct InAnyOrder {
+            static auto equals(auto const& range1, auto const& range2 ) {
+                auto set = range2 | std::ranges::to<std::unordered_set>();
+                for( const auto& match_element : range1 )
+                    if( set.erase(match_element) == 0 )
+                        return false;
+                return set.empty();
+            }
+        };
+
+        template<typename T>
+        struct ContainsElement {
+            T const& element;
+
+            template<typename Range>
+            [[nodiscard]] auto match(Range const& range) const -> MatchResult {
+                static_assert(std::ranges::sized_range<Range>);
+                for( const auto& match_element : range ) {
+                    if( element == match_element )
+                        return true;
+                }
+                return false;
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("contains({})", stringify(element));
+            }
+        };
+
+        template<typename R>
+        struct ContainsRange {
+            R const& range;
+
+            template<typename Range>
+            [[nodiscard]] auto match(Range const& match_range) const -> MatchResult {
+                static_assert(std::ranges::sized_range<Range>);
+                auto set = range | std::ranges::to<std::unordered_set>();
+                for( const auto& match_element : match_range )
+                    set.erase(match_element);
+                return set.empty();
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("contains({})", stringify(range));
+            }
+        };
+
+        template<typename OrderPolicy, typename R>
+        struct Equals {
+            R const& range;
+
+            template<typename Range>
+            [[nodiscard]] auto match(Range const& match_range) const -> MatchResult {
+                static_assert(std::ranges::sized_range<Range>);
+                return OrderPolicy::equals(range, match_range);
+            }
+
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("equals({})", stringify(range));
+            }
+        };
+    }
+
 
     namespace StringMatchers {
 
@@ -102,13 +189,22 @@ namespace CatchKit {
         template<typename CasePolicy=CaseSensitive>
         struct Contains {
             std::string_view match_str;
-            [[nodiscard]] auto match(std::string_view str) const -> MatchResult {
+            [[nodiscard]] auto match( IsStringViewable auto const& str ) const -> MatchResult {
                 return CasePolicy::find(str, match_str);
+            }
+            [[nodiscard]] auto match( NonStringRange auto const& range ) const -> MatchResult {
+                // Special case where we are matching a string, but when contained within a range
+                for( const auto& element : range ) {
+                    if( CasePolicy::equal( match_str, element ) )
+                        return true;
+                }
+                return false;
             }
             [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("contains<{}>(\"{}\")", CasePolicy::name, match_str);
             }
         };
+
         template<typename CasePolicy=CaseSensitive>
         struct Equals {
             std::string_view match_str;
@@ -289,96 +385,12 @@ namespace CatchKit {
         };
     } // namespace FloatMatchers
 
-    namespace RangeMatchers {
-
-        struct InOrder {
-            static auto equals(auto const& range1, auto const& range2 ) {
-                if( std::size(range1) != std::size(range2) )
-                    return false;
-                for( const auto& [e1, e2] : std::views::zip(range1, range2) )
-                    if( e1 != e2 )
-                        return false;
-                return true;
-            }
-        };
-        struct InAnyOrder {
-            static auto equals(auto const& range1, auto const& range2 ) {
-                auto set = range2 | std::ranges::to<std::unordered_set>();
-                for( const auto& match_element : range1 )
-                    if( set.erase(match_element) == 0 )
-                        return false;
-                return set.empty();
-            }
-        };
-
-        template<typename T>
-        struct ContainsElement {
-            T const& element;
-
-            template<typename Range>
-            [[nodiscard]] auto match(Range const& range) const -> MatchResult {
-                static_assert(std::ranges::sized_range<Range>);
-                for( const auto& match_element : range ) {
-                    if( element == match_element )
-                        return true;
-                }
-                return false;
-            }
-            [[nodiscard]] auto describe() const -> MatcherDescription {
-                return std::format("contains({})", stringify(element));
-            }
-        };
-
-        template<typename R>
-        struct ContainsRange {
-            R const& range;
-
-            template<typename Range>
-            [[nodiscard]] auto match(Range const& match_range) const -> MatchResult {
-                static_assert(std::ranges::sized_range<Range>);
-                auto set = range | std::ranges::to<std::unordered_set>();
-                for( const auto& match_element : match_range )
-                    set.erase(match_element);
-                return set.empty();
-            }
-            [[nodiscard]] auto describe() const -> MatcherDescription {
-                return std::format("contains({})", stringify(range));
-            }
-        };
-
-        template<typename OrderPolicy, typename R>
-        struct Equals {
-            R const& range;
-
-            template<typename Range>
-            [[nodiscard]] auto match(Range const& match_range) const -> MatchResult {
-                static_assert(std::ranges::sized_range<Range>);
-                return OrderPolicy::equals(range, match_range);
-            }
-
-            [[nodiscard]] auto describe() const -> MatcherDescription {
-                return std::format("equals({})", stringify(range));
-            }
-        };
-    }
 
     namespace Matchers {
         using StringMatchers::CaseSensitive;
         using StringMatchers::CaseInsensitive;
         using RangeMatchers::InOrder;
         using RangeMatchers::InAnyOrder;
-
-        template<class T>
-        concept IsStringViewable = std::is_convertible_v<T, std::string_view>;
-
-        template<class T>
-        concept NotStringViewable = !std::is_convertible_v<T, std::string_view>;
-
-        template<class T>
-        concept NonStringRange = NotStringViewable<T> && std::ranges::sized_range<T>;
-
-        template<class T>
-        concept NotARange = NotStringViewable<T> && !std::ranges::sized_range<T>;
 
         auto equals(NotARange auto& value) { return GenericMatchers::Equals{value}; }
 

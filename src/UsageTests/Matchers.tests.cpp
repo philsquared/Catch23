@@ -96,6 +96,14 @@ TEST("Composed matchers cannot be stored") {
     // CHECK_THAT( 0.01, is_close_to_but_not_zero && is_zero );
 }
 
+TEST("Can match single string in range of strings") {
+    std::vector strings = {"one", "two", "three"};
+    CHECK_THAT(strings, contains("two"));
+    CHECK_THAT(strings, contains<CaseSensitive>("two"));
+    CHECK_THAT(strings, !contains<CaseSensitive>("Two"));
+    CHECK_THAT(strings, contains<CaseInsensitive>("Two"));
+}
+
 // The following tests have been taken from the Catch2 test suite,
 // with modifications to allow for the new matcher syntax and semantics
 
