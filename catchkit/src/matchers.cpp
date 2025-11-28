@@ -5,6 +5,7 @@
 #include "catchkit/matchers.h"
 
 #include <algorithm>
+#include <regex>
 
 namespace CatchKit {
 
@@ -33,6 +34,13 @@ namespace CatchKit {
                 [](char a, char b) {
                     return std::tolower(a) == std::tolower(b);
                 }).empty();
+        }
+
+        bool CaseSensitive::matches_regex(std::string const& str, std::string const& regex_str) {
+            return std::regex_match(str, std::regex(regex_str));
+        }
+        bool CaseInsensitive::matches_regex(std::string const& str, std::string const& regex_str) {
+            return std::regex_match(str, std::regex(regex_str, std::regex::icase));
         }
 
     } // namespace StringMatchers

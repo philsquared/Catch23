@@ -60,10 +60,12 @@ namespace CatchKit {
         struct CaseSensitive {
             static bool equal(std::string_view str1, std::string_view str2);
             static bool find(std::string_view str, std::string_view substr);
+            static bool matches_regex(std::string const& str, std::string const& regex_str);
         };
         struct CaseInsensitive {
             static bool equal(std::string_view str1, std::string_view str2);
             static bool find(std::string_view str, std::string_view substr);
+            static bool matches_regex(std::string const& str, std::string const& regex_str);
         };
 
         template<typename CasePolicy=CaseSensitive>
@@ -111,6 +113,19 @@ namespace CatchKit {
             }
             [[nodiscard]] auto describe() const -> MatcherDescription {
                 return std::format("equals(\"{}\")", match_str);
+            }
+        };
+
+
+        template<typename CasePolicy=CaseSensitive>
+        struct MatchesRegex {
+            std::string regex_str;
+
+            [[nodiscard]] auto match(std::string const& str) const -> MatchResult {
+                return CasePolicy::matches_regex(str, regex_str);
+            }
+            [[nodiscard]] auto describe() const -> MatcherDescription {
+                return std::format("matches_regex(\"{}\")", regex_str);
             }
         };
 
@@ -310,6 +325,9 @@ namespace CatchKit {
 
         template<typename CasePolicy=CaseSensitive>
         auto equals(std::string_view str) { return StringMatchers::Equals<CasePolicy>{str}; }
+
+        template<typename CasePolicy=CaseSensitive>
+        auto matches_regex(std::string str) { return StringMatchers::MatchesRegex<CasePolicy>{ std::move(str) }; }
 
         template<std::floating_point T>
         auto is_close_to(T target, double margin = 100*std::numeric_limits<T>::epsilon() ) {

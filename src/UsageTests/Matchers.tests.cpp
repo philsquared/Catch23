@@ -233,34 +233,33 @@ TEST_CASE( "Equals", "[matchers]" ) {
                 equals<CaseInsensitive>( "this string contains 'ABC' as a substring" ) );
 }
 
-// TEST_CASE( "Regex string matcher -- libstdc++-4.8 workaround",
-//            "[matchers][approvals]" ) {
-// // DJGPP has similar problem with its regex support as libstdc++ 4.8
-// #ifndef __DJGPP__
-//     REQUIRE_THAT( testStringForMatching(),
-//                   Matches( "this string contains 'abc' as a substring" ) );
-//     REQUIRE_THAT( testStringForMatching(),
-//                   Matches( "this string CONTAINS 'abc' as a substring",
-//                            Catch::CaseSensitive::No ) );
-//     REQUIRE_THAT( testStringForMatching(),
-//                   Matches( "^this string contains 'abc' as a substring$" ) );
-//     REQUIRE_THAT( testStringForMatching(), Matches( "^.* 'abc' .*$" ) );
-//     REQUIRE_THAT( testStringForMatching(),
-//                   Matches( "^.* 'ABC' .*$", Catch::CaseSensitive::No ) );
-// #endif
-//
-//     REQUIRE_THAT( testStringForMatching2(),
-//                   !Matches( "this string contains 'abc' as a substring" ) );
-// }
-//
-// TEST_CASE( "Regex string matcher", "[matchers][.failing]" ) {
-//     CHECK_THAT( testStringForMatching(),
-//                 Matches( "this STRING contains 'abc' as a substring" ) );
-//     CHECK_THAT( testStringForMatching(),
-//                 Matches( "contains 'abc' as a substring" ) );
-//     CHECK_THAT( testStringForMatching(),
-//                 Matches( "this string contains 'abc' as a" ) );
-// }
+TEST_CASE( "Regex string matcher -- libstdc++-4.8 workaround",
+           "[matchers][approvals]" ) {
+// DJGPP has similar problem with its regex support as libstdc++ 4.8
+#ifndef __DJGPP__
+    REQUIRE_THAT( testStringForMatching(),
+                  matches_regex( "this string contains 'abc' as a substring" ) );
+    REQUIRE_THAT( testStringForMatching(),
+                  matches_regex<CaseInsensitive>( "this string CONTAINS 'abc' as a substring" ) );
+    REQUIRE_THAT( testStringForMatching(),
+                  matches_regex( "^this string contains 'abc' as a substring$" ) );
+    REQUIRE_THAT( testStringForMatching(), matches_regex( "^.* 'abc' .*$" ) );
+    REQUIRE_THAT( testStringForMatching(),
+                  matches_regex<CaseInsensitive>( "^.* 'ABC' .*$" ) );
+#endif
+
+    REQUIRE_THAT( testStringForMatching2(),
+                  !matches_regex( "this string contains 'abc' as a substring" ) );
+}
+
+TEST_CASE( "Regex string matcher", "[matchers][.failing]" ) {
+    CHECK_THAT( testStringForMatching(),
+                matches_regex( "this STRING contains 'abc' as a substring" ) );
+    CHECK_THAT( testStringForMatching(),
+                matches_regex( "contains 'abc' as a substring" ) );
+    CHECK_THAT( testStringForMatching(),
+                matches_regex( "this string contains 'abc' as a" ) );
+}
 
 TEST_CASE( "Matchers can be composed with the && operator",
            "[matchers][operators][operator&&]" ) {
