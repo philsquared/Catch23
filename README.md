@@ -3,7 +3,7 @@
 # What is Catch23?
 Catch23 is a new test framework, in the spirit of [Catch/ Catch2](https://github.com/catchorg/Catch2), but rewritten from the ground up for C++23 and on
 
-This is an early work-in-progress and is not intended for general use.
+This is a pre-release work-in-progress and is not, yet, intended for general use.
 
 What's different?
 The vast majority is purely internal - which not only makes maintenance far easier (and enables new possibilities) 
@@ -19,13 +19,13 @@ We also have `CHECK_THAT` and `REQUIRE_THAT` for matchers.
 Matchers themselves are heavily updated and more of the special case macros from Catch2 are covered by Matchers, now.
 
 So, for now, those four macros are pretty much it 
-(there's also a couple of convenience macros: `CHECK_FALSE` and `REQUIRE_FALSE` - 
-which use matchers under the hood, and `FAIL` and `SUCCEED` - which call onto `REQUIRE(false)` and `REQUIRE(true)`, for now).
+(there's also a few specialised macros: `CHECK_FALSE` and `REQUIRE_FALSE` - which negate their expression evaluation -
+ and `FAIL` and `PASS` - which explicitly pass or fail a test, with an optional message).
 
 ## New Matchers system
 
 Matchers are instrumental to how Catch23 works.
-You can think of `CHECK` and `REQUIRE` as special cases of matchers (although they have their own code paths for now).
+You can think of `CHECK` and `REQUIRE` as special cases of matchers (although they have their own code paths).
 
 Matchers are both simpler to write and also more powerful - all thanks to modern C++ (mostly C++20)!
 
@@ -89,9 +89,9 @@ and a set of template specialisations for common types. You could write your own
 That's all true in Catch23, except the specialisations are more robust and powerful thanks to C++20 concepts.
 The fallback to `std::ostreamstream` is optional, and is accompanied by a fallback to `std::format` (also configurable).
 
-But I'm saving the best for last. In Catch23, enums are automatically covertible to strings (and we don't even have reflection yet)!
+But I'm saving the best for last! In Catch23, enums are automatically convertible to strings (and we don't even have reflection yet)!
 That's with the caveat that it uses a nasty tricky involving `std::source_location` and some templated probing.
-It's a cutdown version of the technique used by libraries like Magic Enum.
+It's a cutdown (and updated) version of the technique used by libraries like Magic Enum.
 
 ```
 /../example.cpp:65:43: ❌ FAILED
@@ -135,6 +135,8 @@ x : int = 42
 y : float = 3.140000
 ```
 
+This works through the same pseudo-reflection trick as enums.
+
 ## Separation of concerns
 
 Catch23 is actually two (will possibly be three) libraries!
@@ -147,8 +149,8 @@ So you can use CatchKit on its own to get Catch-like assertions that you can put
 Some of this maybe further split out but that is not clear, yet.
 
 At time of writing the test case support (with automatic registration) is there (you can use `TEST` or `TEST_CASE`).
-Tags are supported, but not yet parsed (except for "[." to hide tests).
-There is a minimal test runner and a basic ConsoleReporter. There is no command line interface.
+Tags are supported, but with a slightly different syntax to Catch2 (unless using the interop header).
+There is a minimal test runner and a ConsoleReporter. There is no command line interface.
 
 ## In the main
 
@@ -165,7 +167,9 @@ Take a look at what `CATCH23_IMPL_MIN_MAIN` generates for ideas.
 
 ## What's next
 
-In progress right now is support for `SECTION`s, as well as generators (they both run on something called "Execution Nodes").
+
+`SECTION`s are supported but could do with more tests.
+Generators, with a new interface, are in-progress (they both run on something called "Execution Nodes").
 The features are there and working, but need more testing and fleshing out.
 
 Currently, the generators interface is looking like this (same idea as Catch2, but more streamlined implementation):
@@ -174,7 +178,8 @@ Currently, the generators interface is looking like this (same idea as Catch2, b
 auto value = GENERATE( 100, values_of<int>{.up_to=42} );
 ```
 
-The `100,` syntax is under consideration. Without it the default is 100 values.
+The `100,` syntax is under consideration. Without it the default is 100 values. 
+This is the equivalent of composing `take` in Catch2.
 Writing your own generator is very easy. E.g. here's how a string generator is implemented:
 
 ```c++
@@ -183,7 +188,7 @@ struct values_of<std::string> {
     size_t min_len = 0;
     size_t max_len = 65;
     
-    auto generate() -> std::string;
+    auto generate( RandomNumberGenerator& rng ) const -> std::string;
     // Impl does the actual generating of a random string, given that data    
 };
 
