@@ -31,7 +31,7 @@
         })
 
 #define CATCHKIT_INTERNAL_BOOL_ASSERT(macro_name, checker_fun, pass) \
-    checker.checker_fun( CatchKit::AssertionContext(macro_name) ) \
+    checker.checker_fun( CatchKit::AssertionContext(macro_name, {} ) ) \
         .handle_unexpected_exceptions([&](CatchKit::Detail::Asserter& asserter){ \
             asserter.simple_assert( pass ); \
         })
