@@ -24,6 +24,14 @@ We need different reporters and a way to specify them
 
 Do we need to lock down the interface for specifying reporters in terms of format, target (e.g filename) and disposition (show passing tests etc?).
 
+## Redirect stdout
+
+At least std::cout, but if we can redirect stdout in general that's even better
+
+## Custom exception translation
+
+## Signal handling
+
 ## CI
 
 Need to build and run tests on GitHub
