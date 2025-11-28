@@ -15,9 +15,9 @@ namespace CatchKit::Detail {
         return container->current_node = node;
     }
 
-    auto ExecutionNode::find_child( NodeId const& id_to_find ) const -> ExecutionNode* {
+    auto ExecutionNode::find_child( std::source_location loc_to_find ) const -> ExecutionNode* {
         for(auto const& child : children) {
-            if(child->id == id_to_find)
+            if( locations_are_equal(child->id.location, loc_to_find) )
                 return child.get();
         }
         return nullptr;

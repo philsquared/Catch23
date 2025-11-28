@@ -19,7 +19,7 @@ namespace CatchKit::Detail {
         explicit operator bool() const noexcept { return entered; }
     };
 
-    auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location const& location = std::source_location::current()) -> SectionInfo;
+    auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location location = std::source_location::current()) -> SectionInfo;
 
 } // namespace CatchKit::Detail
 

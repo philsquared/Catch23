@@ -14,9 +14,8 @@ namespace CatchKit::Detail {
             node.exit( std::uncaught_exceptions() > 0 );
     }
 
-    auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location const& location) -> SectionInfo {
-        // !TBD: avoid always copying the string
-        auto node = nodes.find_node({std::string(name), location});
+    auto try_enter_section(ExecutionNodes& nodes, std::string_view name, std::source_location location) -> SectionInfo {
+        auto node = nodes.find_node(location);
         if( !node )
             node = &nodes.add_node({std::string(name), location});
 

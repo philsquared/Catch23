@@ -14,17 +14,18 @@
 
 namespace CatchKit::Detail {
 
+    inline auto locations_are_equal(std::source_location loc1, std::source_location loc2) -> bool {
+        return loc1.line() == loc2.line()
+            && loc1.column() == loc2.column()
+            && loc1.file_name() == loc2.file_name();
+    }
+
     struct NodeId {
         std::string name;
         std::source_location location = std::source_location::current();
 
-        // !TBD: We could have a NodeIdLite that has a string_view so we don't copy the strings
-        // every time
-
         auto operator == (NodeId const& other) const -> bool {
-            return location.line() == other.location.line()
-                && location.column() == other.location.column()
-                && location.file_name() == other.location.file_name();
+            return locations_are_equal( location, other.location );
         };
     };
 
@@ -78,7 +79,8 @@ namespace CatchKit::Detail {
         explicit ExecutionNode( NodeId id ) : id(std::move(id)) {}
         virtual ~ExecutionNode() = default;
 
-        [[nodiscard]] auto find_child(NodeId const& id_to_find) const -> ExecutionNode*;
+        [[nodiscard]] auto find_child( std::source_location loc_to_find ) const -> ExecutionNode*;
+        [[nodiscard]] auto find_child(NodeId const& id_to_find) const { return find_child( id_to_find.location ); }
 
         auto add_child(std::unique_ptr<ExecutionNode>&& child) -> ExecutionNode& {
             child->parent = this;
@@ -122,6 +124,9 @@ namespace CatchKit::Detail {
         [[nodiscard]] auto get_current_node() const { return current_node; }
         [[nodiscard]] auto find_node(NodeId const& id) const -> ExecutionNode* {
             return current_node->find_child(id);
+        }
+        [[nodiscard]] auto find_node(std::source_location loc) const -> ExecutionNode* {
+            return current_node->find_child(loc);
         }
     };
 
