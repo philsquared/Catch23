@@ -3,7 +3,7 @@
 //
 
 // The following are taken from the Catch2 codebase, with minor modifications in some places.
-// !TBD This is a work-in-progress and some commented out sections need some work
+// !TBD This is a work-in-progress and some commented out sections (all marked with !TBD) need some work
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wpadded"

@@ -370,8 +370,6 @@ TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
 
     std::vector<int> empty;
 
-    // !TBD: contains(str)
-
     SECTION( "Contains (element)" ) {
         CHECK_THAT( v, contains( 1 ) );
     }

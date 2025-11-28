@@ -53,7 +53,6 @@ namespace CatchKit::Detail {
                 if( substr.starts_with( "string_view<char16_t>" ) )
                     return "std::u16string_view";
             }
-            // !TBD: add more matches
         }
         return std::string(type_name);
     }
