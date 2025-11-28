@@ -49,6 +49,9 @@ Need to build and run tests on GitHub
 ## Matchers
 
 * More container matchers
+  * starts_with/ ends_with for containers
+  * composite element matchers (e.g. "all elements must match")
+  * range of string against single string element
 
 ## Break into debugger
 

@@ -362,32 +362,27 @@ TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
 
     std::vector<int> empty;
 
-    // SECTION( "Contains (element)" ) {
-    //     CHECK_THAT( v, contains( 1 ) );
-    //     CHECK_THAT( v, VectorContains( 2 ) );
-    //     CHECK_THAT( v5, ( VectorContains<int, CustomAllocator<int>>( 2 ) ) );
-    // }
-    // SECTION( "Contains (vector)" ) {
-    //     CHECK_THAT( v, Contains( v2 ) );
-    //     CHECK_THAT( v, Contains<int>( { 1, 2 } ) );
-    //     CHECK_THAT( v5,
-    //                 ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
-    //                     v2 ) ) );
-    //
-    //     v2.push_back( 3 ); // now exactly matches
-    //     CHECK_THAT( v, Contains( v2 ) );
-    //
-    //     CHECK_THAT( v, Contains( empty ) );
-    //     CHECK_THAT( empty, Contains( empty ) );
-    //
-    //     CHECK_THAT( v5,
-    //                 ( Contains<int, std::allocator<int>, CustomAllocator<int>>(
-    //                     v2 ) ) );
-    //     CHECK_THAT( v5, Contains( v6 ) );
-    // }
-    // SECTION( "Contains (element), composed" ) {
-    //     CHECK_THAT( v, VectorContains( 1 ) && VectorContains( 2 ) );
-    // }
+    // !TBD: contains(str)
+
+    SECTION( "Contains (element)" ) {
+        CHECK_THAT( v, contains( 1 ) );
+    }
+    SECTION( "Contains (vector)" ) {
+        CHECK_THAT( v, contains( v2 ) );
+        CHECK_THAT( v, contains( std::vector{ 1, 2 } ) );
+
+        v2.push_back( 3 ); // now exactly matches
+        CHECK_THAT( v, contains( v2 ) );
+
+        CHECK_THAT( v, contains( empty ) );
+        CHECK_THAT( empty, contains( empty ) );
+
+        CHECK_THAT( v5, contains( v2 ) );
+        CHECK_THAT( v5, contains( v6 ) );
+    }
+    SECTION( "Contains (element), composed" ) {
+        CHECK_THAT( v, contains( 1 ) && contains( 2 ) );
+    }
 
     SECTION( "Equals" ) {
 
@@ -407,27 +402,24 @@ TEST_CASE( "Vector matchers", "[matchers][vector]" ) {
         v6.push_back( 3 );
         CHECK_THAT( v5, equals(v6) );
     }
-    // SECTION( "UnorderedEquals" ) {
-    //     CHECK_THAT( v, UnorderedEquals( v ) );
-    //     CHECK_THAT( v, UnorderedEquals<int>( { 3, 2, 1 } ) );
-    //     CHECK_THAT( empty, UnorderedEquals( empty ) );
-    //
-    //     auto permuted = v;
-    //     std::next_permutation( begin( permuted ), end( permuted ) );
-    //     REQUIRE_THAT( permuted, UnorderedEquals( v ) );
-    //
-    //     std::reverse( begin( permuted ), end( permuted ) );
-    //     REQUIRE_THAT( permuted, UnorderedEquals( v ) );
-    //
-    //     CHECK_THAT(
-    //         v5,
-    //         ( UnorderedEquals<int, std::allocator<int>, CustomAllocator<int>>(
-    //             permuted ) ) );
-    //
-    //     auto v5_permuted = v5;
-    //     std::next_permutation( begin( v5_permuted ), end( v5_permuted ) );
-    //     CHECK_THAT( v5_permuted, UnorderedEquals( v5 ) );
-    // }
+    SECTION( "UnorderedEquals" ) {
+        CHECK_THAT( v, equals<InAnyOrder>( v ) );
+        CHECK_THAT( v, equals<InAnyOrder>( std::vector{ 3, 2, 1 } ) );
+        CHECK_THAT( empty, equals<InAnyOrder>( empty ) );
+
+        auto permuted = v;
+        std::next_permutation( begin( permuted ), end( permuted ) );
+        REQUIRE_THAT( permuted, equals<InAnyOrder>( v ) );
+
+        std::reverse( begin( permuted ), end( permuted ) );
+        REQUIRE_THAT( permuted, equals<InAnyOrder>( v ) );
+
+        CHECK_THAT( v5, equals<InAnyOrder>( permuted ) );
+
+        auto v5_permuted = v5;
+        std::next_permutation( begin( v5_permuted ), end( v5_permuted ) );
+        CHECK_THAT( v5_permuted, equals<InAnyOrder>( v5 ) );
+    }
 }
 
 TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
@@ -452,15 +444,15 @@ TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
 
     std::vector<int> empty;
 
-    // SECTION( "Contains (element)" ) {
-    //     CHECK_THAT( v, contains( -1 ) );
-    //     CHECK_THAT( empty, contains( 1 ) );
-    // }
-    // SECTION( "Contains (vector)" ) {
-    //     CHECK_THAT( empty, Contains( v ) );
-    //     v2.push_back( 4 );
-    //     CHECK_THAT( v, Contains( v2 ) );
-    // }
+    SECTION( "Contains (element)" ) {
+        CHECK_THAT( v, contains( -1 ) );
+        CHECK_THAT( empty, contains( 1 ) );
+    }
+    SECTION( "Contains (vector)" ) {
+        CHECK_THAT( empty, contains( v ) );
+        v2.push_back( 4 );
+        CHECK_THAT( v, contains( v2 ) );
+    }
 
     SECTION( "Equals" ) {
         CHECK_THAT( v, equals( v2 ) );
@@ -468,18 +460,18 @@ TEST_CASE( "Vector matchers that fail", "[matchers][vector][.][failing]" ) {
         CHECK_THAT( empty, equals( v ) );
         CHECK_THAT( v, equals( empty ) );
     }
-    // SECTION( "UnorderedEquals" ) {
-    //     CHECK_THAT( v, UnorderedEquals( empty ) );
-    //     CHECK_THAT( empty, UnorderedEquals( v ) );
-    //
-    //     auto permuted = v;
-    //     std::next_permutation( begin( permuted ), end( permuted ) );
-    //     permuted.pop_back();
-    //     CHECK_THAT( permuted, UnorderedEquals( v ) );
-    //
-    //     std::reverse( begin( permuted ), end( permuted ) );
-    //     CHECK_THAT( permuted, UnorderedEquals( v ) );
-    // }
+    SECTION( "UnorderedEquals" ) {
+        CHECK_THAT( v, equals<InAnyOrder>( empty ) );
+        CHECK_THAT( empty, equals<InAnyOrder>( v ) );
+
+        auto permuted = v;
+        std::next_permutation( begin( permuted ), end( permuted ) );
+        permuted.pop_back();
+        CHECK_THAT( permuted, equals<InAnyOrder>( v ) );
+
+        std::reverse( begin( permuted ), end( permuted ) );
+        CHECK_THAT( permuted, equals<InAnyOrder>( v ) );
+    }
 }
 
 namespace {
@@ -685,16 +677,16 @@ TEST_CASE( "Arbitrary predicate matcher", "[matchers][generic]" ) {
             } ) );
     }
 }
-//
-// TEST_CASE( "Regression test #1", "[matchers][vector]" ) {
-//     // At some point, UnorderedEqualsMatcher skipped
-//     // mismatched prefixed before doing the comparison itself
-//     std::vector<char> actual = { 'a', 'b' };
-//     std::vector<char> expected = { 'c', 'b' };
-//
-//     CHECK_THAT( actual, !UnorderedEquals( expected ) );
-// }
-//
+
+TEST_CASE( "Regression test #1", "[matchers][vector]" ) {
+    // At some point, UnorderedEqualsMatcher skipped
+    // mismatched prefixed before doing the comparison itself
+    std::vector<char> actual = { 'a', 'b' };
+    std::vector<char> expected = { 'c', 'b' };
+
+    CHECK_THAT( actual, !equals<InAnyOrder>( expected ) );
+}
+
 TEST_CASE( "Predicate matcher can accept const char*",
            "[matchers][compilation]" ) {
     REQUIRE_THAT( "foo", matches_predicate( []( const char* const& ) {
