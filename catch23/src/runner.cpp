@@ -8,33 +8,37 @@
 namespace CatchKit::Detail {
 
     namespace {
+        void handle_unexpected_exception( TestResultHandler& test_handler ) {
+            // We need a new context because the old one had string_views to outdated data
+            // - we want to preserve the last known source location, though
+            AssertionContext context{
+                .macro_name = "",
+                .original_expression = "* unknown line after the reported location *",
+                .message = {},
+                .location = test_handler.get_last_known_location() };
+            test_handler.on_assertion_start( ResultDisposition::Continue, context );
+            if( test_handler.on_assertion_result(ResultType::Failed) == ResultDetailNeeded::Yes ) {
+                test_handler.on_assertion_result_detail(
+                    ExceptionExpressionInfo{
+                        get_exception_message(std::current_exception()),
+                        ExceptionExpressionInfo::Type::Unexpected },
+                    {} );
+            }
+        }
         void invoke_test( Test const& test, TestResultHandler& test_handler ) {
-            Checker checker{.result_handler=&test_handler };
-            Checker old_checker = std::move(::checker);
-            ::checker = std::move(checker);
+            Checker old_checker = std::move(::catch23_checker);
+            ::catch23_checker = Checker{ .result_handler=&test_handler };
 
             try {
-                test.test_fun(checker);
+                test.test_fun(::catch23_checker);
             }
-            catch( TestCancelled ) { /* allow to pass through */ } // NOSONAR NOLINT (misc-typo)
+            catch( TestCancelled ) { // NOSONAR NOLINT (misc-typo)
+                // allow test cancellation to pass through
+            }
             catch( ... ) { // NOSONAR NOLINT (misc-typo)
-                // We need a new context because the old one had string_views to outdated data
-                // - we want to preserve the last known source location, though
-                AssertionContext context{
-                    .macro_name = "",
-                    .original_expression = "* unknown line after the reported location *",
-                    .message = {},
-                    .location = test_handler.get_last_known_location() };
-                test_handler.on_assertion_start( ResultDisposition::Continue, context );
-                if( test_handler.on_assertion_result(ResultType::Failed) == ResultDetailNeeded::Yes ) {
-                    test_handler.on_assertion_result_detail(
-                        ExceptionExpressionInfo{
-                            get_exception_message(std::current_exception()),
-                            ExceptionExpressionInfo::Type::Unexpected },
-                        {} );
-                }
+                handle_unexpected_exception( test_handler );
             }
-            ::checker = std::move(old_checker);
+            ::catch23_checker = std::move(old_checker);
         }
     }
     auto try_shrink( Test const& test, TestResultHandler& test_handler, ExecutionNode* leaf_node ) {
@@ -94,6 +98,16 @@ namespace CatchKit::Detail {
         auto matching_tests = tests.get_all_tests()
             | std::views::filter( [this](Test const& test) { return matches_config(test); } );
         run_tests( matching_tests );
+    }
+
+    void TestRunner::run_tests( std::vector<Test const*> const& tests_to_run, bool soloing ) {
+        result_handler.get_reporter().on_test_run_start();
+        if( soloing )
+            println( ColourIntent::Warning, "\nWarning: Running soloed test(s) (tests with the [solo] tag) only.\n");
+        for( auto const test : tests_to_run) {
+            run_test( *test );
+        }
+        result_handler.get_reporter().on_test_run_end();
     }
 
     void TestRunner::run_test( Test const& test ) {

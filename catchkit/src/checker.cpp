@@ -9,7 +9,7 @@ namespace {
     CatchKit::Detail::AssertResultHandler default_assertion_handler; // NOSONAR NOLINT (misc-typo)
 }
 
-constinit CatchKit::Checker checker{ &default_assertion_handler }; // NOSONAR NOLINT (misc-typo)
+constinit CatchKit::Checker catch23_checker{ &default_assertion_handler }; // NOSONAR NOLINT (misc-typo)
 
 namespace CatchKit::Detail {
 

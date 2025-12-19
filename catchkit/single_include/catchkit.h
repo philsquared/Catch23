@@ -849,7 +849,7 @@ namespace CatchKit
 } // namespace CatchKit
 
 // This global instance is used if not using the one passed in to a function locally
-extern constinit CatchKit::Checker checker; // NOSONAR NOLINT (misc-typo)
+extern constinit CatchKit::Checker catch23_checker; // NOSONAR NOLINT (misc-typo)
 
 
 // Packed from catchkit/include/catchkit/internal_matchers.h

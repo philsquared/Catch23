@@ -21,6 +21,9 @@ namespace CatchKit::Detail {
     class TestRunner {
         TestResultHandler result_handler;
         Config config;
+
+        void run_tests( std::vector<Test const*> const& tests_to_run, bool soloing );
+
     public:
         explicit TestRunner( Reporter& reporter, Config config )
         :   result_handler(reporter),
@@ -32,11 +35,9 @@ namespace CatchKit::Detail {
         void run_tests( TestRegistry const& tests );
 
         void run_tests( range_of<Test> auto& tests ) {
-            result_handler.get_reporter().on_test_run_start();
-
             std::vector<Test const*> tests_to_run;
             bool soloing = false;
-            for( auto&& test : tests) {
+            for( auto const& test : tests) {
                 if( test.test_info.has_tag_type(Tag::Type::solo) ) {
                     if( !soloing ) {
                         tests_to_run.clear();
@@ -48,13 +49,7 @@ namespace CatchKit::Detail {
                     tests_to_run.push_back( &test );
                 }
             }
-            if( soloing )
-                println( ColourIntent::Warning, "\nWarning: Running soloed test(s) (tests with the [solo] tag) only.\n");
-            for( auto const test : tests_to_run) {
-                run_test( *test );
-            }
-
-            result_handler.get_reporter().on_test_run_end();
+            run_tests( tests_to_run, soloing );
         }
 
         auto matches_config( Test const& test ) const -> bool;
