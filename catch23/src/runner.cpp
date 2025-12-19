@@ -80,9 +80,20 @@ namespace CatchKit::Detail {
         test_handler.on_shrink_end();
 
     }
+    auto TestRunner::matches_config( Test const& test ) const -> bool {
+        if( config.tests_or_tags.empty() )
+            return true;
+
+        // !TBD: Just matches exact test name, for now
+        if( test.test_info.name == config.tests_or_tags )
+            return true;
+        return false;
+    }
 
     void TestRunner::run_tests( TestRegistry const& tests ) {
-        run_tests( tests.get_all_tests() );
+        auto matching_tests = tests.get_all_tests()
+            | std::views::filter( [this](Test const& test) { return matches_config(test); } );
+        run_tests( matching_tests );
     }
 
     void TestRunner::run_test( Test const& test ) {

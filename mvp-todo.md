@@ -24,6 +24,15 @@ We need different reporters and a way to specify them
 
 Do we need to lock down the interface for specifying reporters in terms of format, target (e.g. filename) and disposition (show passing tests etc.?).
 
+## Anon tests
+
+* should have (generated) name
+* Can we support `TEST` with only tags arg?
+
+## BDD
+
+* GIVEN/ WHEN/ THEN
+
 ## Redirect stdout
 
 At least `std::cout`, but if we can redirect stdout in general that's even better
@@ -57,3 +66,5 @@ Need to build and run tests on GitHub
 ## Skip tests
 
 # Templated tests?
+
+# Indentation aware output?

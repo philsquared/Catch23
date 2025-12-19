@@ -42,6 +42,11 @@ add_library(Catch23 STATIC
         include/catch23/catch23_main_mod.h
         include/catch23/test_registry.h
         src/test_registry.cpp
+        include/catch23/clara.h
+        src/clara.cpp
+        include/catch23/config.h
+        include/catch23/command_line.h
+        src/command_line.cpp
 )
 
 target_include_directories(Catch23 PUBLIC include)

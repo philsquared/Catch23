@@ -5,6 +5,7 @@
 #ifndef CATCH23_RUNNER_H
 #define CATCH23_RUNNER_H
 
+#include "config.h"
 #include "print.h"
 #include "test_registry.h"
 #include "test.h"
@@ -19,14 +20,18 @@ namespace CatchKit::Detail {
 
     class TestRunner {
         TestResultHandler result_handler;
+        Config config;
     public:
-        explicit TestRunner( Reporter& reporter ) : result_handler(reporter) {}
+        explicit TestRunner( Reporter& reporter, Config config )
+        :   result_handler(reporter),
+            config(std::move(config))
+        {}
 
         void run_test( Test const& test );
 
         void run_tests( TestRegistry const& tests );
 
-        void run_tests( range_of<Test> auto const& tests ) {
+        void run_tests( range_of<Test> auto& tests ) {
             result_handler.get_reporter().on_test_run_start();
 
             std::vector<Test const*> tests_to_run;
@@ -51,6 +56,8 @@ namespace CatchKit::Detail {
 
             result_handler.get_reporter().on_test_run_end();
         }
+
+        auto matches_config( Test const& test ) const -> bool;
     };
 
 } // namespace CatchKit::Detail

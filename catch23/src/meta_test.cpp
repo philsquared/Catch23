@@ -23,7 +23,7 @@ namespace CatchKit {
     {}
 
     auto MetaTestRunner::run( Detail::Test const& test ) && -> MetaTestResults {
-        TestRunner runner( reporter );
+        TestRunner runner( reporter, Config() );
         runner.run_test( test );
         return MetaTestResults{ std::move(reporter.results) };
     }
