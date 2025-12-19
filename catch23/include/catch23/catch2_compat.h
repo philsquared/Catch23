@@ -17,9 +17,6 @@ namespace CatchKit::Detail {
 
 // TEST_CASE macro is now in macros.h
 
-#define CHECK_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "CHECK_FALSE", check, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
-#define REQUIRE_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE_FALSE", require, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
-
 #ifdef FAIL
 #undef FAIL
 #endif

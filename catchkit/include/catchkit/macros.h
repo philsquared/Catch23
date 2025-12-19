@@ -42,6 +42,9 @@
 #define CHECK_THAT( arg, matcher ) CATCHKIT_INTERNAL_ASSERT_THAT( "CHECK_THAT", check, arg, matcher )
 #define REQUIRE_THAT( arg, matcher ) CATCHKIT_INTERNAL_ASSERT_THAT( "REQUIRE_THAT", require, arg, matcher )
 
+#define CHECK_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "CHECK_FALSE", check, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
+#define REQUIRE_FALSE(...) CATCHKIT_INTERNAL_ASSERT( "REQUIRE_FALSE", require, CatchKit::Detail::InvertResult::Yes, __VA_ARGS__ )
+
 // Variable capture
 #define CATCHKIT_INTERNAL_DECLARE_VAR_X(suffix, var) CatchKit::Detail::TypedVariableCaptureRef CATCHKIT_INTERNAL_UNIQUE_NAME(var_capture##suffix)(var, #var, checker)
 
