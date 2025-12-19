@@ -19,15 +19,10 @@ namespace CatchKit::Detail {
     auto parse_templated_name( std::string const& templated_name, std::source_location location ) -> std::string_view {
         return parse_templated_name_from_function_name( templated_name, location.function_name() );
     }
-    auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified) -> std::string_view {
-        auto qualified_enum_name = parse_templated_name_from_function_name("candidate", function_name);
-        if( auto comma = qualified_enum_name.find_first_of(','); comma != std::string_view::npos )
-            qualified_enum_name = qualified_enum_name.substr(0, comma);
-        if( fully_qualified )
-            return qualified_enum_name; // NOLINT
-        if( auto last_colon = qualified_enum_name.find_last_of(':'); last_colon != std::string_view::npos )
-            return qualified_enum_name.substr(last_colon+1);
-        return qualified_enum_name; // NOLINT
+    auto remove_qualification(std::string_view qualified_name) -> std::string_view {
+        if( auto last_colon = qualified_name.find_last_of(':'); last_colon != std::string_view::npos )
+            return qualified_name.substr(last_colon+1);
+        return qualified_name; // NOLINT
     }
     auto unknown_enum_to_string(size_t enum_value) -> std::string {
         return std::format("<unknown enum value: {}>", enum_value);

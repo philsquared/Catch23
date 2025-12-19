@@ -67,6 +67,11 @@ TEST("Enum classes can be converted to strings", [reflection_tag]) {
     CHECK( CatchKit::enum_to_string( Colours::blue ) == "blue");
 }
 
+TEST("Invalid enum classes can be converted to strings", [reflection_tag]) {
+    auto ultra_violet = static_cast<Colours>(static_cast<int>(Colours::blue)+1);
+    CHECK( CatchKit::enum_to_string( ultra_violet ) == "(Colours)3");
+}
+
 enum ColoursUnscoped{ red, green, blue };
 static_assert(requires { std::integral_constant<ColoursUnscoped, static_cast<ColoursUnscoped>(std::size_t())>{}; } );
 
@@ -74,4 +79,18 @@ TEST("Unscoped enums can be converted to strings", [reflection_tag]) {
     CHECK( CatchKit::enum_to_string( ColoursUnscoped::red ) == "red");
     CHECK( CatchKit::enum_to_string( ColoursUnscoped::green ) == "green");
     CHECK( CatchKit::enum_to_string( ColoursUnscoped::blue ) == "blue");
+}
+
+enum class BigEnum {
+    Zero, One, Two, Three, Four, Five, Six, Seven, Eight, Nine,
+    Ten, Eleven, Twelve, Thirteen, Fourteen, Fifteen, Sixteen, Seventeen, Eighteen, Nineteen,
+    Twenty, TwentyOne, TwentyTwo, TwentyThree, TwentyFour, TwentyFive, TwentySix, TwentySeven, TwentyEight, TwentyNine,
+    Thirty, ThirtyOne, ThirtyTwo
+};
+
+TEST("Larger enum classes can be converted to strings", [reflection_tag]) {
+    CHECK( CatchKit::enum_to_string( BigEnum::One ) == "One");
+    CHECK( CatchKit::enum_to_string( BigEnum::Sixteen ) == "Sixteen");
+    CHECK( CatchKit::enum_to_string( BigEnum::Seventeen ) == "Seventeen");
+    CHECK( CatchKit::enum_to_string( BigEnum::ThirtyTwo ) == "ThirtyTwo");
 }

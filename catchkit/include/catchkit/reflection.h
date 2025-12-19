@@ -5,6 +5,7 @@
 #ifndef CATCHKIT_REFLECTION_H
 #define CATCHKIT_REFLECTION_H
 
+#include <cassert>
 #include <string>
 #include <source_location>
 #include <string_view>
@@ -31,21 +32,41 @@ namespace CatchKit {
                 return parse_templated_name("T");
         }
 
-        auto parse_enum_name_from_function(std::string_view function_name, bool fully_qualified = false) -> std::string_view;
+        template<typename E, E ec>
+        consteval auto enum_case_to_string() -> std::string_view {
+            std::string_view fname = std::source_location::current().function_name();
+            if( auto start = fname.find("ec = "); start != std::string_view::npos ) {
+                start += 5;
+                auto end = fname.find_first_of(";]", start);
+                assert( end != std::string_view::npos );
+                return fname.substr(start, end-start);
+            }
+            return {};
+        }
+        consteval auto is_valid_enum_case(std::string_view name) -> bool {
+            return !name.empty() && name[0] != '(';
+        }
+
         auto unknown_enum_to_string(size_t enum_value) -> std::string;
+        auto remove_qualification(std::string_view qualified_name) -> std::string_view;
 
         constexpr std::size_t enum_probe_start = 0;
-        constexpr std::size_t enum_probe_end = 16;
+        constexpr std::size_t enum_sparse_probe_end = 16;
+        constexpr std::size_t enum_sequential_probe_end = 64;
 
-        template<typename E, E candidate=static_cast<E>(enum_probe_start), size_t max_probe=enum_probe_end>
+        template<typename E, E candidate=static_cast<E>(enum_probe_start)>
         struct enum_value_string {
             static constexpr auto find(E e) -> std::string_view {
-                if( e == candidate )
-                    return parse_enum_name_from_function(std::source_location::current().function_name());
-                if constexpr(constexpr auto raw_value = static_cast<std::size_t>( candidate );
-                    raw_value < max_probe &&
-                    requires { std::integral_constant<E, static_cast<E>(raw_value+1)>{}; } ) {
-                        return enum_value_string<E, static_cast<E>(raw_value + 1)>::find(e);
+                constexpr auto case_name = enum_case_to_string<E, candidate>();
+                constexpr auto raw_value = static_cast<std::size_t>( candidate );
+                if constexpr( raw_value < enum_sparse_probe_end || is_valid_enum_case( case_name ) ) {
+                    if( e == candidate )
+                        return remove_qualification( case_name );
+                    if constexpr(
+                            raw_value < enum_sequential_probe_end &&
+                            requires { std::integral_constant<E, static_cast<E>(raw_value+1)>{}; } ) {
+                        return enum_value_string<E, static_cast<E>(raw_value+1)>::find(e);
+                    }
                 }
                 return {};
             }
