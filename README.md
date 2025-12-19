@@ -5,6 +5,8 @@ Catch23 is a new test framework, in the spirit of [Catch/ Catch2](https://github
 
 This is a pre-release work-in-progress and is not, yet, intended for general use.
 
+Feel free to try it out on [Compiler Explorer, here](https://compiler-explorer.com/z/sTeGzs8M9).
+
 What's different?
 The vast majority is purely internal - which not only makes maintenance far easier (and enables new possibilities) 
 but should improve runtime - and may help with compile times, too (not currently measured).
