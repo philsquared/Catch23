@@ -94,3 +94,15 @@ TEST("Larger enum classes can be converted to strings", [reflection_tag]) {
     CHECK( CatchKit::enum_to_string( BigEnum::Seventeen ) == "Seventeen");
     CHECK( CatchKit::enum_to_string( BigEnum::ThirtyTwo ) == "ThirtyTwo");
 }
+
+enum class Negative {
+    MinusOne = -1,
+    Zero = 0,
+    One = 1
+};
+
+TEST("Enums with negative values can be converted to strings", [reflection_tag]) {
+    CHECK( CatchKit::enum_to_string( Negative::MinusOne ) == "MinusOne");
+    CHECK( CatchKit::enum_to_string( Negative::Zero ) == "Zero");
+    CHECK( CatchKit::enum_to_string( Negative::One ) == "One");
+}

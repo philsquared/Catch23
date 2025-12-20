@@ -24,9 +24,6 @@ namespace CatchKit::Detail {
             return qualified_name.substr(last_colon+1);
         return qualified_name; // NOLINT
     }
-    auto unknown_enum_to_string(size_t enum_value) -> std::string {
-        return std::format("<unknown enum value: {}>", enum_value);
-    }
 
     auto normalise_type_name(std::string_view type_name) -> std::string {
         if( type_name.starts_with("std::") ) {

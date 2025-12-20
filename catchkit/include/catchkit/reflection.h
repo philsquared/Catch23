@@ -9,6 +9,8 @@
 #include <string>
 #include <source_location>
 #include <string_view>
+#include <format>
+#include <utility>
 
 namespace CatchKit {
     namespace Detail {
@@ -31,14 +33,15 @@ namespace CatchKit {
             else
                 return parse_templated_name("T");
         }
+        auto normalise_type_name(std::string_view type_name) -> std::string;
 
-        template<typename E, E ec>
+        // Converts this compile-time known enum case to a string
+        template<auto EC>
         consteval auto enum_case_to_string() -> std::string_view {
             std::string_view fname = std::source_location::current().function_name();
-            if( auto start = fname.find("ec = "); start != std::string_view::npos ) {
-                start += 5;
-                auto end = fname.find_first_of(";]", start);
-                assert( end != std::string_view::npos );
+            if( auto start = fname.find("EC = "); start != std::string_view::npos ) {
+                auto end = fname.find_first_of(";]", start += 5);
+                assert( end != std::string_view::npos ); // If a compiler error leads here we need to fix the parsing
                 return fname.substr(start, end-start);
             }
             return {};
@@ -47,38 +50,47 @@ namespace CatchKit {
             return !name.empty() && name[0] != '(';
         }
 
-        auto unknown_enum_to_string(size_t enum_value) -> std::string;
+        auto unknown_enum_to_string(std::integral auto enum_value) -> std::string {
+            return std::format("<unknown enum value: {}>", enum_value);
+        }
         auto remove_qualification(std::string_view qualified_name) -> std::string_view;
 
-        constexpr std::size_t enum_probe_start = 0;
-        constexpr std::size_t enum_sparse_probe_end = 16;
-        constexpr std::size_t enum_sequential_probe_end = 64;
+        constexpr int enum_probe_start = 0;
+        constexpr int enum_sparse_probe_end = 16;
+        constexpr int enum_sequential_probe_end = 64;
 
-        template<typename E, E candidate=static_cast<E>(enum_probe_start)>
+        template<typename E, int direction=1, std::underlying_type_t<E> probe=enum_probe_start>
         struct enum_value_string {
-            static constexpr auto find(E e) -> std::string_view {
-                constexpr auto case_name = enum_case_to_string<E, candidate>();
-                constexpr auto raw_value = static_cast<std::size_t>( candidate );
-                if constexpr( raw_value < enum_sparse_probe_end || is_valid_enum_case( case_name ) ) {
-                    if( e == candidate )
+            using UnderlyingType = std::underlying_type_t<E>;
+            static constexpr UnderlyingType candidate = probe*direction;
+            static constexpr auto find(E value) -> std::string_view { return find(std::to_underlying(value)); }
+            static constexpr auto find(UnderlyingType underlying) -> std::string_view {
+                if constexpr( requires { std::integral_constant<E, static_cast<E>( candidate )>{}; } ) {
+                    constexpr auto case_name = enum_case_to_string<static_cast<E>( candidate )>();
+                    if( underlying == candidate )
                         return remove_qualification( case_name );
-                    if constexpr(
-                            raw_value < enum_sequential_probe_end &&
-                            requires { std::integral_constant<E, static_cast<E>(raw_value+1)>{}; } ) {
-                        return enum_value_string<E, static_cast<E>(raw_value+1)>::find(e);
+                    if constexpr( ( probe < enum_sparse_probe_end || is_valid_enum_case( case_name ) )
+                            && probe <= enum_sequential_probe_end ) {
+                        return enum_value_string<E, direction, probe+1>::find(underlying);
                     }
                 }
                 return {};
             }
         };
 
-        template<typename E>
+        // Convert a runtime enum case value to a string
+        template<typename E> requires std::is_enum_v<E>
         auto constexpr enum_to_string(E e) -> std::string {
-            if( auto val = enum_value_string<E>::find(e); !val.empty() )
-                return std::string(val);
-            return unknown_enum_to_string(static_cast<size_t>(e));
+            auto underlying = std::to_underlying(e);
+            if constexpr( std::is_signed_v<std::underlying_type_t<E>> ) {
+                if( underlying < 0 )
+                    if( auto name = enum_value_string<E, -1, 1>::find(e); !name.empty() )
+                        return std::string(name);
+            }
+            if( auto name = enum_value_string<E>::find(e); !name.empty() )
+                return std::string(name);
+            return unknown_enum_to_string( underlying );
         }
-        auto normalise_type_name(std::string_view type_name) -> std::string;
 
     } // namespace Detail
 
