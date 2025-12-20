@@ -136,6 +136,14 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
         enum class Single { Only = 10 };
         CHECK( CatchKit::enum_to_string( Single::Only ) == "Only" );
     }
+    SECTION("Empty enum") {
+        enum class Empty {};
+        CHECK_THAT( CatchKit::enum_to_string(static_cast<Empty>(0)), contains("0") );
+    }
+    SECTION("Bitmask combinations") {
+        enum class Flags { A = 1, B = 2, C = 4 };
+        CHECK_THAT( CatchKit::enum_to_string(static_cast<Flags>(3)), contains("3") ); // A|B
+    }
     SECTION("Tricky names") {
         enum class Names { _, _0, x, X, red, Red, RED };
         CHECK( CatchKit::enum_to_string( Names::_ ) == "_" );
@@ -177,9 +185,15 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
             CHECK_THAT( CatchKit::enum_to_string( Tiny::Max ), contains("127") );
         }
         SECTION("bigger max probe") {
+            // Use version in Detail that lets us specify probe limits
             enum class Tiny : int8_t { Min = -128, Max = 127 };
-            CHECK( CatchKit::enum_to_string<128, 128>( Tiny::Min ) == "Min" );
-            CHECK( CatchKit::enum_to_string<128, 128>( Tiny::Max ) == "Max" );
+            CHECK( CatchKit::probed_enum_to_string<128, 128>( Tiny::Min ) == "Min" );
+            CHECK( CatchKit::probed_enum_to_string<128, 128>( Tiny::Max ) == "Max" );
+        }
+        SECTION("Bool underlying type") {
+            enum class Bool : bool { False = false, True = true };
+            CHECK( CatchKit::enum_to_string(Bool::False) == "False" );
+            CHECK( CatchKit::enum_to_string(Bool::True) == "True" );
         }
     }
 }

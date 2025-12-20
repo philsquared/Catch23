@@ -90,7 +90,7 @@ namespace CatchKit {
                 int probe_start=enum_probe_start,
                 typename E>
             requires std::is_enum_v<E>
-        auto constexpr enum_to_string(E e) -> std::string {
+        auto constexpr probed_enum_to_string(E e) -> std::string {
             auto underlying = std::to_underlying(e);
             if constexpr( std::is_signed_v<std::underlying_type_t<E>> ) {
                 if( underlying < 0 )
@@ -105,7 +105,13 @@ namespace CatchKit {
     } // namespace Detail
 
     using Detail::type_to_string;
-    using Detail::enum_to_string;
+    using Detail::probed_enum_to_string; // Lets you specify the probe parameters
+
+    // Convert a runtime enum case value to a string
+    template<typename E> requires std::is_enum_v<E>
+    auto constexpr enum_to_string(E e) -> std::string {
+        return Detail::probed_enum_to_string(e);
+    }
 
 } // namespace CatchKit
 
