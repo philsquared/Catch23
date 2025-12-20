@@ -120,6 +120,13 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
         struct E{};
         CHECK( CatchKit::enum_to_string( Tmpl<E>::E::V ) == "V" );
     }
+    SECTION("Defined inside a lambda") {
+        auto lambda = [] {
+            enum class Inner { V };
+            return CatchKit::enum_to_string(Inner::V);
+        };
+        CHECK( lambda() == "V" );
+    }
     SECTION("enums with aliases") {
         enum class Alias { A = 0, B = 0, C = 1 };
 
@@ -178,6 +185,15 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
         CHECK_THAT( CatchKit::enum_to_string( Seq::yy ), contains("66") );
         CHECK_THAT( CatchKit::enum_to_string( Seq::zz ), contains("67") );
     }
+    SECTION("Expression defined enums") {
+        enum class Expr { A = 1 << 0, B = 1 << 1, C = 1 << 2 };
+        CHECK( CatchKit::enum_to_string(Expr::A) == "A" );
+        CHECK( CatchKit::enum_to_string(Expr::C) == "C" );
+    }
+    SECTION("Large underlying with big value") {
+        enum class Big : uint64_t { Large = 1'000'000'000'000ULL };
+        CHECK_THAT( CatchKit::enum_to_string(Big::Large), contains("1000000000000") );
+    }
     SECTION("underlying type boundaries") {
         SECTION("default max probe") {
             enum class Tiny : int8_t { Min = -128, Max = 127 };
@@ -194,6 +210,11 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
             enum class Bool : bool { False = false, True = true };
             CHECK( CatchKit::enum_to_string(Bool::False) == "False" );
             CHECK( CatchKit::enum_to_string(Bool::True) == "True" );
+        }
+        SECTION("unsigned underlying") {
+            enum class Unsigned : uint8_t { A = 0, B = 255 };
+            CHECK( CatchKit::enum_to_string(Unsigned::A) == "A" );
+            CHECK( CatchKit::probed_enum_to_string<256, 256>(Unsigned::B) == "B" );
         }
     }
 }
