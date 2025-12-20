@@ -40,7 +40,8 @@ namespace CatchKit {
         consteval auto enum_case_to_string() -> std::string_view {
             std::string_view fname = std::source_location::current().function_name();
             if( auto start = fname.find("EC = "); start != std::string_view::npos ) {
-                auto end = fname.find_first_of(";]", start += 5);
+                start += 5;
+                auto end = fname.find_first_of(";]", start);
                 assert( end != std::string_view::npos ); // If a compiler error leads here we need to fix the parsing
                 return fname.substr(start, end-start);
             }
@@ -59,19 +60,23 @@ namespace CatchKit {
         constexpr int enum_sparse_probe_end = 16;
         constexpr int enum_sequential_probe_end = 64;
 
-        template<typename E, int direction=1, std::underlying_type_t<E> probe=enum_probe_start>
+        template<typename E,
+            int direction,
+            int probe,
+            int sparse_probe_end,
+            int sequential_probe_end>
         struct enum_value_string {
             using UnderlyingType = std::underlying_type_t<E>;
-            static constexpr UnderlyingType candidate = probe*direction;
+            static constexpr UnderlyingType candidate = static_cast<UnderlyingType>(probe*direction);
             static constexpr auto find(E value) -> std::string_view { return find(std::to_underlying(value)); }
             static constexpr auto find(UnderlyingType underlying) -> std::string_view {
                 if constexpr( requires { std::integral_constant<E, static_cast<E>( candidate )>{}; } ) {
                     constexpr auto case_name = enum_case_to_string<static_cast<E>( candidate )>();
                     if( underlying == candidate )
                         return remove_qualification( case_name );
-                    if constexpr( ( probe < enum_sparse_probe_end || is_valid_enum_case( case_name ) )
-                            && probe <= enum_sequential_probe_end ) {
-                        return enum_value_string<E, direction, probe+1>::find(underlying);
+                    if constexpr( ( probe < sparse_probe_end || is_valid_enum_case( case_name ) )
+                            && probe <sequential_probe_end ) {
+                        return enum_value_string<E, direction, probe+1, sparse_probe_end, sequential_probe_end>::find(underlying);
                     }
                 }
                 return {};
@@ -79,15 +84,20 @@ namespace CatchKit {
         };
 
         // Convert a runtime enum case value to a string
-        template<typename E> requires std::is_enum_v<E>
+        template<
+                int sparse_probe_end=enum_sparse_probe_end,
+                int sequential_probe_end=enum_sequential_probe_end,
+                int probe_start=enum_probe_start,
+                typename E>
+            requires std::is_enum_v<E>
         auto constexpr enum_to_string(E e) -> std::string {
             auto underlying = std::to_underlying(e);
             if constexpr( std::is_signed_v<std::underlying_type_t<E>> ) {
                 if( underlying < 0 )
-                    if( auto name = enum_value_string<E, -1, 1>::find(e); !name.empty() )
+                    if( auto name = enum_value_string<E, -1, probe_start+1, sparse_probe_end, sequential_probe_end>::find(e); !name.empty() )
                         return std::string(name);
             }
-            if( auto name = enum_value_string<E>::find(e); !name.empty() )
+            if( auto name = enum_value_string<E, 1, probe_start, sparse_probe_end, sequential_probe_end>::find(e); !name.empty() )
                 return std::string(name);
             return unknown_enum_to_string( underlying );
         }

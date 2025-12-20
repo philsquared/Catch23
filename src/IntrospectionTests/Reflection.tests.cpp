@@ -106,3 +106,80 @@ TEST("Enums with negative values can be converted to strings", [reflection_tag])
     CHECK( CatchKit::enum_to_string( Negative::Zero ) == "Zero");
     CHECK( CatchKit::enum_to_string( Negative::One ) == "One");
 }
+
+namespace Ns1::Ns2 {
+    enum class Nested { a, b, c };
+}
+template<typename T> struct Tmpl { enum class E { V }; };
+
+TEST("Some tricky enum conversions", [reflection_tag]) {
+    SECTION("nested namespace") {
+        CHECK( CatchKit::enum_to_string( Ns1::Ns2::Nested::b ) == "b" );
+    }
+    SECTION("Within template") {
+        struct E{};
+        CHECK( CatchKit::enum_to_string( Tmpl<E>::E::V ) == "V" );
+    }
+    SECTION("enums with aliases") {
+        enum class Alias { A = 0, B = 0, C = 1 };
+
+        CHECK_THAT( CatchKit::enum_to_string( Alias::A ), equals("A") || equals("B") );
+        CHECK_THAT( CatchKit::enum_to_string( Alias::B ), equals("A") || equals("B") );
+        CHECK( CatchKit::enum_to_string( Alias::C ) == "C" );
+    }
+    SECTION("Gaps spanning zero") {
+        enum class Gappy { A = -10, B = 10 };
+        CHECK( CatchKit::enum_to_string( Gappy::A ) == "A" );
+        CHECK( CatchKit::enum_to_string( Gappy::B ) == "B" );
+    }
+    SECTION("Single enum") {
+        enum class Single { Only = 10 };
+        CHECK( CatchKit::enum_to_string( Single::Only ) == "Only" );
+    }
+    SECTION("Tricky names") {
+        enum class Names { _, _0, x, X, red, Red, RED };
+        CHECK( CatchKit::enum_to_string( Names::_ ) == "_" );
+        CHECK( CatchKit::enum_to_string( Names::_0 ) == "_0" );
+        CHECK( CatchKit::enum_to_string( Names::x ) == "x" );
+        CHECK( CatchKit::enum_to_string( Names::X ) == "X" );
+        CHECK( CatchKit::enum_to_string( Names::red ) == "red" );
+        CHECK( CatchKit::enum_to_string( Names::Red ) == "Red" );
+        CHECK( CatchKit::enum_to_string( Names::RED ) == "RED" );
+    }
+    SECTION("Out of range") {
+        // The sparse problem limit is 16. We can go beyond that sequentially,
+        // but if there is a gap we stop.
+        // If the sparse probe limit changes this test will need to be updated
+        enum class Sparse { a=15, b=16, c=17, d=19 };
+        CHECK( CatchKit::enum_to_string( Sparse::a ) == "a" );
+        CHECK( CatchKit::enum_to_string( Sparse::b ) == "b" );
+        CHECK( CatchKit::enum_to_string( Sparse::c ) == "c" );
+        CHECK_THAT( CatchKit::enum_to_string( Sparse::d ), contains("19") );
+
+        // The sequential probe limit is 64, so we can't convert anything past that
+        enum class Seq {
+            a=16, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
+            aa, bb, cc, dd, ee, ff, gg, hh, ii, jj, kk, ll, mm, nn,
+            oo, pp, qq, rr, ss, tt, uu, vv, ww, xx, yy, zz
+        };
+
+        CHECK( CatchKit::enum_to_string( Seq::a ) == "a" );
+        CHECK( CatchKit::enum_to_string( Seq::b ) == "b" );
+        CHECK( CatchKit::enum_to_string( Seq::ww ) == "ww" );
+        CHECK_THAT( CatchKit::enum_to_string( Seq::xx ), contains("65") );
+        CHECK_THAT( CatchKit::enum_to_string( Seq::yy ), contains("66") );
+        CHECK_THAT( CatchKit::enum_to_string( Seq::zz ), contains("67") );
+    }
+    SECTION("underlying type boundaries") {
+        SECTION("default max probe") {
+            enum class Tiny : int8_t { Min = -128, Max = 127 };
+            CHECK_THAT( CatchKit::enum_to_string( Tiny::Min ), contains("-128") );
+            CHECK_THAT( CatchKit::enum_to_string( Tiny::Max ), contains("127") );
+        }
+        SECTION("bigger max probe") {
+            enum class Tiny : int8_t { Min = -128, Max = 127 };
+            CHECK( CatchKit::enum_to_string<128, 128>( Tiny::Min ) == "Min" );
+            CHECK( CatchKit::enum_to_string<128, 128>( Tiny::Max ) == "Max" );
+        }
+    }
+}
