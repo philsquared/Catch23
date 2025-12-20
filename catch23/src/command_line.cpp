@@ -3,7 +3,8 @@
 //
 
 #include "catch23/command_line.h"
-#include "print"
+
+#include <print>
 
 namespace CatchKit {
 
