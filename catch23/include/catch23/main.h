@@ -10,7 +10,7 @@
 #define CATCH23_MIN_MAIN(...) \
     int main() { \
         auto reporter = CatchKit::ConsoleReporter(__VA_ARGS__); \
-        CatchKit::TestRunner runner(reporter); \
+        CatchKit::TestRunner runner(reporter, {}); \
         runner.run_tests(CatchKit::get_test_registry()); \
     }
 
