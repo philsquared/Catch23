@@ -102,9 +102,9 @@ enum class Negative {
 };
 
 TEST("Enums with negative values can be converted to strings", [reflection_tag]) {
-    CHECK( CatchKit::enum_to_string( Negative::MinusOne ) == "MinusOne");
-    CHECK( CatchKit::enum_to_string( Negative::Zero ) == "Zero");
-    CHECK( CatchKit::enum_to_string( Negative::One ) == "One");
+    CHECK( CatchKit::enum_to_string( Negative::MinusOne ) == "MinusOne" );
+    CHECK( CatchKit::enum_to_string( Negative::Zero ) == "Zero" );
+    CHECK( CatchKit::enum_to_string( Negative::One ) == "One" );
 }
 
 namespace Ns1::Ns2 {
@@ -162,7 +162,7 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
         CHECK( CatchKit::enum_to_string( Names::RED ) == "RED" );
     }
     SECTION("Out of range") {
-        // The sparse problem limit is 16. We can go beyond that sequentially,
+        // The sparse probe limit is 16. We can go beyond that sequentially,
         // but if there is a gap we stop.
         // If the sparse probe limit changes this test will need to be updated
         enum class Sparse { a=15, b=16, c=17, d=19 };
@@ -201,7 +201,7 @@ TEST("Some tricky enum conversions", [reflection_tag]) {
             CHECK_THAT( CatchKit::enum_to_string( Tiny::Max ), contains("127") );
         }
         SECTION("bigger max probe") {
-            // Use version in Detail that lets us specify probe limits
+            // Use lower-level version that lets us specify probe limits
             enum class Tiny : int8_t { Min = -128, Max = 127 };
             CHECK( CatchKit::probed_enum_to_string<128, 128>( Tiny::Min ) == "Min" );
             CHECK( CatchKit::probed_enum_to_string<128, 128>( Tiny::Max ) == "Max" );
