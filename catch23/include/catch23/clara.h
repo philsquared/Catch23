@@ -177,7 +177,6 @@ namespace CatchKit::Clara {
 
             template<typename Self, typename Other>
             [[nodiscard]] auto operator | (this Self const& self, Other const& other) -> Parser {
-                Parser composite;
                 return Parser() | self | other;
             }
         };

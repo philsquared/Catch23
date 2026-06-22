@@ -12,17 +12,25 @@
 
 int main(int argc, char** argv) {
     using namespace CatchKit;
-    auto maybe_config = parse_config(argc, argv);
-    if( !maybe_config )
-        return maybe_config.error();
 
-    auto const& config = *maybe_config;
+    Config config;
+    auto parser = make_cli_parser(config);
+
+    if( auto result = parser.parse(argc, argv); !result ) {
+        std::println("Invalid command line");
+        return 1;
+    }
+    if( config.help ) {
+        std::println("Help!" );
+        // !TBD: show usage
+        return 0;
+    }
 
     // !TBD: Choose reporter based on config:
-    auto reporter = CatchKit::ConsoleReporter( config.show_successful_tests ? ReportOn::AllResults : ReportOn::FailingTests );
+    auto reporter = ConsoleReporter( config.show_successful_tests ? ReportOn::AllResults : ReportOn::FailingTests );
 
-    CatchKit::TestRunner runner(reporter, config);
-    runner.run_tests(CatchKit::get_test_registry());
+    TestRunner runner(reporter, config);
+    runner.run_tests(get_test_registry());
 }
 
 

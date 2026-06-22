@@ -90,6 +90,7 @@ namespace CatchKit::Clara {
                     // consume
                 }
                 else {
+                    int i = 7;
                     // store/ error
                 }
                 tokens.next();

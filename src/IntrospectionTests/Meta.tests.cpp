@@ -118,4 +118,5 @@ TEST("Tests can be queried", ["test-tag"]) {
         auto const& info = tests[0]->test_info;
         REQUIRE( info.name == "Tests can be queried" );
     }
+    // !TBD: Lookup by test spec (wildcards, tag expressions)
 }

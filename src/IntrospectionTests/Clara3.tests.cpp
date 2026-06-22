@@ -36,6 +36,10 @@ TEST("Single simple flag parsers") {
         cli.parse({"--abc"});
         REQUIRE(simple == true);
     }
+    SECTION("Unexpected arg passed") {
+        CHECK(cli.parse({"--def"}));
+        CHECK(simple == false);
+    }
 }
 
 TEST("Composed flag parsers") {
